@@ -2,9 +2,11 @@ package TheWorks;
 
 public class Main {
 
+	static int mode;
+
 	public static void main(String[] args) {
 
-		int mode = 0;
+		mode = 0;
 
 		Start start = new Start();
 
@@ -21,6 +23,10 @@ public class Main {
 				PlayArea.add(P1, P2);
 			}
 		}
+	}
+
+	public static void setMode(int m) {
+		mode = m;
 	}
 
 }
