@@ -11,8 +11,8 @@ public class Playspace extends JPanel implements ActionListener {
 	private ArrayList<Player> players = new ArrayList<Player>();
 
 	public Playspace() { // Constructor, breaks Main from static.
-		super("FightingGame"); // Sets up JFrame
-		windowsetup(); // Configures JFrame
+		super(); // Sets up JPanel
+		windowsetup(); // Configures JPanel
 	}
 
 	// Begin player add
