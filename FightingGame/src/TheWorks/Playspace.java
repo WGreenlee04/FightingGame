@@ -4,9 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-import javax.swing.JFrame;
+import javax.swing.JPanel;
 
-public class Playspace extends JFrame implements ActionListener {
+public class Playspace extends JPanel implements ActionListener {
 	private int area; // the size of the window on screen
 	private ArrayList<Player> players = new ArrayList<Player>();
 
@@ -27,7 +27,6 @@ public class Playspace extends JFrame implements ActionListener {
 	// End player add
 
 	public void windowsetup() {
-		this.setLayout();
 	}
 
 	@Override
