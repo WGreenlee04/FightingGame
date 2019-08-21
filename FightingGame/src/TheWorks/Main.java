@@ -4,12 +4,18 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		Playspace PlayArea = new Playspace();
-		Player P1 = new Player();
-		Player P2 = new Player();
+		int mode = 0;
 
-		PlayArea.add(P1);
-		PlayArea.add(P2);
+		Start start = new Start();
+
+		if (mode == 2) {
+
+			Playspace PlayArea = new Playspace();
+			Player P1 = new Player1();
+			Player P2 = new Player2();
+
+			PlayArea.add(P1, P2);
+		}
 	}
 
 }

@@ -10,11 +10,12 @@ public class Playspace extends JFrame implements ActionListener {
 	private int area; // the size of the window on screen
 	private ArrayList<Player> players = new ArrayList<Player>();
 
-	public Playspace() {
-		super("FightingGame");
-		windowsetup();
+	public Playspace() { // Constructor, breaks Main from static.
+		super("FightingGame"); // Sets up JFrame
+		windowsetup(); // Configures JFrame
 	}
 
+	// Begin player add
 	public void add(Player p) {
 		players.add(p);
 	}
@@ -23,9 +24,10 @@ public class Playspace extends JFrame implements ActionListener {
 		players.add(a);
 		players.add(b);
 	}
+	// End player add
 
 	public void windowsetup() {
-
+		this.setLayout();
 	}
 
 	@Override
