@@ -12,7 +12,7 @@ public class Main {
 
 		Start start = new Start();
 
-		while (pressed)
+		while (pressed) {
 			if (mode == 1) {
 				// initiate 1 player mode
 			} else {
@@ -26,6 +26,7 @@ public class Main {
 					PlayArea.add(P1, P2);
 				}
 			}
+		}
 	}
 
 	public static void setMode(int m) {

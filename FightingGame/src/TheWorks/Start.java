@@ -22,6 +22,7 @@ public class Start extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (mode2.isEnabled()) {
 					Main.setMode(2);
+					Main.pressed();
 				}
 				if (!mode2.isEnabled()) {
 					System.out.println();
