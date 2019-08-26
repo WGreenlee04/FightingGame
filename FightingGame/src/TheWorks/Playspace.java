@@ -12,7 +12,6 @@ public class Playspace extends JPanel implements ActionListener {
 
 	public Playspace() { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
-		windowsetup(); // Configures JPanel
 	}
 
 	// Begin player add
@@ -25,9 +24,6 @@ public class Playspace extends JPanel implements ActionListener {
 		players.add(b);
 	}
 	// End player add
-
-	public void windowsetup() {
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {

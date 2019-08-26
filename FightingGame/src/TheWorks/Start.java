@@ -11,18 +11,20 @@ public class Start extends JFrame {
 
 	public Start() {
 		super("Start");
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setVisible(true);
-		this.setSize(200, 90);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setVisible(true);
+		setSize(200, 90);
+		setLocationRelativeTo(null);
 		JButton mode2 = new JButton("Multiplayer");
 		JButton mode1 = new JButton("Singleplayer");
-		this.add(mode2, BorderLayout.NORTH);
-		this.add(mode1, BorderLayout.SOUTH);
+		add(mode2, BorderLayout.NORTH);
+		add(mode1, BorderLayout.SOUTH);
 		mode2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (mode2.isEnabled()) {
 					Main.setMode(2);
 					Main.getRun().run();
+					setVisible(false);
 				}
 				if (!mode2.isEnabled()) {
 					System.out.println();
