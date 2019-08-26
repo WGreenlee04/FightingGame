@@ -4,19 +4,25 @@ import javax.swing.JFrame;
 
 public class Application extends JFrame {
 
-	Playspace p;
+	Playspace pspace;
 
-	public Application() {
+	public Application(int i) {
+
+		if (i == 1) {
+			pspace.add(new Player1());
+		} else if (i == 2) {
+			pspace.add(new Player1(), new Player2());
+		}
 
 		initUI();
 	}
 
 	private void initUI() {
 
-		p = new Playspace();
-		add(p);
+		pspace = new Playspace();
+		add(pspace);
 
-		setSize(250, 200);
+		setSize(1000, 1000);
 
 		setTitle("Application");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -25,7 +31,7 @@ public class Application extends JFrame {
 	}
 
 	public Playspace getPlayspace() {
-		return p;
+		return pspace;
 	}
 
 }

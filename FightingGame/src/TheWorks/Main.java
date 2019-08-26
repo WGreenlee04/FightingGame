@@ -19,11 +19,7 @@ public class Main {
 				} else if (mode == 2) {
 
 					// initiate 2 player mode
-					Application application = new Application();
-					Player P1 = new Player1();
-					Player P2 = new Player2();
-
-					application.getPlayspace().add(P1, P2);
+					Application application = new Application(2);
 				}
 			}
 		};

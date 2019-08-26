@@ -1,27 +1,56 @@
 package TheWorks;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
+import java.awt.Image;
+import java.awt.Point;
 
-public abstract class Player {
+public class Player {
 	int health;
 	int damage;
-	File file;
-	BufferedImage img;
+	String imageDir;
+	Image img;
+	Point point;
 
 	public Player() {
+		health = 1000;
+		damage = 35;
+		point = new Point(0, 0);
+	}
+
+	public void setHealth(int h) {
+		health = h;
 
 	}
 
-	public abstract void setHealth(int h);
+	public int getHealth() {
+		return health;
+	}
 
-	public abstract int getHealth();
+	public void setDamage(int d) {
+		damage = d;
 
-	public abstract void setDamage(int d);
+	}
 
-	public abstract int getDamage();
+	public int getDamage() {
+		return damage;
+	}
 
-	public abstract BufferedImage getImage();
+	public String getImageDir() {
+		return imageDir;
+	}
 
-	public abstract void setImage(BufferedImage b);
+	public void setImage(Image i) {
+		img = i;
+	}
+
+	public Image getImage() {
+		return img;
+	}
+
+	public Point getPoint() {
+		return point;
+	}
+
+	public void setPoint(Point p) {
+		point = p;
+	}
 }

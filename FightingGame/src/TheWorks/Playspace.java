@@ -1,50 +1,49 @@
 package TheWorks;
 
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
 public class Playspace extends JPanel implements ActionListener {
 	private int area; // the size of the window on screen
-	private ArrayList<Player> players = new ArrayList<Player>();
+	public Player1 p1;
+	public Player2 p2;
 
 	public Playspace() { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
+		initSpace();
 	}
 
 	// Begin player add
-	public void add(Player p) {
-		players.add(p);
+	public void add(Player1 p) {
+		p1 = p;
 	}
 
-	public void add(Player a, Player b) {
-		players.add(a);
-		players.add(b);
+	public void add(Player1 a, Player2 b) {
+		p1 = a;
+		p2 = b;
 	}
 	// End player add
 
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-
-		drawCharacter(g);
+		g.drawImage(p1.getImage(), 0, 0, null);
 	}
 
-	private void drawCharacter(Graphics g) {
+	public void initSpace() {
+		load(p1);
+		if (p2 != null) {
+			load(p2);
+		}
+	}
 
-		Graphics2D g2d = (Graphics2D) g;
-
-		RenderingHints rh = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-		rh.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-
-		g2d.setRenderingHints(rh);
-
+	public void load(Player p) {
+		ImageIcon ii = new ImageIcon(p.getImageDir());
+		p.setImage(ii.getImage());
 	}
 
 	@Override
