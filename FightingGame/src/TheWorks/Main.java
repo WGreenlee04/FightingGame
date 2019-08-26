@@ -10,7 +10,7 @@ public class Main {
 		mode = 0;
 		pressed = false;
 
-		Start start = new Start();
+		Start startwindow = new Start();
 
 		while (pressed) {
 			if (mode == 1) {
