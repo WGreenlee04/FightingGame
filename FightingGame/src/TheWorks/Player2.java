@@ -6,37 +6,34 @@ public class Player2 extends Player {
 
 	@Override
 	public void setHealth(int h) {
-		// TODO Auto-generated method stub
+		health = h;
 
 	}
 
 	@Override
 	public int getHealth() {
-		// TODO Auto-generated method stub
-		return 0;
+		return health;
 	}
 
 	@Override
 	public void setDamage(int d) {
-		// TODO Auto-generated method stub
+		damage = d;
 
 	}
 
 	@Override
 	public int getDamage() {
-		// TODO Auto-generated method stub
-		return 0;
+		return damage;
 	}
 
 	@Override
 	public BufferedImage getImage() {
-		// TODO Auto-generated method stub
-		return null;
+		return img;
 	}
 
 	@Override
 	public void setImage(BufferedImage b) {
-		// TODO Auto-generated method stub
+		img = b;
 
 	}
 
