@@ -12,6 +12,8 @@ public class Playspace extends JPanel implements ActionListener {
 	private int area; // the size of the window on screen
 	public Player1 p1;
 	public Player2 p2;
+	public Image p1_img;
+	public Image p2_img;
 
 	public Playspace() { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
@@ -32,7 +34,7 @@ public class Playspace extends JPanel implements ActionListener {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		g.drawImage(p1.getImage(), 0, 0, null);
+		g.drawImage(p1_img, 0, 0, null);
 	}
 
 	public void initSpace() {
@@ -43,15 +45,13 @@ public class Playspace extends JPanel implements ActionListener {
 	}
 
 	public void load1(Player1 p) {
-		ImageIcon ii = new ImageIcon("//src/resources/stickBlue.png");
-		Image i = ii.getImage();
-		p.setImage(i);
+		ImageIcon ii = new ImageIcon("src/resources/stickBlue.png");
+		p1_img = ii.getImage();
 	}
 
 	public void load2(Player2 p) {
-		ImageIcon ii = new ImageIcon("//src/resources/stickRed.png");
-		Image i = ii.getImage();
-		p.setImage(i);
+		ImageIcon ii = new ImageIcon("src/resources/stickRed.png");
+		Image p2_img = ii.getImage();
 	}
 
 	@Override

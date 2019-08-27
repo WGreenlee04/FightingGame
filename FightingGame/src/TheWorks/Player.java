@@ -1,22 +1,17 @@
 package TheWorks;
 
-import java.awt.Image;
 import java.awt.Point;
-
-import javax.swing.ImageIcon;
 
 public class Player {
 	int health;
 	int damage;
 	String imageDir;
-	Image img;
 	Point point;
 
 	public Player() {
 		health = 1000;
 		damage = 35;
 		point = new Point(0, 0);
-		img = new ImageIcon("//src/resources/stick.png").getImage();
 	}
 
 	public void setHealth(int h) {
@@ -39,14 +34,6 @@ public class Player {
 
 	public String getImageDir() {
 		return imageDir;
-	}
-
-	public void setImage(Image i) {
-		img = i;
-	}
-
-	public Image getImage() {
-		return img;
 	}
 
 	public Point getPoint() {
