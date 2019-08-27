@@ -1,5 +1,6 @@
 package TheWorks;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -10,7 +11,8 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener {
-	private static final int DELAY = 0;
+	private static final int DELAY = 25;
+	private static final int GRAVITY = 10;
 	private int area; // the size of the window on screen
 	public Player p1;
 	public Player p2;
@@ -39,7 +41,8 @@ public class Playspace extends JPanel implements ActionListener {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		g.drawImage(p1_img, 300, 0, null);
+		g.drawImage(p1_img, (int) p1.getPoint().getX(), (int) p1.getPoint().getY(), null);
+		g.drawImage(p2_img, this.getWidth() - (int) p2.getPoint().getX(), (int) p2.getPoint().getY(), null);
 	}
 
 	public void initSpace(int i) { // loads both characters, and sets up space
@@ -54,6 +57,8 @@ public class Playspace extends JPanel implements ActionListener {
 			load2();
 		}
 
+		setBackground(Color.WHITE);
+
 	}
 
 	public void load1() {
@@ -63,7 +68,7 @@ public class Playspace extends JPanel implements ActionListener {
 
 	public void load2() {
 		ImageIcon ii = new ImageIcon(p2.getImageDir());
-		Image p2_img = ii.getImage();
+		p2_img = ii.getImage();
 	}
 
 	public Image loadObject(String Dir) {
@@ -75,7 +80,10 @@ public class Playspace extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		// TODO Auto-generated method stub
-
+		if (p1.getPoint().getY() + (p1_img.getHeight(this)) < this.getHeight())
+			p1.getPoint().translate(0, GRAVITY);
+		if (p2.getPoint().getY() + (p2_img.getHeight(this)) < this.getHeight())
+			p2.getPoint().translate(0, GRAVITY);
+		repaint();
 	}
 }

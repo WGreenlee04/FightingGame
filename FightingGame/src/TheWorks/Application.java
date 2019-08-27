@@ -17,7 +17,7 @@ public class Application extends JFrame {
 		pspace = new Playspace(i);
 		add(pspace);
 
-		setSize(1000, 1000);
+		setSize(1000, 500);
 
 		setTitle("Application");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

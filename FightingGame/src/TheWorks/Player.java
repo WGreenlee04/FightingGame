@@ -7,11 +7,12 @@ public class Player {
 	int damage;
 	String imageDir;
 	Point point;
+	int direction;
 
 	public Player(String imageDir) {
 		health = 1000;
 		damage = 35;
-		point = new Point(0, 0);
+		point = new Point(100, 300);
 		this.imageDir = imageDir;
 	}
 
@@ -43,5 +44,13 @@ public class Player {
 
 	public void setPoint(Point p) {
 		point = p;
+	}
+
+	public int getDirection() {
+		return direction;
+	}
+
+	public void setDirection(int direction) {
+		this.direction = direction;
 	}
 }
