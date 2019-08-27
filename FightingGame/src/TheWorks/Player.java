@@ -8,10 +8,11 @@ public class Player {
 	String imageDir;
 	Point point;
 
-	public Player() {
+	public Player(String imageDir) {
 		health = 1000;
 		damage = 35;
 		point = new Point(0, 0);
+		this.imageDir = imageDir;
 	}
 
 	public void setHealth(int h) {

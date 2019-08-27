@@ -8,19 +8,13 @@ public class Application extends JFrame {
 
 	public Application(int i) {
 
-		initUI();
-
-		if (i == 1) {
-			pspace.add(new Player1());
-		} else if (i == 2) {
-			pspace.add(new Player1(), new Player2());
-		}
+		initUI(i);
 
 	}
 
-	private void initUI() {
+	private void initUI(int i) {
 
-		pspace = new Playspace();
+		pspace = new Playspace(i);
 		add(pspace);
 
 		setSize(1000, 1000);
