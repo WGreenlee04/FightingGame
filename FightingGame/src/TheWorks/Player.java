@@ -3,6 +3,8 @@ package TheWorks;
 import java.awt.Image;
 import java.awt.Point;
 
+import javax.swing.ImageIcon;
+
 public class Player {
 	int health;
 	int damage;
@@ -14,6 +16,7 @@ public class Player {
 		health = 1000;
 		damage = 35;
 		point = new Point(0, 0);
+		img = new ImageIcon("//src/resources/stick.png").getImage();
 	}
 
 	public void setHealth(int h) {

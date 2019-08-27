@@ -1,6 +1,7 @@
 package TheWorks;
 
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -35,15 +36,22 @@ public class Playspace extends JPanel implements ActionListener {
 	}
 
 	public void initSpace() {
-		load(p1);
+		load1(p1);
 		if (p2 != null) {
-			load(p2);
+			load2(p2);
 		}
 	}
 
-	public void load(Player p) {
-		ImageIcon ii = new ImageIcon(p.getImageDir());
-		p.setImage(ii.getImage());
+	public void load1(Player1 p) {
+		ImageIcon ii = new ImageIcon("//src/resources/stickBlue.png");
+		Image i = ii.getImage();
+		p.setImage(i);
+	}
+
+	public void load2(Player2 p) {
+		ImageIcon ii = new ImageIcon("//src/resources/stickRed.png");
+		Image i = ii.getImage();
+		p.setImage(i);
 	}
 
 	@Override
