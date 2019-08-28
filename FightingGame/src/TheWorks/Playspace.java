@@ -75,7 +75,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		if (p2 != null) {
 			load2();
 		}
-
 		setBackground(Color.WHITE);
 		setFocusable(true);
 		addKeyListener(this);
@@ -104,30 +103,30 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		if (p1.getPoint().getY() + (p1_img.getHeight(this)) < HEIGHT)
 			p1_Y -= GRAVITY;
 		if (p2.getPoint().getY() + (p2_img.getHeight(this)) < HEIGHT)
-			p1_Y -= GRAVITY;
+			p2_Y -= GRAVITY;
 
 		// If at a wall, bounce p1
 		if (p1.getPoint().getX() <= 0) {
-			p1.getPoint().translate(-(int) p1.getPoint().getX(), 0);
+			p1.getPoint().translate((WIDTH - (int) p1.getPoint().getX()), 0);
 		}
 		if (p1.getPoint().getX() >= WIDTH + p1_img.getWidth(this)) {
-			p1.getPoint().translate(-(int) p1.getPoint().getX(), 0);
+			p1.getPoint().translate(-(WIDTH - (int) p1.getPoint().getX()), 0);
 		}
-		if (p1.getPoint().getY() + (p2_img.getHeight(this)) < HEIGHT)
-			p1_Y = -p1_Y / 4;
+		if (p1.getPoint().getY() - (p1_img.getHeight(this)) < HEIGHT)
+			p1_Y = 0;
 
 		// If at wall, bounce p2
-		if (p2.getPoint().getX() <= 0) {
-			p2.getPoint().translate(1, 0);
-			p2_X = -p1_X / 4;
+		if (p2.getPoint().getX() <= 0 - p2_img.getWidth(this)) {
+			p2.getPoint().translate((WIDTH - (int) p2.getPoint().getX()), 0);
 		}
-		if (p2.getPoint().getX() >= WIDTH + p1_img.getWidth(this)) {
-			p2.getPoint().translate(-1, 0);
-			p2_X = -p1_X / 4;
+		if (p2.getPoint().getX() >= WIDTH + p2_img.getWidth(this)) {
+			p2.getPoint().translate(-(WIDTH - (int) p2.getPoint().getX()), 0);
 		}
-		if (p2.getPoint().getY() + (p2_img.getHeight(this)) < HEIGHT)
-			p2_Y = -p1_Y / 4;
+		if (p2.getPoint().getY() - (p2_img.getHeight(this)) < HEIGHT)
+			p2_Y = 0;
+
 		// Add acceleration if key is pressed
+		// p1
 		if (APressed) {
 			if (p1_X >= 0) {
 				p1_X = -15 * 2;
@@ -142,6 +141,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				p1_X = 10 * 2;
 			}
 		}
+
+		// p2
 		if (LeftPressed) {
 			if (p2_X >= 0) {
 				p2_X = -15 * 2;
@@ -159,22 +160,42 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// if acceleration of x, carry out acceleration, decreasing it by one
 		// each time.
-		if (p1_X > 0 && p1.getPoint().getX() > 0) {
+
+		// p1
+		if (p1_X > 0) {
 			p1.getPoint().translate(p1_X / 2, 0);
 			p1_X--;
 		}
-		if (p1_X < 0 && p1.getPoint().getX() > 0) {
+		if (p1_X < 0) {
 			p1.getPoint().translate(p1_X / 2, 0);
 			p1_X++;
 		}
-		if (p2_X > 0 && p1.getPoint().getX() > 0) {
+		if (p1_Y > 0) {
+			p1.getPoint().translate(-p1_Y / 2, 0);
+			p1_Y--;
+		}
+		if (p1_Y < 0) {
+			p1.getPoint().translate(-p1_Y / 2, 0);
+			p1_Y++;
+		}
+		// p2
+		if (p2_X > 0) {
 			p2.getPoint().translate(p2_X / 2, 0);
 			p2_X--;
 		}
-		if (p2_X < 0 && p1.getPoint().getX() > 0) {
+		if (p2_X < 0) {
 			p2.getPoint().translate(p2_X / 2, 0);
 			p2_X++;
 		}
+		if (p2_Y > 0) {
+			p2.getPoint().translate(-p2_Y / 2, 0);
+			p2_Y--;
+		}
+		if (p2_Y < 0) {
+			p2.getPoint().translate(-p2_Y / 2, 0);
+			p2_Y++;
+		}
+		//
 		repaint();
 	}
 
