@@ -12,7 +12,7 @@ public class Player {
 	public Player(String imageDir) {
 		health = 1000;
 		damage = 35;
-		point = new Point(100, 0);
+		point = new Point(0, 0);
 		this.imageDir = imageDir;
 	}
 

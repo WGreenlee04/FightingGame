@@ -26,6 +26,16 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public int p2_Y;
 	private Timer timer;
 	public KeyListener keylistener = this;
+	public boolean APressed;
+	public boolean SPressed;
+	public boolean WPressed;
+	public boolean DPressed;
+	public boolean UpPressed;
+	public boolean LeftPressed;
+	public boolean RightPressed;
+	public boolean DownPressed;
+	public final int WIDTH = 1000;
+	public final int HEIGHT = 500;
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
@@ -48,8 +58,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		g.drawImage(p1_img, (int) p1.getPoint().getX(), (int) p1.getPoint().getY(), null);
-		g.drawImage(p2_img, this.getWidth() - ((int) p2.getPoint().getX() + 100), (int) p2.getPoint().getY(), null);
+		g.drawImage(p1_img, (int) p1.getPoint().getX(), (int) p1.getPoint().getY(), this);
+		g.drawImage(p2_img, (int) p2.getPoint().getX(), (int) p2.getPoint().getY(), this);
 	}
 
 	public void initSpace(int i) { // loads both characters, and sets up space
@@ -58,6 +68,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			add(new Player("src/resources/stickBlueResize.png"));
 		if (i != 1)
 			add(new Player("src/resources/stickBlueResize.png"), new Player("src/resources/stickRedResize.png"));
+
+		p2.getPoint().translate(WIDTH, 0);
 
 		load1();
 		if (p2 != null) {
@@ -89,36 +101,78 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		// Gravity Players 1 and 2
-		if (p1.getPoint().getY() + (p1_img.getHeight(this)) < this.getHeight())
-			p1.getPoint().translate(0, GRAVITY);
-		if (p2.getPoint().getY() + (p2_img.getHeight(this)) < this.getHeight())
-			p2.getPoint().translate(0, GRAVITY);
+		if (p1.getPoint().getY() + (p1_img.getHeight(this)) < HEIGHT)
+			p1_Y -= GRAVITY;
+		if (p2.getPoint().getY() + (p2_img.getHeight(this)) < HEIGHT)
+			p1_Y -= GRAVITY;
 
 		// If at a wall, bounce p1
 		if (p1.getPoint().getX() <= 0) {
-			p1.getPoint().translate(1, 0);
-			p1_X = -p1_X / 4;
+			p1.getPoint().translate(-(int) p1.getPoint().getX(), 0);
 		}
-		if (p1.getPoint().getX() >= this.getWidth() - p1_img.getWidth(this)) {
-			p1.getPoint().translate(-1, 0);
-			p1_X = -p1_X / 4;
+		if (p1.getPoint().getX() >= WIDTH + p1_img.getWidth(this)) {
+			p1.getPoint().translate(-(int) p1.getPoint().getX(), 0);
+		}
+		if (p1.getPoint().getY() + (p2_img.getHeight(this)) < HEIGHT)
+			p1_Y = -p1_Y / 4;
+
+		// If at wall, bounce p2
+		if (p2.getPoint().getX() <= 0) {
+			p2.getPoint().translate(1, 0);
+			p2_X = -p1_X / 4;
+		}
+		if (p2.getPoint().getX() >= WIDTH + p1_img.getWidth(this)) {
+			p2.getPoint().translate(-1, 0);
+			p2_X = -p1_X / 4;
+		}
+		if (p2.getPoint().getY() + (p2_img.getHeight(this)) < HEIGHT)
+			p2_Y = -p1_Y / 4;
+		// Add acceleration if key is pressed
+		if (APressed) {
+			if (p1_X >= 0) {
+				p1_X = -15 * 2;
+			} else {
+				p1_X = -10 * 2;
+			}
+		}
+		if (DPressed) {
+			if (p1_X <= 0) {
+				p1_X = 15 * 2;
+			} else {
+				p1_X = 10 * 2;
+			}
+		}
+		if (LeftPressed) {
+			if (p2_X >= 0) {
+				p2_X = -15 * 2;
+			} else {
+				p2_X = -10 * 2;
+			}
+		}
+		if (RightPressed) {
+			if (p2_X <= 0) {
+				p2_X = 15 * 2;
+			} else {
+				p2_X = 10 * 2;
+			}
 		}
 
-		// if acceleration of x, carry out acceleration, decreasing it by one each time.
+		// if acceleration of x, carry out acceleration, decreasing it by one
+		// each time.
 		if (p1_X > 0 && p1.getPoint().getX() > 0) {
-			p1.getPoint().translate(p1_X, 0);
+			p1.getPoint().translate(p1_X / 2, 0);
 			p1_X--;
 		}
 		if (p1_X < 0 && p1.getPoint().getX() > 0) {
-			p1.getPoint().translate(p1_X, 0);
+			p1.getPoint().translate(p1_X / 2, 0);
 			p1_X++;
 		}
 		if (p2_X > 0 && p1.getPoint().getX() > 0) {
-			p2.getPoint().translate(p2_X, 0);
+			p2.getPoint().translate(p2_X / 2, 0);
 			p2_X--;
 		}
 		if (p2_X < 0 && p1.getPoint().getX() > 0) {
-			p2.getPoint().translate(p2_X, 0);
+			p2.getPoint().translate(p2_X / 2, 0);
 			p2_X++;
 		}
 		repaint();
@@ -127,37 +181,57 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_A) {
-			if (p1_X >= 0) {
-				p1_X = -15;
-			} else {
-				p1_X = -10;
-			}
+			APressed = true;
 		}
 		if (e.getKeyCode() == KeyEvent.VK_D) {
-			if (p1_X <= 0) {
-				p1_X = 15;
-			} else {
-				p1_X = 10;
-			}
+			DPressed = true;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_S) {
+			DPressed = true;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_W) {
+			WPressed = true;
 		}
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			if (p2_X >= 0) {
-				p2_X = 15;
-			} else {
-				p2_X = 10;
-			}
+			LeftPressed = true;
 		}
 		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			if (p2_X <= 0) {
-				p2_X = -15;
-			} else {
-				p2_X = -10;
-			}
+			RightPressed = true;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_UP) {
+			UpPressed = true;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+			DownPressed = true;
 		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
+		if (e.getKeyCode() == KeyEvent.VK_A) {
+			APressed = false;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_S) {
+			SPressed = false;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_D) {
+			DPressed = false;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_W) {
+			WPressed = false;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_UP) {
+			UpPressed = false;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+			DownPressed = false;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+			LeftPressed = false;
+		}
+		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+			RightPressed = false;
+		}
 	}
 
 	@Override
