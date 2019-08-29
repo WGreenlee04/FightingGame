@@ -14,16 +14,12 @@ import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private static final int DELAY = 25;
-	private static final int GRAVITY = 10;
+	private static final int GRAVITY = -20;
 	private int area; // the size of the window on screen
-	public Player p1;
-	public Player p2;
-	public Image p1_img;
-	public Image p2_img;
-	public int p1_X;
-	public int p2_X;
-	public int p1_Y;
-	public int p2_Y;
+	public Player[] players;
+	public Image[] images;
+	public int[] pAccelX;
+	public int[] pAccelY;
 	private Timer timer;
 	public KeyListener keylistener = this;
 	public boolean APressed;
@@ -36,30 +32,37 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean DownPressed;
 	public final int WIDTH = 1000;
 	public final int HEIGHT = 500;
+	public final int playercount = 2;
+	public final int dashspeed = 60;
+	public final int playerspeed = 15;
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
+		players = new Player[playercount];
+		images = new Image[playercount];
+		pAccelX = new int[playercount];
+		pAccelY = new int[playercount];
 		initSpace(i);
 		timer = new Timer(DELAY, this);
 		timer.start(); // Starts timer
 	}
 
 	// Begin player add
-	public void add(Player p) {
-		p1 = p;
+	public void add(Player a) {
+		players[0] = a;
 	}
 
 	public void add(Player a, Player b) {
-		p1 = a;
-		p2 = b;
+		players[0] = a;
+		players[1] = b;
 	}
 	// End player add
 
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		g.drawImage(p1_img, (int) p1.getPoint().getX(), (int) p1.getPoint().getY(), this);
-		g.drawImage(p2_img, (int) p2.getPoint().getX(), (int) p2.getPoint().getY(), this);
+		for (int i = 0; i < players.length; i++)
+			g.drawImage(images[i], players[i].getX(), players[i].getY(), this);
 	}
 
 	public void initSpace(int i) { // loads both characters, and sets up space
@@ -69,25 +72,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		if (i != 1)
 			add(new Player("src/resources/stickBlueResize.png"), new Player("src/resources/stickRedResize.png"));
 
-		p2.getPoint().translate(WIDTH, 0);
+		for (i = 0; i < 2; i++)
+			images[i] = loadObject(players[i].getImageDir());
 
-		load1();
-		if (p2 != null) {
-			load2();
-		}
+		setSize(1000, 500);
 		setBackground(Color.WHITE);
 		setFocusable(true);
 		addKeyListener(this);
-	}
-
-	public void load1() {
-		ImageIcon ii = new ImageIcon(p1.getImageDir());
-		p1_img = ii.getImage();
-	}
-
-	public void load2() {
-		ImageIcon ii = new ImageIcon(p2.getImageDir());
-		p2_img = ii.getImage();
 	}
 
 	public Image loadObject(String Dir) {
@@ -100,102 +91,79 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		// Gravity Players 1 and 2
-		if (p1.getPoint().getY() + (p1_img.getHeight(this)) < HEIGHT)
-			p1_Y -= GRAVITY;
-		if (p2.getPoint().getY() + (p2_img.getHeight(this)) < HEIGHT)
-			p2_Y -= GRAVITY;
+		for (int i = 0; i < players.length; i++)
+			if (-players[i].getY() - (images[i].getHeight(this)) / 2 > -HEIGHT)
+				pAccelY[i] = GRAVITY;
 
-		// If at a wall, bounce p1
-		if (p1.getPoint().getX() <= 0) {
-			p1.getPoint().translate((WIDTH - (int) p1.getPoint().getX()), 0);
+		// If at a wall, loop
+		for (int i = 0; i < players.length; i++) {
+			if (players[i].getX() <= 0 - images[i].getWidth(this))
+				players[i].setX(WIDTH - images[i].getWidth(this));
+			if (players[i].getX() >= WIDTH + images[i].getWidth(this))
+				players[i].setX(0 - images[i].getWidth(this));
+			if (-players[i].getY() - (images[i].getHeight(this) + 50) < -HEIGHT)
+				players[i].setY(players[i].getY() + GRAVITY / 2);
+			;
 		}
-		if (p1.getPoint().getX() >= WIDTH + p1_img.getWidth(this)) {
-			p1.getPoint().translate(-(WIDTH - (int) p1.getPoint().getX()), 0);
-		}
-		if (p1.getPoint().getY() - (p1_img.getHeight(this)) < HEIGHT)
-			p1_Y = 0;
-
-		// If at wall, bounce p2
-		if (p2.getPoint().getX() <= 0 - p2_img.getWidth(this)) {
-			p2.getPoint().translate((WIDTH - (int) p2.getPoint().getX()), 0);
-		}
-		if (p2.getPoint().getX() >= WIDTH + p2_img.getWidth(this)) {
-			p2.getPoint().translate(-(WIDTH - (int) p2.getPoint().getX()), 0);
-		}
-		if (p2.getPoint().getY() - (p2_img.getHeight(this)) < HEIGHT)
-			p2_Y = 0;
 
 		// Add acceleration if key is pressed
-		// p1
 		if (APressed) {
-			if (p1_X >= 0) {
-				p1_X = -15 * 2;
+			if (pAccelX[0] == 0) {
+				pAccelX[0] = -dashspeed * 2;
 			} else {
-				p1_X = -10 * 2;
+				pAccelX[0] = -playerspeed * 2;
 			}
 		}
 		if (DPressed) {
-			if (p1_X <= 0) {
-				p1_X = 15 * 2;
+			if (pAccelX[0] == 0) {
+				pAccelX[0] = dashspeed * 2;
 			} else {
-				p1_X = 10 * 2;
+				pAccelX[0] = playerspeed * 2;
 			}
+		}
+		if (WPressed) {
+			pAccelY[0] = 20;
 		}
 
 		// p2
 		if (LeftPressed) {
-			if (p2_X >= 0) {
-				p2_X = -15 * 2;
+			if (pAccelX[1] == 0) {
+				pAccelX[1] = -dashspeed * 2;
 			} else {
-				p2_X = -10 * 2;
+				pAccelX[1] = -playerspeed * 2;
 			}
 		}
 		if (RightPressed) {
-			if (p2_X <= 0) {
-				p2_X = 15 * 2;
+			if (pAccelX[1] == 0) {
+				pAccelX[1] = dashspeed * 2;
 			} else {
-				p2_X = 10 * 2;
+				pAccelX[1] = playerspeed * 2;
 			}
 		}
+		if (UpPressed) {
+			pAccelY[1] = 20;
+		}
 
-		// if acceleration of x, carry out acceleration, decreasing it by one
+		// if acceleration of x, carry out acceleration, decreasing it by one half
 		// each time.
-
-		// p1
-		if (p1_X > 0) {
-			p1.getPoint().translate(p1_X / 2, 0);
-			p1_X--;
+		for (int i = 0; i < players.length; i++) {
+			if (pAccelX[i] > 0) {
+				players[i].setX(players[i].getX() + pAccelX[i] / 2);
+				pAccelX[i]--;
+			}
+			if (pAccelX[i] < 0) {
+				players[i].setX(players[i].getX() + pAccelX[i] / 2);
+				pAccelX[i]++;
+			}
+			if (pAccelY[i] > 0) {
+				players[i].setY(players[i].getY() - pAccelY[i] / 2);
+				pAccelY[i]--;
+			}
+			if (pAccelY[i] < 0) {
+				players[i].setY(players[i].getY() - pAccelY[i] / 2);
+				pAccelY[i]++;
+			}
 		}
-		if (p1_X < 0) {
-			p1.getPoint().translate(p1_X / 2, 0);
-			p1_X++;
-		}
-		if (p1_Y > 0) {
-			p1.getPoint().translate(-p1_Y / 2, 0);
-			p1_Y--;
-		}
-		if (p1_Y < 0) {
-			p1.getPoint().translate(-p1_Y / 2, 0);
-			p1_Y++;
-		}
-		// p2
-		if (p2_X > 0) {
-			p2.getPoint().translate(p2_X / 2, 0);
-			p2_X--;
-		}
-		if (p2_X < 0) {
-			p2.getPoint().translate(p2_X / 2, 0);
-			p2_X++;
-		}
-		if (p2_Y > 0) {
-			p2.getPoint().translate(-p2_Y / 2, 0);
-			p2_Y--;
-		}
-		if (p2_Y < 0) {
-			p2.getPoint().translate(-p2_Y / 2, 0);
-			p2_Y++;
-		}
-		//
 		repaint();
 	}
 

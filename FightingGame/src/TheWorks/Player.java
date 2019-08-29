@@ -1,18 +1,16 @@
 package TheWorks;
 
-import java.awt.Point;
-
 public class Player {
 	int health;
 	int damage;
 	String imageDir;
-	Point point;
-	int direction;
+	int X;
+	int Y;
+	int rotation;
 
 	public Player(String imageDir) {
 		health = 1000;
 		damage = 35;
-		point = new Point(0, 0);
 		this.imageDir = imageDir;
 	}
 
@@ -38,19 +36,28 @@ public class Player {
 		return imageDir;
 	}
 
-	public Point getPoint() {
-		return point;
+	public int getX() {
+		return X;
 	}
 
-	public void setPoint(Point p) {
-		point = p;
+	public void setX(int x) {
+		X = x;
 	}
 
-	public int getDirection() {
-		return direction;
+	public int getY() {
+		return Y;
 	}
 
-	public void setDirection(int direction) {
-		this.direction = direction;
+	public void setY(int y) {
+		Y = y;
 	}
+
+	public int getRotation() {
+		return rotation;
+	}
+
+	public void setRotation(int rotation) {
+		this.rotation = rotation;
+	}
+
 }
