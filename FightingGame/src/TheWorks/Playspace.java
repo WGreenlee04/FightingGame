@@ -41,7 +41,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean jump1 = false;
 	public boolean jump2 = false;
 	public int[] jumps = { 0, 0 };
-	public final double imageScale = 0.31690140845;
+	public final double imageScaleP1 = 90 / images[0].getWidth(this);
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
