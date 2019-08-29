@@ -25,8 +25,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean APressed;
 	public boolean SPressed;
 	public boolean WPressed;
+	public boolean WReleased;
 	public boolean DPressed;
 	public boolean UpPressed;
+	public boolean UpReleased;
 	public boolean LeftPressed;
 	public boolean RightPressed;
 	public boolean DownPressed;
@@ -35,6 +37,11 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public final int playercount = 2;
 	public final int dashspeed = 60;
 	public final int playerspeed = 15;
+	public final int jumpheight = 80;
+	public boolean jump1 = false;
+	public boolean jump2 = false;
+	public int[] jumps = { 0, 0 };
+	public final double imageScale = 0.31690140845;
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
@@ -75,7 +82,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		for (i = 0; i < 2; i++)
 			images[i] = loadObject(players[i].getImageDir());
 
-		setSize(1000, 500);
+		setSize(super.getWidth(), super.getHeight());
 		setBackground(Color.WHITE);
 		setFocusable(true);
 		addKeyListener(this);
@@ -90,23 +97,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		// Gravity Players 1 and 2
-		for (int i = 0; i < players.length; i++)
-			if (-players[i].getY() - (images[i].getHeight(this)) / 2 > -HEIGHT)
-				pAccelY[i] = GRAVITY;
 
-		// If at a wall, loop
-		for (int i = 0; i < players.length; i++) {
-			if (players[i].getX() <= 0 - images[i].getWidth(this))
-				players[i].setX(WIDTH - images[i].getWidth(this));
-			if (players[i].getX() >= WIDTH + images[i].getWidth(this))
-				players[i].setX(0 - images[i].getWidth(this));
-			if (-players[i].getY() - (images[i].getHeight(this) + 50) < -HEIGHT)
-				players[i].setY(players[i].getY() + GRAVITY / 2);
-			;
-		}
+		doGravity();
+		collide();
 
 		// Add acceleration if key is pressed
+		// p1
 		if (APressed) {
 			if (pAccelX[0] == 0) {
 				pAccelX[0] = -dashspeed * 2;
@@ -121,8 +117,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				pAccelX[0] = playerspeed * 2;
 			}
 		}
-		if (WPressed) {
-			pAccelY[0] = 20;
+		if (WPressed && !jump1) {
+			jump1 = true;
+			players[0].setY(players[0].getY() - jumpheight);
+		}
+		if (UpReleased && jumps[0] <= 2) {
+			jump1 = false;
+			jumps[0]++;
 		}
 
 		// p2
@@ -140,10 +141,42 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				pAccelX[1] = playerspeed * 2;
 			}
 		}
-		if (UpPressed) {
-			pAccelY[1] = 20;
+		if (UpPressed && !jump2) {
+			jump2 = true;
+			players[1].setY(players[1].getY() - jumpheight);
+		}
+		if (UpReleased && jumps[1] <= 2) {
+			jump2 = false;
+			jumps[1]++;
 		}
 
+		doMovement();
+		repaint();
+	}
+
+	private void doGravity() {
+		// Gravity Players 1 and 2
+		for (int i = 0; i < players.length; i++)
+			if (-players[i].getY() - (images[i].getHeight(this)) / 2 > -HEIGHT)
+				pAccelY[i] = GRAVITY;
+	}
+
+	private void collide() {
+		// If at a wall, loop
+		for (int i = 0; i < players.length; i++) {
+			if (players[i].getX() <= 0 - images[i].getWidth(this))
+				players[i].setX(WIDTH - images[i].getWidth(this));
+			if (players[i].getX() >= WIDTH + images[i].getWidth(this))
+				players[i].setX(0 - images[i].getWidth(this));
+			if (-players[i].getY() - (images[i].getHeight(this) + 50) < -HEIGHT) {
+				jumps[i] = 0;
+				players[i].setY(players[i].getY() + pAccelY[i] / 2);
+			}
+		}
+
+	}
+
+	private void doMovement() {
 		// if acceleration of x, carry out acceleration, decreasing it by one half
 		// each time.
 		for (int i = 0; i < players.length; i++) {
@@ -164,7 +197,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				pAccelY[i]++;
 			}
 		}
-		repaint();
+
 	}
 
 	@Override
@@ -208,9 +241,11 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 		if (e.getKeyCode() == KeyEvent.VK_W) {
 			WPressed = false;
+			WReleased = true;
 		}
 		if (e.getKeyCode() == KeyEvent.VK_UP) {
 			UpPressed = false;
+			UpReleased = true;
 		}
 		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
 			DownPressed = false;
