@@ -37,10 +37,11 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public final int playercount = 2;
 	public final int dashspeed = 30;
 	public final int playerspeed = 7;
-	public final int jumpheight = 6;
-	public final int fallspeed = -10;
+	public final int jumpheight = 9;
+	public final int fallspeed = -20;
 	public boolean jump1 = false;
 	public boolean jump2 = false;
+	public boolean fall[] = { false, false };
 	public int[] jumps = { 0, 0 };
 	public double[] imageScale;
 
@@ -139,11 +140,15 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 		if (WReleased && jumps[0] <= 2) {
 			jump1 = false;
+			fall[0] = false;
 			jumps[0]++;
 			WReleased = false;
 		}
-		if (SPressed && -players[1].getY() - (images[1].getHeight(this) + 50) > -HEIGHT) {
-			pAccelY[0] = fallspeed;
+		if (SPressed || fall[0]) {
+			if (!(players[0].getY() + images[0].getHeight(this) > HEIGHT)) {
+				pAccelY[0] = fallspeed;
+				fall[0] = true;
+			}
 		}
 
 		// p2
@@ -163,6 +168,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 		if (UpPressed && !jump2) {
 			jump2 = true;
+			fall[1] = false;
 			pAccelY[1] = jumpheight * 2;
 		}
 		if (UpReleased && jumps[1] <= 2) {
@@ -170,8 +176,11 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			jumps[1]++;
 			UpReleased = false;
 		}
-		if (DownPressed && -players[1].getY() - (images[1].getHeight(this) + 50) > -HEIGHT) {
-			pAccelY[1] = fallspeed;
+		if (DownPressed || fall[1]) {
+			if (!(players[1].getY() + images[0].getHeight(this) > HEIGHT)) {
+				pAccelY[1] = fallspeed;
+				fall[1] = true;
+			}
 		}
 
 		doMovement();
@@ -182,7 +191,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// Gravity Players 1 and 2
 		for (int i = 0; i < players.length; i++)
 			if (pAccelY[i] <= 0) {
-				if (-players[i].getY() - (images[i].getHeight(this)) / 2 > -HEIGHT)
+				if (!(players[i].getY() + images[i].getHeight(this) > HEIGHT))
 					pAccelY[i] = GRAVITY;
 			}
 	}
@@ -194,10 +203,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setX(WIDTH - images[i].getWidth(this));
 			if (players[i].getX() >= WIDTH + images[i].getWidth(this))
 				players[i].setX(0 - images[i].getWidth(this));
-			if (-players[i].getY() - (images[i].getHeight(this) + 50) < -HEIGHT) {
+			if (!(players[i].getY() + images[i].getHeight(this) < HEIGHT)) {
 				jumps[i] = 0;
-				players[i].setY(players[i].getY() + pAccelY[i]);
+				fall[i] = false;
+				players[i].setY(HEIGHT - images[i].getHeight(this));
 			}
+			System.out.println(players[1].getY() + 150);
 		}
 	}
 
