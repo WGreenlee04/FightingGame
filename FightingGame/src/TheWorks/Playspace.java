@@ -14,7 +14,7 @@ import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private static final int DELAY = 25;
-	private static final int GRAVITY = -10;
+	private static final int GRAVITY = -5;
 	private int area; // the size of the window on screen
 	public Player[] players;
 	public Image[] images;
@@ -33,11 +33,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean RightPressed;
 	public boolean DownPressed;
 	public final int WIDTH = 1000;
-	public final int HEIGHT = 500;
+	public final int HEIGHT = 800;
 	public final int playercount = 2;
-	public final int dashspeed = 60;
-	public final int playerspeed = 14;
-	public final int jumpheight = 12;
+	public final int dashspeed = 30;
+	public final int playerspeed = 7;
+	public final int jumpheight = 6;
+	public final int fallspeed = -10;
 	public boolean jump1 = false;
 	public boolean jump2 = false;
 	public int[] jumps = { 0, 0 };
@@ -93,11 +94,11 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			if (i == 0) {
 				players[i].setX(0);
 			} else {
-				players[i].setX((WIDTH / i) - images[i].getWidth(this));
+				players[i].setX((WIDTH / i + 1) - images[i].getWidth(this));
 			}
 
 		setLocation(0, 0);
-		setSize(super.getWidth(), super.getHeight());
+		setSize(WIDTH, HEIGHT);
 		setBackground(Color.WHITE);
 		setFocusable(true);
 		addKeyListener(this);
@@ -141,6 +142,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			jumps[0]++;
 			WReleased = false;
 		}
+		if (SPressed && -players[1].getY() - (images[1].getHeight(this) + 50) > -HEIGHT) {
+			pAccelY[0] = fallspeed;
+		}
 
 		// p2
 		if (LeftPressed) {
@@ -166,6 +170,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			jumps[1]++;
 			UpReleased = false;
 		}
+		if (DownPressed && -players[1].getY() - (images[1].getHeight(this) + 50) > -HEIGHT) {
+			pAccelY[1] = fallspeed;
+		}
 
 		doMovement();
 		repaint();
@@ -189,29 +196,30 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setX(0 - images[i].getWidth(this));
 			if (-players[i].getY() - (images[i].getHeight(this) + 50) < -HEIGHT) {
 				jumps[i] = 0;
-				players[i].setY(players[i].getY() + pAccelY[i] / 2);
+				players[i].setY(players[i].getY() + pAccelY[i]);
 			}
 		}
 	}
 
 	private void doMovement() {
-		// if acceleration of x, carry out acceleration, decreasing it by one half
+		// if acceleration of x, carry out acceleration, decreasing it by one
+		// half
 		// each time.
 		for (int i = 0; i < players.length; i++) {
 			if (pAccelX[i] > 0) {
-				players[i].setX(players[i].getX() + pAccelX[i] / 2);
+				players[i].setX(players[i].getX() + pAccelX[i]);
 				pAccelX[i]--;
 			}
 			if (pAccelX[i] < 0) {
-				players[i].setX(players[i].getX() + pAccelX[i] / 2);
+				players[i].setX(players[i].getX() + pAccelX[i]);
 				pAccelX[i]++;
 			}
 			if (pAccelY[i] > 0) {
-				players[i].setY(players[i].getY() - pAccelY[i] / 2);
+				players[i].setY(players[i].getY() - pAccelY[i]);
 				pAccelY[i]--;
 			}
 			if (pAccelY[i] < 0) {
-				players[i].setY(players[i].getY() - pAccelY[i] / 2);
+				players[i].setY(players[i].getY() - pAccelY[i]);
 				pAccelY[i]++;
 			}
 		}

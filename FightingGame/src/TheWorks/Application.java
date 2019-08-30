@@ -17,7 +17,7 @@ public class Application extends JFrame {
 		pspace = new Playspace(i);
 		add(pspace);
 
-		setSize(1000, 500);
+		setSize(1000, 800);
 
 		setTitle("StickFight");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
