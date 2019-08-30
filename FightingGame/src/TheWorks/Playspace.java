@@ -235,7 +235,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			DPressed = true;
 		}
 		if (e.getKeyCode() == KeyEvent.VK_S) {
-			DPressed = true;
+			SPressed = true;
 		}
 		if (e.getKeyCode() == KeyEvent.VK_W) {
 			WPressed = true;
