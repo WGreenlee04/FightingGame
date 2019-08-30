@@ -14,7 +14,7 @@ import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private static final int DELAY = 25;
-	private static final int GRAVITY = -20;
+	private static final int GRAVITY = -10;
 	private int area; // the size of the window on screen
 	public Player[] players;
 	public Image[] images;
@@ -36,12 +36,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public final int HEIGHT = 500;
 	public final int playercount = 2;
 	public final int dashspeed = 60;
-	public final int playerspeed = 15;
-	public final int jumpheight = 80;
+	public final int playerspeed = 14;
+	public final int jumpheight = 12;
 	public boolean jump1 = false;
 	public boolean jump2 = false;
 	public int[] jumps = { 0, 0 };
-	public final double imageScaleP1 = 90 / images[0].getWidth(this);
+	public double[] imageScale;
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
@@ -49,6 +49,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		images = new Image[playercount];
 		pAccelX = new int[playercount];
 		pAccelY = new int[playercount];
+		imageScale = new double[playercount];
 		initSpace(i);
 		timer = new Timer(DELAY, this);
 		timer.start(); // Starts timer
@@ -75,13 +76,27 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public void initSpace(int i) { // loads both characters, and sets up space
 
 		if (i == 1)
-			add(new Player("src/resources/stickBlueResize.png"));
+			add(new Player("src/resources/stickBlue.png"));
 		if (i != 1)
-			add(new Player("src/resources/stickBlueResize.png"), new Player("src/resources/stickRedResize.png"));
+			add(new Player("src/resources/stickBlue.png"), new Player("src/resources/stickRed.png"));
 
-		for (i = 0; i < 2; i++)
+		for (i = 0; i < images.length; i++)
 			images[i] = loadObject(players[i].getImageDir());
 
+		for (i = 0; i < imageScale.length; i++)
+			imageScale[i] = 90 / images[i].getWidth(this);
+
+		for (i = 0; i < images.length; i++)
+			images[i] = images[i].getScaledInstance(90, 150, Image.SCALE_SMOOTH);
+
+		for (i = 0; i < players.length; i++)
+			if (i == 0) {
+				players[i].setX(0);
+			} else {
+				players[i].setX((WIDTH / i) - images[i].getWidth(this));
+			}
+
+		setLocation(0, 0);
 		setSize(super.getWidth(), super.getHeight());
 		setBackground(Color.WHITE);
 		setFocusable(true);
@@ -89,8 +104,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 
 	public Image loadObject(String Dir) {
-		ImageIcon ii = new ImageIcon(Dir);
-		Image i = ii.getImage();
+		ImageIcon iIcon = new ImageIcon(Dir);
+		Image i = iIcon.getImage();
 
 		return i;
 	}
@@ -119,11 +134,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 		if (WPressed && !jump1) {
 			jump1 = true;
-			players[0].setY(players[0].getY() - jumpheight);
+			pAccelY[0] = jumpheight * 2;
 		}
-		if (UpReleased && jumps[0] <= 2) {
+		if (WReleased && jumps[0] <= 2) {
 			jump1 = false;
 			jumps[0]++;
+			WReleased = false;
 		}
 
 		// p2
@@ -143,11 +159,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 		if (UpPressed && !jump2) {
 			jump2 = true;
-			players[1].setY(players[1].getY() - jumpheight);
+			pAccelY[1] = jumpheight * 2;
 		}
 		if (UpReleased && jumps[1] <= 2) {
 			jump2 = false;
 			jumps[1]++;
+			UpReleased = false;
 		}
 
 		doMovement();
@@ -157,12 +174,14 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private void doGravity() {
 		// Gravity Players 1 and 2
 		for (int i = 0; i < players.length; i++)
-			if (-players[i].getY() - (images[i].getHeight(this)) / 2 > -HEIGHT)
-				pAccelY[i] = GRAVITY;
+			if (pAccelY[i] <= 0) {
+				if (-players[i].getY() - (images[i].getHeight(this)) / 2 > -HEIGHT)
+					pAccelY[i] = GRAVITY;
+			}
 	}
 
 	private void collide() {
-		// If at a wall, loop
+		// If at a wall, loop or bounce
 		for (int i = 0; i < players.length; i++) {
 			if (players[i].getX() <= 0 - images[i].getWidth(this))
 				players[i].setX(WIDTH - images[i].getWidth(this));
@@ -173,7 +192,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setY(players[i].getY() + pAccelY[i] / 2);
 			}
 		}
-
 	}
 
 	private void doMovement() {

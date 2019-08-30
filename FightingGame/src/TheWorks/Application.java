@@ -19,7 +19,7 @@ public class Application extends JFrame {
 
 		setSize(1000, 500);
 
-		setTitle("Application");
+		setTitle("StickFight");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setVisible(true);
