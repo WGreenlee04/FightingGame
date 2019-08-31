@@ -1,16 +1,29 @@
 package TheWorks;
 
+import java.awt.Image;
+
 public class Item {
 	int damage;
 	int X;
 	int Y;
+	int attackDelay;
 	double dropRate;
+	Image currentImage;
 
-	public Item(int d, int x, int y, double dR) {
+	public Item(int d, int x, int y, int aD, double dR) {
 		damage = d;
 		X = x;
 		Y = y;
+		attackDelay = aD;
 		dropRate = dR;
+	}
+
+	public Image getCurrentImage() {
+		return currentImage;
+	}
+
+	public void setCurrentImage(Image currentImage) {
+		this.currentImage = currentImage;
 	}
 
 	public int getDamage() {

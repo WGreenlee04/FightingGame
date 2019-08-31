@@ -15,15 +15,15 @@ import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private static final int DELAY = 25;
-	private static final int GRAVITY = -15;
-	private int area; // the size of the window on screen
+	private Timer timer;
+	public static final int GRAVITY = -15;
+	public int area; // the size of the window on screen
 	public Player[] players; // Array of players
 	public Image[] images; // Player Images
 	public int[] pAccelX; // acceleration of players X
 	public int[] pAccelY; // acceleration of players Y
-	public final Item[] ITEMS = {}; // all item types
+	public Image[] itemImages;
 	public ArrayList<Item> items; // currently displayed items
-	private Timer timer;
 	public KeyListener keylistener = this;
 	public boolean APressed;
 	public boolean SPressed;
@@ -35,6 +35,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean LeftPressed;
 	public boolean RightPressed;
 	public boolean DownPressed;
+	public final Item[] ITEMS = { new Stick() }; // all item types
 	public final int WIDTH = 1000;
 	public final int HEIGHT = 800;
 	public final int playercount = 2; // number of players throughout the game
@@ -56,6 +57,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		pAccelX = new int[playercount];
 		pAccelY = new int[playercount];
 		items = new ArrayList<Item>(itemcount);
+		itemImages = new Image[itemcount];
 
 		// Timer setup
 		timer = new Timer(DELAY, this);
@@ -81,10 +83,14 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		for (i = 0; i < images.length; i++)
 			images[i] = images[i].getScaledInstance(90, 150, Image.SCALE_SMOOTH);
 
-		// Loads items
+		// Loads items, and by design, Item images
 		for (i = 0; i < items.size(); i++) {
-			double chance = Math.random();
-			// if chance meets spawn chance, set items(i) to that.
+			for (int k = 0; k < ITEMS.length; k++) {
+				double chance = Math.random();
+				if (chance <= ITEMS[0].getDropRate()) {
+					items.add(ITEMS[i]);
+				}
+			}
 		}
 
 		// Sets start pos of players X
@@ -132,7 +138,14 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public void actionPerformed(ActionEvent arg0) {
 
 		doGravity();
+		doAcceleration();
+		doMovement();
+		collide();
+		repaint();
+		System.out.println(players[1].getY() + 150);
+	}
 
+	private void doAcceleration() {
 		// Add acceleration if key is pressed
 		// p1
 		if (APressed) {
@@ -193,11 +206,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			pAccelY[1] = fallspeed;
 			fall[1] = true;
 		}
-
-		doMovement();
-		collide();
-		repaint();
-		System.out.println(players[1].getY() + 150);
 	}
 
 	private void doGravity() {
