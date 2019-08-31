@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -14,12 +15,14 @@ import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private static final int DELAY = 25;
-	private static final int GRAVITY = -10;
+	private static final int GRAVITY = -15;
 	private int area; // the size of the window on screen
-	public Player[] players;
-	public Image[] images;
-	public int[] pAccelX;
-	public int[] pAccelY;
+	public Player[] players; // Array of players
+	public Image[] images; // Player Images
+	public int[] pAccelX; // acceleration of players X
+	public int[] pAccelY; // acceleration of players Y
+	public final Item[] ITEMS = {}; // all item types
+	public ArrayList<Item> items; // currently displayed items
 	private Timer timer;
 	public KeyListener keylistener = this;
 	public boolean APressed;
@@ -34,40 +37,55 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean DownPressed;
 	public final int WIDTH = 1000;
 	public final int HEIGHT = 800;
-	public final int playercount = 2;
+	public final int playercount = 2; // number of players throughout the game
+	public final int itemcount = 1; // the number of items on board at start
 	public final int dashspeed = 30;
 	public final int playerspeed = 7;
 	public final int jumpheight = 9;
 	public final int fallspeed = -20;
-	public boolean jump1 = false;
-	public boolean jump2 = false;
-	public boolean fall[] = { false, false };
-	public int[] jumps = { 0, 0 };
+	public boolean jump1 = false; // if player1 is jumping
+	public boolean jump2 = false; // if player2 is jumping
+	public boolean fall[] = { false, false }; // if either player is falling
+	public int[] jumps = { 0, 0 }; // number of jumps for each player
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
+		// Array inits
 		players = new Player[playercount];
 		images = new Image[playercount];
 		pAccelX = new int[playercount];
 		pAccelY = new int[playercount];
-		initSpace(i);
+		items = new ArrayList<Item>(itemcount);
+
+		// Timer setup
 		timer = new Timer(DELAY, this);
+		// Space setup
+		initSpace(i);
+		// Timer start
 		timer.start(); // Starts timer
 	}
 
 	public void initSpace(int i) { // loads both characters, and sets up space
 
+		// Adds both players to board array
 		if (i == 1)
 			add(new Player("src/resources/stickBlue.png"));
 		if (i != 1)
 			add(new Player("src/resources/stickBlue.png"), new Player("src/resources/stickRed.png"));
 
-		for (i = 0; i < images.length; i++)
+		// Loads ONLY images for PLAYERS
+		for (i = 0; i < players.length; i++)
 			images[i] = loadObject(players[i].getImageDir());
 
+		// Scales the images to correct size
 		for (i = 0; i < images.length; i++)
 			images[i] = images[i].getScaledInstance(90, 150, Image.SCALE_SMOOTH);
 
+		// Loads items
+		for (i = 0; i < items.size(); i++)
+			;
+
+		// Sets start pos of players X
 		for (i = 0; i < players.length; i++)
 			if (i == 0) {
 				players[i].setX(0);

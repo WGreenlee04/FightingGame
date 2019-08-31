@@ -2,7 +2,7 @@ package TheWorks;
 
 public class Player {
 	int health;
-	int damage;
+	Item item;
 	String imageDir;
 	int X;
 	int Y;
@@ -10,7 +10,6 @@ public class Player {
 
 	public Player(String imageDir) {
 		health = 1000;
-		damage = 35;
 		this.imageDir = imageDir;
 	}
 
@@ -23,13 +22,13 @@ public class Player {
 		return health;
 	}
 
-	public void setDamage(int d) {
-		damage = d;
+	public void setItem(Item i) {
+		item = i;
 
 	}
 
-	public int getDamage() {
-		return damage;
+	public Item getItem() {
+		return item;
 	}
 
 	public String getImageDir() {
