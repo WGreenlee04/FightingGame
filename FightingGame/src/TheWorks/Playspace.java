@@ -14,7 +14,7 @@ import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private static final int DELAY = 25;
-	private static final int GRAVITY = -5;
+	private static final int GRAVITY = -10;
 	private int area; // the size of the window on screen
 	public Player[] players;
 	public Image[] images;
@@ -43,7 +43,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean jump2 = false;
 	public boolean fall[] = { false, false };
 	public int[] jumps = { 0, 0 };
-	public double[] imageScale;
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
@@ -51,10 +50,36 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		images = new Image[playercount];
 		pAccelX = new int[playercount];
 		pAccelY = new int[playercount];
-		imageScale = new double[playercount];
 		initSpace(i);
 		timer = new Timer(DELAY, this);
 		timer.start(); // Starts timer
+	}
+
+	public void initSpace(int i) { // loads both characters, and sets up space
+
+		if (i == 1)
+			add(new Player("src/resources/stickBlue.png"));
+		if (i != 1)
+			add(new Player("src/resources/stickBlue.png"), new Player("src/resources/stickRed.png"));
+
+		for (i = 0; i < images.length; i++)
+			images[i] = loadObject(players[i].getImageDir());
+
+		for (i = 0; i < images.length; i++)
+			images[i] = images[i].getScaledInstance(90, 150, Image.SCALE_SMOOTH);
+
+		for (i = 0; i < players.length; i++)
+			if (i == 0) {
+				players[i].setX(0);
+			} else {
+				players[i].setX((WIDTH / (i) - 100) - images[i].getWidth(this));
+			}
+
+		setLocation(0, 0);
+		setSize(WIDTH, HEIGHT);
+		setBackground(Color.WHITE);
+		setFocusable(true);
+		addKeyListener(this);
 	}
 
 	// Begin player add
@@ -68,44 +93,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 	// End player add
 
-	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		for (int i = 0; i < players.length; i++)
-			g.drawImage(images[i], players[i].getX(), players[i].getY(), this);
-	}
-
-	public void initSpace(int i) { // loads both characters, and sets up space
-
-		if (i == 1)
-			add(new Player("src/resources/stickBlue.png"));
-		if (i != 1)
-			add(new Player("src/resources/stickBlue.png"), new Player("src/resources/stickRed.png"));
-
-		for (i = 0; i < images.length; i++)
-			images[i] = loadObject(players[i].getImageDir());
-
-		for (i = 0; i < imageScale.length; i++)
-			imageScale[i] = 90 / images[i].getWidth(this);
-
-		for (i = 0; i < images.length; i++)
-			images[i] = images[i].getScaledInstance(90, 150, Image.SCALE_SMOOTH);
-
-		for (i = 0; i < players.length; i++)
-			if (i == 0) {
-				players[i].setX(0);
-			} else {
-				players[i].setX((WIDTH / i + 1) - images[i].getWidth(this));
-			}
-
-		setLocation(0, 0);
-		setSize(WIDTH, HEIGHT);
-		setBackground(Color.WHITE);
-		setFocusable(true);
-		addKeyListener(this);
-	}
-
 	public Image loadObject(String Dir) {
+
 		ImageIcon iIcon = new ImageIcon(Dir);
 		Image i = iIcon.getImage();
 
@@ -113,10 +102,16 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 
 	@Override
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		for (int i = 0; i < players.length; i++)
+			g.drawImage(images[i], players[i].getX(), players[i].getY(), this);
+	}
+
+	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
 		doGravity();
-		collide();
 
 		// Add acceleration if key is pressed
 		// p1
@@ -145,10 +140,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			WReleased = false;
 		}
 		if (SPressed || fall[0]) {
-			if (!(players[0].getY() + images[0].getHeight(this) > HEIGHT)) {
-				pAccelY[0] = fallspeed;
-				fall[0] = true;
-			}
+			pAccelY[0] = fallspeed;
+			fall[0] = true;
 		}
 
 		// p2
@@ -177,22 +170,21 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			UpReleased = false;
 		}
 		if (DownPressed || fall[1]) {
-			if (!(players[1].getY() + images[0].getHeight(this) > HEIGHT)) {
-				pAccelY[1] = fallspeed;
-				fall[1] = true;
-			}
+			pAccelY[1] = fallspeed;
+			fall[1] = true;
 		}
 
 		doMovement();
+		collide();
 		repaint();
+		System.out.println(players[1].getY() + 150);
 	}
 
 	private void doGravity() {
 		// Gravity Players 1 and 2
 		for (int i = 0; i < players.length; i++)
 			if (pAccelY[i] <= 0) {
-				if (!(players[i].getY() + images[i].getHeight(this) > HEIGHT))
-					pAccelY[i] = GRAVITY;
+				pAccelY[i] = GRAVITY;
 			}
 	}
 
@@ -203,12 +195,11 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setX(WIDTH - images[i].getWidth(this));
 			if (players[i].getX() >= WIDTH + images[i].getWidth(this))
 				players[i].setX(0 - images[i].getWidth(this));
-			if (!(players[i].getY() + images[i].getHeight(this) < HEIGHT)) {
+			if (!(players[i].getY() + images[i].getHeight(this) + 35 < HEIGHT)) {
 				jumps[i] = 0;
 				fall[i] = false;
-				players[i].setY(HEIGHT - images[i].getHeight(this));
+				players[i].setY(HEIGHT - (images[i].getHeight(this) + 35));
 			}
-			System.out.println(players[1].getY() + 150);
 		}
 	}
 
