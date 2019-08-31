@@ -82,8 +82,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			images[i] = images[i].getScaledInstance(90, 150, Image.SCALE_SMOOTH);
 
 		// Loads items
-		for (i = 0; i < items.size(); i++)
-			;
+		for (i = 0; i < items.size(); i++) {
+			double chance = Math.random();
+			// if chance meets spawn chance, set items(i) to that.
+		}
 
 		// Sets start pos of players X
 		for (i = 0; i < players.length; i++)
