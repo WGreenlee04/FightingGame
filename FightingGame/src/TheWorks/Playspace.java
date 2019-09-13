@@ -11,12 +11,13 @@ import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener, KeyListener {
-	private static final int DELAY = 25;
+	private static final int DELAY = 20;
 	private Timer timer;
-	public static final int GRAVITY = -15;
+	public static final int GRAVITY = -4;
 	public int area; // the size of the window on screen
 	public Player[] players; // Array of players
 	public Image[] images; // Player Images
@@ -40,14 +41,15 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public final int HEIGHT = 800;
 	public final int playercount = 2; // number of players throughout the game
 	public final int itemcount = 1; // the number of items on board at start
-	public final int dashspeed = 30;
+	public final int dashspeed = 7;
 	public final int playerspeed = 7;
-	public final int jumpheight = 9;
-	public final int fallspeed = -20;
+	public final int jumpheight = 12;
+	public final int fallspeed = -25;
 	public boolean jump1 = false; // if player1 is jumping
 	public boolean jump2 = false; // if player2 is jumping
 	public boolean fall[] = { false, false }; // if either player is falling
 	public int[] jumps = { 0, 0 }; // number of jumps for each player
+	public JTextArea[] healthBars;
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
@@ -58,6 +60,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		pAccelY = new int[playercount];
 		items = new ArrayList<Item>(itemcount);
 		itemImages = new Image[itemcount];
+		healthBars = new JTextArea[playercount];
 
 		// Timer setup
 		timer = new Timer(DELAY, this);
@@ -67,24 +70,24 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		timer.start(); // Starts timer
 	}
 
-	public void initSpace(int i) { // loads both characters, and sets up space
+	public void initSpace(int m) { // loads both characters, and sets up space
 
 		// Adds both players to board array
-		if (i == 1)
+		if (m == 1)
 			add(new Player("src/resources/stickBlue.png"));
-		if (i != 1)
+		if (m != 1)
 			add(new Player("src/resources/stickBlue.png"), new Player("src/resources/stickRed.png"));
 
 		// Loads ONLY images for PLAYERS
-		for (i = 0; i < players.length; i++)
+		for (int i = 0; i < players.length; i++)
 			images[i] = loadObject(players[i].getImageDir());
 
 		// Scales the images to correct size
-		for (i = 0; i < images.length; i++)
+		for (int i = 0; i < images.length; i++)
 			images[i] = images[i].getScaledInstance(90, 150, Image.SCALE_SMOOTH);
 
 		// Loads items, and by design, Item images
-		for (i = 0; i < items.size(); i++) {
+		for (int i = 0; i < items.size(); i++) {
 			for (int k = 0; k < ITEMS.length; k++) {
 				double chance = Math.random();
 				if (chance <= ITEMS[0].getDropRate()) {
@@ -93,12 +96,20 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			}
 		}
 
+		// Sets health bars
+		for (int i = 0; i < healthBars.length; i++) {
+			healthBars[i] = new JTextArea("" + players[i].getHealth());
+			this.add(healthBars[i]);
+		}
+
 		// Sets start pos of players X
-		for (i = 0; i < players.length; i++)
+		for (int i = 0; i < players.length; i++)
 			if (i == 0) {
 				players[i].setX(0);
+				players[i].setY(765);
 			} else {
 				players[i].setX((WIDTH / (i) - 100) - images[i].getWidth(this));
+				players[i].setY(765);
 			}
 
 		setLocation(0, 0);
@@ -130,8 +141,11 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		for (int i = 0; i < players.length; i++)
+		for (int i = 0; i < players.length; i++) {
 			g.drawImage(images[i], players[i].getX(), players[i].getY(), this);
+			healthBars[i].setPosition(players[i].getX() + images[i].getHeight(this) / 2, 0);
+
+		}
 	}
 
 	@Override
@@ -212,7 +226,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// Gravity Players 1 and 2
 		for (int i = 0; i < players.length; i++)
 			if (pAccelY[i] <= 0) {
-				pAccelY[i] = GRAVITY;
+				pAccelY[i] += GRAVITY;
+			} else {
+				pAccelY[i] -= 1;
 			}
 	}
 
