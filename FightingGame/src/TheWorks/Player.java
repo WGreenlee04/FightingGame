@@ -4,17 +4,19 @@ public class Player {
 	int health;
 	Item item;
 	String imageDir;
+	String darkImageDir;
 	int X;
 	int Y;
 	int Width;
 	int Height;
 	int direction;
 
-	public Player(String imageDir) {
+	public Player(String imageDir, String darkImageDir) {
 		health = 1000;
 		Width = 90;
 		Height = 150;
 		this.imageDir = imageDir;
+		this.darkImageDir = darkImageDir;
 	}
 
 	public int getWidth() {
@@ -78,6 +80,18 @@ public class Player {
 
 	public int getDirection() {
 		return direction;
+	}
+
+	public String getDarkImageDir() {
+		return darkImageDir;
+	}
+
+	public void setDarkImageDir(String darkImageDir) {
+		this.darkImageDir = darkImageDir;
+	}
+
+	public void setImageDir(String imageDir) {
+		this.imageDir = imageDir;
 	}
 
 }

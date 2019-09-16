@@ -47,16 +47,29 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public final int dashspeed = 7;
 	public final int playerspeed = 7;
 	public final int jumpheight = 13;
-	public final int fallspeed = -25;
+	public final int fallspeed = -10;
 	public boolean jump1 = false; // if player1 is jumping
 	public boolean jump2 = false; // if player2 is jumping
 	public boolean fall[] = { false, false }; // if either player is falling
 	public int[] jumps = { 0, 0 }; // number of jumps for each player
 	public JLabel[] healthBars;
 	public JLabel[] healthBarIndicators;
+	public Color backgroundColor;
+	public boolean[] wasAirborne = { false, false };
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
+		setLayout(null);
+		setLocation(0, 0);
+		setSize(WIDTH, HEIGHT);
+		setFocusable(true);
+		addKeyListener(this);
+		setVisible(true);
+
+		backgroundColor = new Color(50, 50, 60);
+		backgroundColor.brighter();
+		setBackground(backgroundColor);
+
 		// Array inits
 		players = new Player[playercount];
 		images = new Image[playercount];
@@ -78,9 +91,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Adds both players to board array
 		if (m == 1)
-			add(new Player("src/resources/stickBlue.png"));
+			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue"));
 		if (m != 1)
-			add(new Player("src/resources/stickBlue.png"), new Player("src/resources/stickRed.png"));
+			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue"),
+					new Player("src/resources/stickRed.png", "src/resources/darkStickRed"));
 
 		// Loads ONLY images for PLAYERS
 		for (int i = 0; i < players.length; i++)
@@ -103,13 +117,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			healthBars[i].setVisible(true);
 			healthBars[i].setHorizontalAlignment(SwingConstants.CENTER);
 			healthBars[i].setVerticalAlignment(SwingConstants.CENTER);
+			healthBars[i].setForeground(Color.white);
 			healthBarIndicators[i] = new JLabel();
 			this.add(healthBarIndicators[i]);
 			healthBarIndicators[i].setVisible(true);
 			healthBarIndicators[i].setBackground(Color.red);
 			healthBarIndicators[i].setOpaque(true);
 		}
-
 		// Sets start pos of players X
 		for (int i = 0; i < players.length; i++)
 			if (i == 0) {
@@ -119,13 +133,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setX((WIDTH / (i) - 100) - images[i].getWidth(this));
 				players[i].setY(765);
 			}
-
-		setLayout(null);
-		setLocation(0, 0);
-		setSize(WIDTH, HEIGHT);
-		setBackground(Color.WHITE);
-		setFocusable(true);
-		addKeyListener(this);
 	}
 
 	// Begin player add
@@ -218,9 +225,16 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			fall[0] = false;
 			jumps[0]++;
 			WReleased = false;
+		} else if (WReleased) {
+			darkenObject(0);
+			wasAirborne[0] = true;
+		} else if (jumps[0] == 0 && wasAirborne[0] && pAccelY[1] <= 1) {
+			lightenObject(0);
+			wasAirborne[0] = false;
 		}
+
 		if (SPressed || fall[0]) {
-			pAccelY[0] = fallspeed;
+			pAccelY[0] += fallspeed;
 			fall[0] = true;
 		}
 
@@ -250,11 +264,28 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			jump2 = false;
 			jumps[1]++;
 			UpReleased = false;
+		} else if (UpReleased) {
+			darkenObject(1);
+			wasAirborne[1] = true;
+		} else if (jumps[1] == 0 && wasAirborne[1] && pAccelY[1] <= 1) {
+			lightenObject(1);
+			wasAirborne[1] = false;
 		}
+
 		if (DownPressed || fall[1]) {
-			pAccelY[1] = fallspeed;
+			pAccelY[1] += fallspeed;
 			fall[1] = true;
 		}
+	}
+
+	private void lightenObject(int i) {
+		images[i] = new ImageIcon(players[i].getImageDir()).getImage();
+
+	}
+
+	private void darkenObject(int i) {
+		images[i] = new ImageIcon(players[i].getDarkImageDir()).getImage();
+
 	}
 
 	private void doGravity() {
