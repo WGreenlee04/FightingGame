@@ -7,11 +7,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener, KeyListener {
@@ -23,7 +27,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public Image[] images; // Player Images
 	public int[] pAccelX; // acceleration of players X
 	public int[] pAccelY; // acceleration of players Y
-	public Image[] itemImages;
 	public ArrayList<Item> items; // currently displayed items
 	public KeyListener keylistener = this;
 	public boolean APressed;
@@ -43,13 +46,14 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public final int itemcount = 1; // the number of items on board at start
 	public final int dashspeed = 7;
 	public final int playerspeed = 7;
-	public final int jumpheight = 12;
+	public final int jumpheight = 13;
 	public final int fallspeed = -25;
 	public boolean jump1 = false; // if player1 is jumping
 	public boolean jump2 = false; // if player2 is jumping
 	public boolean fall[] = { false, false }; // if either player is falling
 	public int[] jumps = { 0, 0 }; // number of jumps for each player
-	public JTextArea[] healthBars;
+	public JLabel[] healthBars;
+	public JLabel[] healthBarIndicators;
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
@@ -59,8 +63,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		pAccelX = new int[playercount];
 		pAccelY = new int[playercount];
 		items = new ArrayList<Item>(itemcount);
-		itemImages = new Image[itemcount];
-		healthBars = new JTextArea[playercount];
+		healthBars = new JLabel[playercount];
+		healthBarIndicators = new JLabel[playercount];
 
 		// Timer setup
 		timer = new Timer(DELAY, this);
@@ -84,22 +88,26 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Scales the images to correct size
 		for (int i = 0; i < images.length; i++)
-			images[i] = images[i].getScaledInstance(90, 150, Image.SCALE_SMOOTH);
+			images[i] = images[i].getScaledInstance(players[i].getWidth(), players[i].getHeight(), Image.SCALE_SMOOTH);
 
 		// Loads items, and by design, Item images
 		for (int i = 0; i < items.size(); i++) {
-			for (int k = 0; k < ITEMS.length; k++) {
-				double chance = Math.random();
-				if (chance <= ITEMS[0].getDropRate()) {
-					items.add(ITEMS[i]);
-				}
-			}
+			items.add(i, ITEMS[0]);
 		}
 
-		// Sets health bars
+		// Sets health bars and indicators
 		for (int i = 0; i < healthBars.length; i++) {
-			healthBars[i] = new JTextArea("" + players[i].getHealth());
+			healthBars[i] = new JLabel();
 			this.add(healthBars[i]);
+			healthBars[i].setSize(50, 10);
+			healthBars[i].setVisible(true);
+			healthBars[i].setHorizontalAlignment(SwingConstants.CENTER);
+			healthBars[i].setVerticalAlignment(SwingConstants.CENTER);
+			healthBarIndicators[i] = new JLabel();
+			this.add(healthBarIndicators[i]);
+			healthBarIndicators[i].setVisible(true);
+			healthBarIndicators[i].setBackground(Color.red);
+			healthBarIndicators[i].setOpaque(true);
 		}
 
 		// Sets start pos of players X
@@ -112,6 +120,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setY(765);
 			}
 
+		setLayout(null);
 		setLocation(0, 0);
 		setSize(WIDTH, HEIGHT);
 		setBackground(Color.WHITE);
@@ -130,6 +139,15 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 	// End player add
 
+	public Image rotateObject(Image image, int degrees) {
+		double rotationRequired = Math.toRadians(degrees);
+		double locationX = image.getWidth(this) / 2;
+		double locationY = image.getHeight(this) / 2;
+		AffineTransform tx = AffineTransform.getRotateInstance(rotationRequired, locationX, locationY);
+		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
+		return op.filter((BufferedImage) image, null);
+	}
+
 	public Image loadObject(String Dir) {
 
 		ImageIcon iIcon = new ImageIcon(Dir);
@@ -143,8 +161,21 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		super.paintComponent(g);
 		for (int i = 0; i < players.length; i++) {
 			g.drawImage(images[i], players[i].getX(), players[i].getY(), this);
-			healthBars[i].setPosition(players[i].getX() + images[i].getHeight(this) / 2, 0);
 
+			// Draw health bars
+			healthBars[i].setText("" + players[i].getHealth());
+			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
+			healthBarIndicators[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
+			healthBarIndicators[i].setSize((int) 50 * (players[i].getHealth() / 1000), 10);
+
+			for (int j = 0; i < items.size(); i++) {
+				if (players[i].getDirection() == -1) {
+					g.drawImage(rotateObject(items.get(j).getCurrentImage(), 90), players[i].getX() - 20,
+							players[i].getY(), this);
+				} else {
+					g.drawImage(items.get(j).getCurrentImage(), players[i].getX() + 20, players[i].getY(), this);
+				}
+			}
 		}
 	}
 
@@ -168,6 +199,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			} else {
 				pAccelX[0] = -playerspeed * 2;
 			}
+			players[0].setDirection(-1);
 		}
 		if (DPressed) {
 			if (pAccelX[0] == 0) {
@@ -175,6 +207,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			} else {
 				pAccelX[0] = playerspeed * 2;
 			}
+			players[0].setDirection(1);
 		}
 		if (WPressed && !jump1) {
 			jump1 = true;
@@ -197,6 +230,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				pAccelX[1] = -dashspeed * 2;
 			} else {
 				pAccelX[1] = -playerspeed * 2;
+				players[1].setDirection(-1);
 			}
 		}
 		if (RightPressed) {
@@ -204,6 +238,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				pAccelX[1] = dashspeed * 2;
 			} else {
 				pAccelX[1] = playerspeed * 2;
+				players[1].setDirection(1);
 			}
 		}
 		if (UpPressed && !jump2) {

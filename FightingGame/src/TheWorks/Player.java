@@ -6,11 +6,31 @@ public class Player {
 	String imageDir;
 	int X;
 	int Y;
-	int rotation;
+	int Width;
+	int Height;
+	int direction;
 
 	public Player(String imageDir) {
 		health = 1000;
+		Width = 90;
+		Height = 150;
 		this.imageDir = imageDir;
+	}
+
+	public int getWidth() {
+		return Width;
+	}
+
+	public void setWidth(int width) {
+		Width = width;
+	}
+
+	public int getHeight() {
+		return Height;
+	}
+
+	public void setHeight(int height) {
+		Height = height;
 	}
 
 	public void setHealth(int h) {
@@ -51,12 +71,13 @@ public class Player {
 		Y = y;
 	}
 
-	public int getRotation() {
-		return rotation;
+	public void setDirection(int i) {
+		direction = i;
+
 	}
 
-	public void setRotation(int rotation) {
-		this.rotation = rotation;
+	public int getDirection() {
+		return direction;
 	}
 
 }
