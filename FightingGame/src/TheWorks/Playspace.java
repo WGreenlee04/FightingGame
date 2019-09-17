@@ -108,10 +108,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Scales the images to correct size
 		for (int i = 0; i < images.length; i++)
-			images[i] = scaleObject(images[i], players[i]);
+			images[i] = scalePlayer(images[i], players[i]);
 
 		// Loads items, and by design, Item images
 		items.add(ITEMS[0]);
+		for (Item item : items)
+			item.setCurrentImage(scaleObject(item.getCurrentImage(), 60, 60));
 
 		// Sets health bars and indicators
 		for (int i = 0; i < healthBars.length; i++) {
@@ -194,13 +196,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	private Image lightenObject(Image image, Player player) {
 		image = new ImageIcon(player.getImageDir()).getImage();
-		image = scaleObject(image, player);
+		image = scalePlayer(image, player);
 		return image;
 	}
 
 	private Image darkenObject(Image image, Player player) {
 		image = new ImageIcon(player.getDarkImageDir()).getImage();
-		image = scaleObject(image, player);
+		image = scalePlayer(image, player);
 		return image;
 	}
 
@@ -211,7 +213,11 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		return (Image) op.filter(toBufferedImage(image), null);
 	}
 
-	private Image scaleObject(Image image, Player player) {
+	private Image scaleObject(Image image, int width, int height) {
+		return image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+	}
+
+	private Image scalePlayer(Image image, Player player) {
 		return image.getScaledInstance(player.getWidth(), player.getHeight(), Image.SCALE_SMOOTH);
 
 	}
@@ -245,7 +251,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 
 	private void renderItems() {
-		for (Item item : items)
+		for (Item item : items) {
 			if (item.getPlayer() != null) {
 				item.setX(item.getPlayer().getX());
 				if (item.getDirection() != item.getPlayer().getDirection()) {
@@ -253,6 +259,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 					item.setCurrentImage(flipObject(item.getCurrentImage()));
 				}
 			}
+		}
 	}
 
 	private void doAcceleration() {
@@ -349,7 +356,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			if (item.getPlayer() == null) {
 				item.setY(item.getY() + ITEMGRAVITY);
 			}
-			System.out.println(item.getY());
 		}
 	}
 
@@ -367,8 +373,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			}
 		}
 		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getY() + items.get(i).getCurrentImage().getHeight(this) + 35 > HEIGHT) {
-				items.get(i).setY(HEIGHT - (items.get(i).getCurrentImage().getHeight(this) + 35));
+			if (items.get(i).getY() + items.get(i).getCurrentImage().getHeight(this) + 30 > HEIGHT) {
+				items.get(i).setY(HEIGHT - (items.get(i).getCurrentImage().getHeight(this) + 30));
 			}
 		}
 	}
