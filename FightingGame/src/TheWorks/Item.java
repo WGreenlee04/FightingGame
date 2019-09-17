@@ -8,6 +8,8 @@ public class Item {
 	int Y;
 	int attackDelay;
 	double dropRate;
+	int direction;
+	Player player;
 	Image currentImage;
 
 	public Item(int d, int x, int y, int aD, double dR) {
@@ -56,6 +58,22 @@ public class Item {
 
 	public void setDropRate(double dropRate) {
 		this.dropRate = dropRate;
+	}
+
+	public Player getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(Player player) {
+		this.player = player;
+	}
+
+	public int getDirection() {
+		return direction;
+	}
+
+	public void setDirection(int direction) {
+		this.direction = direction;
 	}
 
 }

@@ -2,6 +2,7 @@ package TheWorks;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,13 +22,14 @@ import javax.swing.Timer;
 public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private static final int DELAY = 20;
 	private Timer timer;
-	public static final int GRAVITY = -4;
+	public static final int GRAVITY = -4; // Quadratic gravity for players
+	public static final int ITEMGRAVITY = 10; // Linear gravity for items
 	public int area; // the size of the window on screen
 	public Player[] players; // Array of players
 	public Image[] images; // Player Images
 	public int[] pAccelX; // acceleration of players X
 	public int[] pAccelY; // acceleration of players Y
-	public ArrayList<Item> items; // currently displayed items
+	public ArrayList<Item> items = new ArrayList<Item>(); // currently displayed items
 	public KeyListener keylistener = this;
 	public boolean APressed;
 	public boolean SPressed;
@@ -50,12 +52,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public final int fallspeed = -10;
 	public boolean jump1 = false; // if player1 is jumping
 	public boolean jump2 = false; // if player2 is jumping
-	public boolean fall[] = { false, false }; // if either player is falling
+	public boolean fall[]; // if either player is falling
 	public int[] jumps = { 0, 0 }; // number of jumps for each player
 	public JLabel[] healthBars;
 	public JLabel[] healthBarIndicators;
 	public Color backgroundColor;
-	public boolean[] wasAirborne = { false, false };
+	public boolean[] direction;
+	public boolean[] wasAirborne;
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		super(); // Sets up JPanel
@@ -65,7 +68,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		setFocusable(true);
 		addKeyListener(this);
 		setVisible(true);
-
 		backgroundColor = new Color(50, 50, 60);
 		backgroundColor.brighter();
 		setBackground(backgroundColor);
@@ -75,14 +77,18 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		images = new Image[playercount];
 		pAccelX = new int[playercount];
 		pAccelY = new int[playercount];
-		items = new ArrayList<Item>(itemcount);
 		healthBars = new JLabel[playercount];
 		healthBarIndicators = new JLabel[playercount];
+		wasAirborne = new boolean[playercount];
+		fall = new boolean[playercount];
+		direction = new boolean[playercount];
 
 		// Timer setup
 		timer = new Timer(DELAY, this);
+
 		// Space setup
 		initSpace(i);
+
 		// Timer start
 		timer.start(); // Starts timer
 	}
@@ -102,12 +108,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Scales the images to correct size
 		for (int i = 0; i < images.length; i++)
-			images[i] = images[i].getScaledInstance(players[i].getWidth(), players[i].getHeight(), Image.SCALE_SMOOTH);
+			images[i] = scaleObject(images[i], players[i]);
 
 		// Loads items, and by design, Item images
-		for (int i = 0; i < items.size(); i++) {
-			items.add(i, ITEMS[0]);
-		}
+		items.add(ITEMS[0]);
 
 		// Sets health bars and indicators
 		for (int i = 0; i < healthBars.length; i++) {
@@ -124,6 +128,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			healthBarIndicators[i].setBackground(Color.red);
 			healthBarIndicators[i].setOpaque(true);
 		}
+
 		// Sets start pos of players X
 		for (int i = 0; i < players.length; i++)
 			if (i == 0) {
@@ -133,6 +138,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setX((WIDTH / (i) - 100) - images[i].getWidth(this));
 				players[i].setY(765);
 			}
+
+		for (int i = 0; i < playercount; i++) {
+			wasAirborne[i] = false;
+			fall[i] = false;
+			direction[i] = true;
+		}
 	}
 
 	// Begin player add
@@ -146,7 +157,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 	// End player add
 
-	public Image rotateObject(Image image, int degrees) {
+	Image rotateObject(Image image, int degrees) {
 		double rotationRequired = Math.toRadians(degrees);
 		double locationX = image.getWidth(this) / 2;
 		double locationY = image.getHeight(this) / 2;
@@ -155,7 +166,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		return op.filter((BufferedImage) image, null);
 	}
 
-	public Image loadObject(String Dir) {
+	private Image loadObject(String Dir) {
 
 		ImageIcon iIcon = new ImageIcon(Dir);
 		Image i = iIcon.getImage();
@@ -174,27 +185,74 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
 			healthBarIndicators[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
 			healthBarIndicators[i].setSize((int) 50 * (players[i].getHealth() / 1000), 10);
-
-			for (int j = 0; i < items.size(); i++) {
-				if (players[i].getDirection() == -1) {
-					g.drawImage(rotateObject(items.get(j).getCurrentImage(), 90), players[i].getX() - 20,
-							players[i].getY(), this);
-				} else {
-					g.drawImage(items.get(j).getCurrentImage(), players[i].getX() + 20, players[i].getY(), this);
-				}
-			}
 		}
+		for (int i = 0; i < items.size(); i++)
+			// Draw items
+			g.drawImage(items.get(i).getCurrentImage(), items.get(i).getX(), items.get(i).getY(), this);
+
+	}
+
+	private Image lightenObject(Image image, Player player) {
+		image = new ImageIcon(player.getImageDir()).getImage();
+		image = scaleObject(image, player);
+		return image;
+	}
+
+	private Image darkenObject(Image image, Player player) {
+		image = new ImageIcon(player.getDarkImageDir()).getImage();
+		image = scaleObject(image, player);
+		return image;
+	}
+
+	private Image flipObject(Image image) {
+		AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+		tx.translate(-image.getWidth(null), 0);
+		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+		return (Image) op.filter(toBufferedImage(image), null);
+	}
+
+	private Image scaleObject(Image image, Player player) {
+		return image.getScaledInstance(player.getWidth(), player.getHeight(), Image.SCALE_SMOOTH);
+
+	}
+
+	private static BufferedImage toBufferedImage(Image img) {
+		if (img instanceof BufferedImage) {
+			return (BufferedImage) img;
+		}
+
+		// Create a buffered image with transparency
+		BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+		// Draw the image on to the buffered image
+		Graphics2D bGr = bimage.createGraphics();
+		bGr.drawImage(img, 0, 0, null);
+		bGr.dispose();
+
+		// Return the buffered image
+		return bimage;
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
+		renderItems();
 		doGravity();
 		doAcceleration();
 		doMovement();
 		collide();
 		repaint();
-		System.out.println(players[1].getY() + 150);
+	}
+
+	private void renderItems() {
+		for (Item item : items)
+			if (item.getPlayer() != null) {
+				item.setX(item.getPlayer().getX());
+				if (item.getDirection() != item.getPlayer().getDirection()) {
+					item.setDirection(item.getPlayer().getDirection());
+					item.setCurrentImage(flipObject(item.getCurrentImage()));
+				}
+			}
 	}
 
 	private void doAcceleration() {
@@ -226,10 +284,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			jumps[0]++;
 			WReleased = false;
 		} else if (WReleased) {
-			darkenObject(0);
+			darkenObject(images[0], players[0]);
 			wasAirborne[0] = true;
 		} else if (jumps[0] == 0 && wasAirborne[0] && pAccelY[1] <= 1) {
-			lightenObject(0);
+			lightenObject(images[0], players[0]);
 			wasAirborne[0] = false;
 		}
 
@@ -265,10 +323,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			jumps[1]++;
 			UpReleased = false;
 		} else if (UpReleased) {
-			darkenObject(1);
+			darkenObject(images[1], players[1]);
 			wasAirborne[1] = true;
 		} else if (jumps[1] == 0 && wasAirborne[1] && pAccelY[1] <= 1) {
-			lightenObject(1);
+			lightenObject(images[1], players[1]);
 			wasAirborne[1] = false;
 		}
 
@@ -276,16 +334,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			pAccelY[1] += fallspeed;
 			fall[1] = true;
 		}
-	}
-
-	private void lightenObject(int i) {
-		images[i] = new ImageIcon(players[i].getImageDir()).getImage();
-
-	}
-
-	private void darkenObject(int i) {
-		images[i] = new ImageIcon(players[i].getDarkImageDir()).getImage();
-
 	}
 
 	private void doGravity() {
@@ -296,6 +344,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			} else {
 				pAccelY[i] -= 1;
 			}
+		// Gravity on items
+		for (Item item : items) {
+			if (item.getPlayer() == null) {
+				item.setY(item.getY() + ITEMGRAVITY);
+			}
+			System.out.println(item.getY());
+		}
 	}
 
 	private void collide() {
@@ -305,10 +360,15 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setX(WIDTH - images[i].getWidth(this));
 			if (players[i].getX() >= WIDTH + images[i].getWidth(this))
 				players[i].setX(0 - images[i].getWidth(this));
-			if (!(players[i].getY() + images[i].getHeight(this) + 35 < HEIGHT)) {
+			if (players[i].getY() + images[i].getHeight(this) + 35 > HEIGHT) {
 				jumps[i] = 0;
 				fall[i] = false;
 				players[i].setY(HEIGHT - (images[i].getHeight(this) + 35));
+			}
+		}
+		for (int i = 0; i < items.size(); i++) {
+			if (items.get(i).getY() + items.get(i).getCurrentImage().getHeight(this) + 35 > HEIGHT) {
+				items.get(i).setY(HEIGHT - (items.get(i).getCurrentImage().getHeight(this) + 35));
 			}
 		}
 	}
