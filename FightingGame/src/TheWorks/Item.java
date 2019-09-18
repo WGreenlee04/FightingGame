@@ -6,6 +6,8 @@ public class Item {
 	int damage;
 	int X;
 	int Y;
+	int Width;
+	int Height;
 	int attackDelay;
 	double dropRate;
 	int direction;
@@ -74,6 +76,22 @@ public class Item {
 
 	public void setDirection(int direction) {
 		this.direction = direction;
+	}
+
+	public int getWidth() {
+		return Width;
+	}
+
+	public void setWidth(int width) {
+		Width = width;
+	}
+
+	public int getHeight() {
+		return Height;
+	}
+
+	public void setHeight(int height) {
+		Height = height;
 	}
 
 }

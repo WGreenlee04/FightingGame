@@ -44,7 +44,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public JLabel[] healthBarIndicators; // bar itself
 	public boolean[] direction;
 	public boolean[] wasAirborne;
-	public ArrayList<Item> items = new ArrayList<Item>(); // currently displayed items
+	public ArrayList<Item> items = new ArrayList<Item>(); // currently displayed
+															// items
 	public KeyListener keylistener = this;
 	public boolean APressed;
 	public boolean SPressed;
@@ -125,13 +126,14 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		for (int i = 0; i < itemcount; i++) {
 			double spawnVal = Math.random();
 			double locationVal = Math.random();
-			for (Item ITEM : ITEMS) {
-				if (ITEM.getDropRate() >= spawnVal) {
-					items.set(i, ITEM);
-					items.get(i).setX((int) ((WIDTH / 3) + (WIDTH / 3 * locationVal)));
+			for (int I = 0; I < ITEMS.length; I++) {
+				if (ITEMS[I].getDropRate() >= spawnVal) {
+					items.set(i, ITEMS[I]);
+					items.get(i).setX((int) ((WIDTH / 3) + (WIDTH / 3 * locationVal) + items.get(i).getWidth()));
 				}
 			}
-			items.get(i).setCurrentImage(scaleObject(items.get(i).getCurrentImage(), 80, 80));
+			items.get(i).setCurrentImage(
+					scaleObject(items.get(i).getCurrentImage(), items.get(i).getWidth(), items.get(i).getHeight()));
 
 		}
 
@@ -161,6 +163,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setY(765);
 			}
 
+		// Set default array values
 		for (int i = 0; i < playercount; i++) {
 			wasAirborne[i] = false;
 			fall[i] = false;
@@ -170,32 +173,17 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 
 	// Begin player add
+	// SinglePlayer
 	public void add(Player a) {
 		players[0] = a;
 	}
 
+	// 2 Player
 	public void add(Player a, Player b) {
 		players[0] = a;
 		players[1] = b;
 	}
 	// End player add
-
-	private Image rotateObject(Image image, int degrees) {
-		double rotationRequired = Math.toRadians(degrees);
-		double locationX = image.getWidth(this) / 2;
-		double locationY = image.getHeight(this) / 2;
-		AffineTransform tx = AffineTransform.getRotateInstance(rotationRequired, locationX, locationY);
-		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
-		return op.filter((BufferedImage) image, null);
-	}
-
-	private Image loadObject(String Dir) {
-
-		ImageIcon iIcon = new ImageIcon(Dir);
-		Image i = iIcon.getImage();
-
-		return i;
-	}
 
 	@Override
 	public void paintComponent(Graphics g) {
@@ -215,51 +203,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	}
 
-	private Image lightenObject(Image image, Player player) {
-		image = new ImageIcon(player.getImageDir()).getImage();
-		image = scalePlayer(image, player);
-		return image;
-	}
-
-	private Image darkenObject(Image image, Player player) {
-		image = new ImageIcon(player.getDarkImageDir()).getImage();
-		image = scalePlayer(image, player);
-		return image;
-	}
-
-	private Image flipObject(Image image) {
-		AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-		tx.translate(-image.getWidth(null), 0);
-		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-		return (Image) op.filter(toBufferedImage(image), null);
-	}
-
-	private Image scaleObject(Image image, int width, int height) {
-		return image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-	}
-
-	private Image scalePlayer(Image image, Player player) {
-		return image.getScaledInstance(player.getWidth(), player.getHeight(), Image.SCALE_SMOOTH);
-
-	}
-
-	private static BufferedImage toBufferedImage(Image img) {
-		if (img instanceof BufferedImage) {
-			return (BufferedImage) img;
-		}
-
-		// Create a buffered image with transparency
-		BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-
-		// Draw the image on to the buffered image
-		Graphics2D bGr = bimage.createGraphics();
-		bGr.drawImage(img, 0, 0, null);
-		bGr.dispose();
-
-		// Return the buffered image
-		return bimage;
-	}
-
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
@@ -270,8 +213,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		doMovement();
 		doGravity();
 		doAcceleration();
-		renderItems();
 		collide();
+		renderItems();
 		repaint();
 	}
 
@@ -283,10 +226,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 					images[0].getHeight(this));
 			for (int i = 0; i < items.size(); i++) {
 				itemRectangles[i] = new Rectangle(
-						items.get(i).getX() - ((int) items.get(i).getCurrentImage().getWidth(this)),
-						items.get(i).getY() + ((int) items.get(i).getCurrentImage().getHeight(this)),
+						items.get(i).getX() - ((int) items.get(i).getCurrentImage().getWidth(this) / 2),
+						items.get(i).getY() + ((int) items.get(i).getCurrentImage().getHeight(this) / 2),
 						items.get(i).getCurrentImage().getWidth(this), items.get(i).getCurrentImage().getHeight(this));
-				if (itemRectangles[i].intersects(p1)) {
+				if (itemRectangles[i].intersects(p1) && items.get(i).getPlayer() == null) {
 					players[0].setItem(items.get(i));
 					items.get(i).setPlayer(players[0]);
 				}
@@ -303,7 +246,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 						items.get(i).getY() + ((int) items.get(i).getCurrentImage().getHeight(this)),
 						items.get(i).getCurrentImage().getWidth(this), items.get(i).getCurrentImage().getHeight(this));
 				System.out.println(itemRectangles[i].getX());
-				if (itemRectangles[i].intersects(p2)) {
+				if (itemRectangles[i].intersects(p2) && items.get(i).getPlayer() == null) {
 					players[1].setItem(items.get(i));
 					items.get(i).setPlayer(players[1]);
 				}
@@ -361,10 +304,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			fall[0] = false;
 			jumps[0]++;
 			WReleased = false;
-		} else if (jumps[0] > 2) { // oh yeah and if you're out of jumps, we set you to a darker color
+		} else if (jumps[0] > 2) { // oh yeah and if you're out of jumps, we set
+									// you to a darker color
 			images[0] = darkenObject(images[0], players[0]);
 			wasAirborne[0] = true;
-		} else if (jumps[0] == 0 && wasAirborne[0]) { // once your jumps are back, you can be light
+		} else if (jumps[0] == 0 && wasAirborne[0]) { // once your jumps are
+														// back, you can be
+														// light
 			images[0] = lightenObject(images[0], players[0]);
 			wasAirborne[0] = false;
 		}
@@ -408,10 +354,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			jump2 = false;
 			jumps[1]++;
 			UpReleased = false;
-		} else if (jumps[1] > 2) { // oh yeah and if you're out of jumps, we set you to a darker color
+		} else if (jumps[1] > 2) { // oh yeah and if you're out of jumps, we set
+									// you to a darker color
 			images[1] = darkenObject(images[1], players[1]);
 			wasAirborne[1] = true;
-		} else if (jumps[1] == 0 && wasAirborne[1]) { // once your jumps are back, you can be light
+		} else if (jumps[1] == 0 && wasAirborne[1]) { // once your jumps are
+														// back, you can be
+														// light
 			images[1] = lightenObject(images[1], players[1]);
 			wasAirborne[1] = false;
 		}
@@ -493,6 +442,70 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	}
 
+	// IMAGE TOOLBOX START
+	private Image rotateObject(Image image, int degrees) {
+		double rotationRequired = Math.toRadians(degrees);
+		double locationX = image.getWidth(this) / 2;
+		double locationY = image.getHeight(this) / 2;
+		AffineTransform tx = AffineTransform.getRotateInstance(rotationRequired, locationX, locationY);
+		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
+		return op.filter((BufferedImage) image, null);
+	}
+
+	private Image loadObject(String Dir) {
+
+		ImageIcon iIcon = new ImageIcon(Dir);
+		Image i = iIcon.getImage();
+
+		return i;
+	}
+
+	private Image lightenObject(Image image, Player player) {
+		image = new ImageIcon(player.getImageDir()).getImage();
+		image = scalePlayer(image, player);
+		return image;
+	}
+
+	private Image darkenObject(Image image, Player player) {
+		image = new ImageIcon(player.getDarkImageDir()).getImage();
+		image = scalePlayer(image, player);
+		return image;
+	}
+
+	private Image flipObject(Image image) {
+		AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+		tx.translate(-image.getWidth(null), 0);
+		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+		return (Image) op.filter(toBufferedImage(image), null);
+	}
+
+	private Image scaleObject(Image image, int width, int height) {
+		return image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+	}
+
+	private Image scalePlayer(Image image, Player player) {
+		return image.getScaledInstance(player.getWidth(), player.getHeight(), Image.SCALE_SMOOTH);
+
+	}
+
+	private static BufferedImage toBufferedImage(Image img) {
+		if (img instanceof BufferedImage) {
+			return (BufferedImage) img;
+		}
+
+		// Create a buffered image with transparency
+		BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+		// Draw the image on to the buffered image
+		Graphics2D bGr = bimage.createGraphics();
+		bGr.drawImage(img, 0, 0, null);
+		bGr.dispose();
+
+		// Return the buffered image
+		return bimage;
+	}
+	// IMAGE TOOLBOX END
+
 	// Keypress detection
 	@Override
 	public void keyPressed(KeyEvent e) {
@@ -538,7 +551,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			DownPressed = true;
 		}
 
-		if (e.getKeyCode() == KeyEvent.VK_E) {
+		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
 			LShiftPressed = true;
 			LShiftReleased = false;
 		}
@@ -565,6 +578,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			WPressed = false;
 			WReleased = true;
 		}
+		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
+			LShiftPressed = false;
+			LShiftReleased = true;
+		}
 
 		// ULDR Controls
 		if (e.getKeyCode() == KeyEvent.VK_UP) {
@@ -584,9 +601,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			RightPressed = false;
 		}
 
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
-			LShiftPressed = false;
-			LShiftReleased = true;
+		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
+			RShiftPressed = false;
+			RShiftReleased = true;
 		}
 	}
 
