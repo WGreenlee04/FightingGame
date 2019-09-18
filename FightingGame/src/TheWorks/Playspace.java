@@ -24,11 +24,24 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private Timer timer;
 	public static final int GRAVITY = -4; // Quadratic gravity for players
 	public static final int ITEMGRAVITY = 10; // Linear gravity for items
-	public int area; // the size of the window on screen
+	public final int WIDTH = 1000;
+	public final int HEIGHT = 800;
+	public final int playercount = 2; // number of players throughout the game
+	public final int itemcount = 1; // the number of items on board at start
+	public final int dashspeed = 7;
+	public final int playerspeed = 8;
+	public final int jumpheight = 13;
+	public final int fallspeed = -10;
+	public final Item[] ITEMS = { new Stick() }; // all item types
 	public Player[] players; // Array of players
 	public Image[] images; // Player Images
 	public int[] pAccelX; // acceleration of players X
 	public int[] pAccelY; // acceleration of players Y
+	public int[] jumps; // number of jumps for each player
+	public JLabel[] healthBars; // number on bar
+	public JLabel[] healthBarIndicators; // bar itself
+	public boolean[] direction;
+	public boolean[] wasAirborne;
 	public ArrayList<Item> items = new ArrayList<Item>(); // currently displayed items
 	public KeyListener keylistener = this;
 	public boolean APressed;
@@ -41,27 +54,18 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean LeftPressed;
 	public boolean RightPressed;
 	public boolean DownPressed;
-	public final Item[] ITEMS = { new Stick() }; // all item types
-	public final int WIDTH = 1000;
-	public final int HEIGHT = 800;
-	public final int playercount = 2; // number of players throughout the game
-	public final int itemcount = 1; // the number of items on board at start
-	public final int dashspeed = 7;
-	public final int playerspeed = 7;
-	public final int jumpheight = 13;
-	public final int fallspeed = -10;
+	public boolean EPressed;
+	public boolean EReleased;
+	public boolean ShiftPressed;
+	public boolean ShiftReleased;
 	public boolean jump1 = false; // if player1 is jumping
 	public boolean jump2 = false; // if player2 is jumping
 	public boolean fall[]; // if either player is falling
-	public int[] jumps = { 0, 0 }; // number of jumps for each player
-	public JLabel[] healthBars;
-	public JLabel[] healthBarIndicators;
 	public Color backgroundColor;
-	public boolean[] direction;
-	public boolean[] wasAirborne;
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
-		super(); // Sets up JPanel
+		// Sets up JPanel
+		super();
 		setLayout(null);
 		setLocation(0, 0);
 		setSize(WIDTH, HEIGHT);
@@ -82,6 +86,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		wasAirborne = new boolean[playercount];
 		fall = new boolean[playercount];
 		direction = new boolean[playercount];
+		jumps = new int[playercount];
 
 		// Timer setup
 		timer = new Timer(DELAY, this);
@@ -113,7 +118,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// Loads items, and by design, Item images
 		items.add(ITEMS[0]);
 		for (Item item : items)
-			item.setCurrentImage(scaleObject(item.getCurrentImage(), 60, 60));
+			item.setCurrentImage(scaleObject(item.getCurrentImage(), 80, 80));
 
 		// Sets health bars and indicators
 		for (int i = 0; i < healthBars.length; i++) {
@@ -145,6 +150,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			wasAirborne[i] = false;
 			fall[i] = false;
 			direction[i] = true;
+			jumps[i] = 0;
 		}
 	}
 
@@ -159,7 +165,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 	// End player add
 
-	Image rotateObject(Image image, int degrees) {
+	private Image rotateObject(Image image, int degrees) {
 		double rotationRequired = Math.toRadians(degrees);
 		double locationX = image.getWidth(this) / 2;
 		double locationY = image.getHeight(this) / 2;
@@ -265,7 +271,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private void doAcceleration() {
 		// Add acceleration if key is pressed
 		// p1
-		if (APressed) {
+
+		// Left Movement w/ dash
+		if (APressed && !DPressed) {
 			if (pAccelX[0] == 0) {
 				pAccelX[0] = -dashspeed * 2;
 			} else {
@@ -273,7 +281,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			}
 			players[0].setDirection(-1);
 		}
-		if (DPressed) {
+
+		// Right Movement w/ dash
+		if (DPressed && !APressed) {
 			if (pAccelX[0] == 0) {
 				pAccelX[0] = dashspeed * 2;
 			} else {
@@ -281,20 +291,24 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			}
 			players[0].setDirection(1);
 		}
+
+		// If you didn't just jump, and pressed jump, jump
 		if (WPressed && !jump1) {
 			jump1 = true;
 			pAccelY[0] = jumpheight * 2;
 		}
+
+		// You just jumped, and we need to increase jump counter and reset jump
 		if (WReleased && jumps[0] <= 2) {
 			jump1 = false;
 			fall[0] = false;
 			jumps[0]++;
 			WReleased = false;
-		} else if (WReleased) {
-			darkenObject(images[0], players[0]);
+		} else if (jumps[0] > 2) { // oh yeah and if you're out of jumps, we set you to a darker color
+			images[0] = darkenObject(images[0], players[0]);
 			wasAirborne[0] = true;
-		} else if (jumps[0] == 0 && wasAirborne[0] && pAccelY[1] <= 1) {
-			lightenObject(images[0], players[0]);
+		} else if (jumps[0] == 0 && wasAirborne[0]) { // once your jumps are back, you can be light
+			images[0] = lightenObject(images[0], players[0]);
 			wasAirborne[0] = false;
 		}
 
@@ -304,39 +318,48 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 
 		// p2
-		if (LeftPressed) {
+
+		// Left Movement w/ dash
+		if (LeftPressed && !RightPressed) {
 			if (pAccelX[1] == 0) {
 				pAccelX[1] = -dashspeed * 2;
 			} else {
 				pAccelX[1] = -playerspeed * 2;
-				players[1].setDirection(-1);
 			}
+			players[1].setDirection(-1);
 		}
-		if (RightPressed) {
+
+		// Right Movement w/ dash
+		if (RightPressed && !LeftPressed) {
 			if (pAccelX[1] == 0) {
 				pAccelX[1] = dashspeed * 2;
 			} else {
 				pAccelX[1] = playerspeed * 2;
-				players[1].setDirection(1);
 			}
+			players[1].setDirection(1);
 		}
+
+		// If you didn't just jump, and pressed jump, jump
 		if (UpPressed && !jump2) {
 			jump2 = true;
 			fall[1] = false;
 			pAccelY[1] = jumpheight * 2;
 		}
+
+		// You just jumped, and we need to increase jump counter and reset jump
 		if (UpReleased && jumps[1] <= 2) {
 			jump2 = false;
 			jumps[1]++;
 			UpReleased = false;
-		} else if (UpReleased) {
-			darkenObject(images[1], players[1]);
+		} else if (jumps[1] > 2) { // oh yeah and if you're out of jumps, we set you to a darker color
+			images[1] = darkenObject(images[1], players[1]);
 			wasAirborne[1] = true;
-		} else if (jumps[1] == 0 && wasAirborne[1] && pAccelY[1] <= 1) {
-			lightenObject(images[1], players[1]);
+		} else if (jumps[1] == 0 && wasAirborne[1]) { // once your jumps are back, you can be light
+			images[1] = lightenObject(images[1], players[1]);
 			wasAirborne[1] = false;
 		}
 
+		// Fast falling
 		if (DownPressed || fall[1]) {
 			pAccelY[1] += fallspeed;
 			fall[1] = true;
@@ -344,6 +367,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 
 	private void doGravity() {
+
 		// Gravity Players 1 and 2
 		for (int i = 0; i < players.length; i++)
 			if (pAccelY[i] <= 0) {
@@ -351,6 +375,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			} else {
 				pAccelY[i] -= 1;
 			}
+
 		// Gravity on items
 		for (Item item : items) {
 			if (item.getPlayer() == null) {
@@ -360,18 +385,25 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 
 	private void collide() {
-		// If at a wall, loop or bounce
+
+		// looping through the number of players
 		for (int i = 0; i < players.length; i++) {
+
+			// If at wall, loop
 			if (players[i].getX() <= 0 - images[i].getWidth(this))
-				players[i].setX(WIDTH - images[i].getWidth(this));
+				players[i].setX(WIDTH);
 			if (players[i].getX() >= WIDTH + images[i].getWidth(this))
 				players[i].setX(0 - images[i].getWidth(this));
+
+			// If at floor, don't move through
 			if (players[i].getY() + images[i].getHeight(this) + 35 > HEIGHT) {
 				jumps[i] = 0;
 				fall[i] = false;
 				players[i].setY(HEIGHT - (images[i].getHeight(this) + 35));
 			}
 		}
+
+		// When items hit the ground, stop motion
 		for (int i = 0; i < items.size(); i++) {
 			if (items.get(i).getY() + items.get(i).getCurrentImage().getHeight(this) + 30 > HEIGHT) {
 				items.get(i).setY(HEIGHT - (items.get(i).getCurrentImage().getHeight(this) + 30));
@@ -404,34 +436,57 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	}
 
+	// Keypress detection
 	@Override
 	public void keyPressed(KeyEvent e) {
+
+		// WASD Controls
 		if (e.getKeyCode() == KeyEvent.VK_A) {
 			APressed = true;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_D) {
 			DPressed = true;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_S) {
 			SPressed = true;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_W) {
 			WPressed = true;
+			WReleased = false;
 		}
+
+		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
+			ShiftPressed = true;
+			ShiftReleased = false;
+		}
+
+		// ULDR Controls
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 			LeftPressed = true;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
 			RightPressed = true;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_UP) {
 			UpPressed = true;
+			UpReleased = false;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
 			DownPressed = true;
 		}
+
+		if (e.getKeyCode() == KeyEvent.VK_E) {
+			EPressed = true;
+		}
 	}
 
+	// Key Release detection
 	@Override
 	public void keyReleased(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_A) {
@@ -462,6 +517,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 	}
 
+	// We need this, but would rather forget it...
 	@Override
 	public void keyTyped(KeyEvent e) {
 	}
