@@ -106,10 +106,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Adds both players to board array
 		if (m == 1)
-			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue"));
+			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"));
 		if (m != 1)
-			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue"),
-					new Player("src/resources/stickRed.png", "src/resources/darkStickRed"));
+			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"),
+					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png"));
 
 		// Loads ONLY images for PLAYERS
 		for (int i = 0; i < players.length; i++)
@@ -528,9 +528,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			WReleased = false;
 		}
 
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
-			RShiftPressed = true;
-			RShiftReleased = false;
+		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
+			LShiftPressed = true;
+			LShiftReleased = false;
 		}
 
 		// ULDR Controls
@@ -551,9 +551,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			DownPressed = true;
 		}
 
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
-			LShiftPressed = true;
-			LShiftReleased = false;
+		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
+			RShiftPressed = true;
+			RShiftReleased = false;
 		}
 	}
 
