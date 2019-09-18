@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -24,7 +25,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private static final int DELAY = 20;
 	private Timer timer;
 	public static final int GRAVITY = -4; // Quadratic gravity for players
-	public static final int ITEMGRAVITY = 5; // Linear gravity for items
+	public static final int ITEMGRAVITY = 6; // Linear gravity for items
 	public final int WIDTH = 1000;
 	public final int HEIGHT = 800;
 	public final int playercount = 2; // number of players throughout the game
@@ -262,6 +263,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
+		// Player status methods, including animations
+		pickup();
+
+		// Position methods
 		doMovement();
 		doGravity();
 		doAcceleration();
@@ -270,10 +275,48 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		repaint();
 	}
 
+	private void pickup() {
+
+		if (LShiftPressed && players[0].getItem() == null) {
+			Rectangle[] itemRectangles = new Rectangle[items.size()];
+			Rectangle p1 = new Rectangle(players[0].getX(), players[0].getY(), images[0].getWidth(this),
+					images[0].getHeight(this));
+			for (int i = 0; i < items.size(); i++) {
+				itemRectangles[i] = new Rectangle(
+						items.get(i).getX() - ((int) items.get(i).getCurrentImage().getWidth(this)),
+						items.get(i).getY() + ((int) items.get(i).getCurrentImage().getHeight(this)),
+						items.get(i).getCurrentImage().getWidth(this), items.get(i).getCurrentImage().getHeight(this));
+				if (itemRectangles[i].intersects(p1)) {
+					players[0].setItem(items.get(i));
+					items.get(i).setPlayer(players[0]);
+				}
+			}
+		}
+
+		if (RShiftPressed && players[1].getItem() == null) {
+			Rectangle[] itemRectangles = new Rectangle[items.size()];
+			Rectangle p2 = new Rectangle(players[1].getX(), players[1].getY(), images[1].getWidth(this),
+					images[1].getHeight(this));
+			for (int i = 0; i < items.size(); i++) {
+				itemRectangles[i] = new Rectangle(
+						items.get(i).getX() - ((int) items.get(i).getCurrentImage().getWidth(this)),
+						items.get(i).getY() + ((int) items.get(i).getCurrentImage().getHeight(this)),
+						items.get(i).getCurrentImage().getWidth(this), items.get(i).getCurrentImage().getHeight(this));
+				System.out.println(itemRectangles[i].getX());
+				if (itemRectangles[i].intersects(p2)) {
+					players[1].setItem(items.get(i));
+					items.get(i).setPlayer(players[1]);
+				}
+			}
+		}
+
+	}
+
 	private void renderItems() {
 		for (Item item : items) {
 			if (item.getPlayer() != null) {
 				item.setX(item.getPlayer().getX());
+				item.setY(item.getPlayer().getY());
 				if (item.getDirection() != item.getPlayer().getDirection()) {
 					item.setDirection(item.getPlayer().getDirection());
 					item.setCurrentImage(flipObject(item.getCurrentImage()));
