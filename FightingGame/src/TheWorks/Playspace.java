@@ -44,7 +44,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public JLabel[] healthBarIndicators; // bar itself
 	public boolean[] direction;
 	public boolean[] wasAirborne;
-	public ArrayList<Item> items = new ArrayList<Item>(); // currently displayed items
+	public ArrayList<Item> items = new ArrayList<Item>(); // currently displayed
+															// items
 	public KeyListener keylistener = this;
 	public boolean APressed;
 	public boolean SPressed;
@@ -270,8 +271,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		doMovement();
 		doGravity();
 		doAcceleration();
-		renderItems();
 		collide();
+		renderItems();
 		repaint();
 	}
 
@@ -283,10 +284,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 					images[0].getHeight(this));
 			for (int i = 0; i < items.size(); i++) {
 				itemRectangles[i] = new Rectangle(
-						items.get(i).getX() - ((int) items.get(i).getCurrentImage().getWidth(this)),
-						items.get(i).getY() + ((int) items.get(i).getCurrentImage().getHeight(this)),
+						items.get(i).getX() - ((int) items.get(i).getCurrentImage().getWidth(this) / 2),
+						items.get(i).getY() + ((int) items.get(i).getCurrentImage().getHeight(this) / 2),
 						items.get(i).getCurrentImage().getWidth(this), items.get(i).getCurrentImage().getHeight(this));
-				if (itemRectangles[i].intersects(p1)) {
+				if (itemRectangles[i].intersects(p1) && items.get(i).getPlayer() == null) {
 					players[0].setItem(items.get(i));
 					items.get(i).setPlayer(players[0]);
 				}
@@ -303,7 +304,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 						items.get(i).getY() + ((int) items.get(i).getCurrentImage().getHeight(this)),
 						items.get(i).getCurrentImage().getWidth(this), items.get(i).getCurrentImage().getHeight(this));
 				System.out.println(itemRectangles[i].getX());
-				if (itemRectangles[i].intersects(p2)) {
+				if (itemRectangles[i].intersects(p2) && items.get(i).getPlayer() == null) {
 					players[1].setItem(items.get(i));
 					items.get(i).setPlayer(players[1]);
 				}
@@ -361,10 +362,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			fall[0] = false;
 			jumps[0]++;
 			WReleased = false;
-		} else if (jumps[0] > 2) { // oh yeah and if you're out of jumps, we set you to a darker color
+		} else if (jumps[0] > 2) { // oh yeah and if you're out of jumps, we set
+									// you to a darker color
 			images[0] = darkenObject(images[0], players[0]);
 			wasAirborne[0] = true;
-		} else if (jumps[0] == 0 && wasAirborne[0]) { // once your jumps are back, you can be light
+		} else if (jumps[0] == 0 && wasAirborne[0]) { // once your jumps are
+														// back, you can be
+														// light
 			images[0] = lightenObject(images[0], players[0]);
 			wasAirborne[0] = false;
 		}
@@ -408,10 +412,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			jump2 = false;
 			jumps[1]++;
 			UpReleased = false;
-		} else if (jumps[1] > 2) { // oh yeah and if you're out of jumps, we set you to a darker color
+		} else if (jumps[1] > 2) { // oh yeah and if you're out of jumps, we set
+									// you to a darker color
 			images[1] = darkenObject(images[1], players[1]);
 			wasAirborne[1] = true;
-		} else if (jumps[1] == 0 && wasAirborne[1]) { // once your jumps are back, you can be light
+		} else if (jumps[1] == 0 && wasAirborne[1]) { // once your jumps are
+														// back, you can be
+														// light
 			images[1] = lightenObject(images[1], players[1]);
 			wasAirborne[1] = false;
 		}
