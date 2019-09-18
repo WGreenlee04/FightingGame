@@ -1,7 +1,6 @@
 package TheWorks;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -46,6 +45,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean[] wasAirborne;
 	public ArrayList<Item> items = new ArrayList<Item>(); // currently displayed
 															// items
+	public Color backgroundColor;
 	public KeyListener keylistener = this;
 	public boolean APressed;
 	public boolean SPressed;
@@ -64,12 +64,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean jump1 = false; // if player1 is jumping
 	public boolean jump2 = false; // if player2 is jumping
 	public boolean fall[]; // if either player is falling
-	public Color backgroundColor;
 
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		// Sets up JPanel
 		super();
-		super.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		setLayout(null);
 		setLocation(0, 0);
 		setSize(WIDTH, HEIGHT);
@@ -105,11 +103,22 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public void initSpace(int m) { // loads both characters, and sets up space
 
 		// Adds both players to board array
-		if (m == 1)
+		switch (m) {
+		case 1:
 			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"));
-		if (m != 1)
+			break;
+
+		case 2:
 			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"),
 					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png"));
+			break;
+
+		default:
+			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"),
+					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png"));
+			break;
+
+		}
 
 		// Loads ONLY images for PLAYERS
 		for (int i = 0; i < players.length; i++)
@@ -311,6 +320,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		} else if (jumps[0] == 0 && wasAirborne[0]) { // once your jumps are
 														// back, you can be
 														// light
+
 			images[0] = lightenObject(images[0], players[0]);
 			wasAirborne[0] = false;
 		}
@@ -356,13 +366,17 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			UpReleased = false;
 		} else if (jumps[1] > 2) { // oh yeah and if you're out of jumps, we set
 									// you to a darker color
-			images[1] = darkenObject(images[1], players[1]);
-			wasAirborne[1] = true;
+			if (!(images[1].equals(scalePlayer(new ImageIcon(players[1].getDarkImageDir()).getImage(), players[1])))) {
+				images[1] = darkenObject(images[1], players[1]);
+				wasAirborne[1] = true;
+			}
 		} else if (jumps[1] == 0 && wasAirborne[1]) { // once your jumps are
 														// back, you can be
 														// light
-			images[1] = lightenObject(images[1], players[1]);
-			wasAirborne[1] = false;
+			if (!(images[1].equals(scalePlayer(new ImageIcon(players[1].getImageDir()).getImage(), players[1])))) {
+				images[1] = lightenObject(images[1], players[1]);
+				wasAirborne[1] = false;
+			}
 		}
 
 		// Fast falling
@@ -461,15 +475,27 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 
 	private Image lightenObject(Image image, Player player) {
-		image = new ImageIcon(player.getImageDir()).getImage();
-		image = scalePlayer(image, player);
-		return image;
+		Image testImg = new ImageIcon(player.getImageDir()).getImage();
+		testImg = scalePlayer(testImg, player);
+		if (!(image.equals(testImg))) {
+			image = new ImageIcon(player.getImageDir()).getImage();
+			image = scalePlayer(image, player);
+			return image;
+		} else {
+			return image;
+		}
 	}
 
 	private Image darkenObject(Image image, Player player) {
-		image = new ImageIcon(player.getDarkImageDir()).getImage();
-		image = scalePlayer(image, player);
-		return image;
+		Image testImg = new ImageIcon(player.getDarkImageDir()).getImage();
+		testImg = scalePlayer(testImg, player);
+		if (!(image.equals(testImg))) {
+			image = new ImageIcon(player.getDarkImageDir()).getImage();
+			image = scalePlayer(image, player);
+			return image;
+		} else {
+			return image;
+		}
 	}
 
 	private Image flipObject(Image image) {

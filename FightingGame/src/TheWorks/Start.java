@@ -26,8 +26,10 @@ public class Start extends JFrame {
 					Main.getRun().run();
 					setVisible(false);
 				}
-				if (!mode2.isEnabled()) {
-					System.out.println();
+				if (mode1.isEnabled()) {
+					Main.setMode(1);
+					Main.getRun().run();
+					setVisible(false);
 				}
 			}
 		});
