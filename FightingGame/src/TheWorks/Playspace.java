@@ -1,6 +1,7 @@
 package TheWorks;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -23,12 +24,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private static final int DELAY = 20;
 	private Timer timer;
 	public static final int GRAVITY = -4; // Quadratic gravity for players
-	public static final int ITEMGRAVITY = 10; // Linear gravity for items
+	public static final int ITEMGRAVITY = 5; // Linear gravity for items
 	public final int WIDTH = 1000;
 	public final int HEIGHT = 800;
 	public final int playercount = 2; // number of players throughout the game
-	public final int itemcount = 1; // the number of items on board at start
-	public final int dashspeed = 7;
+	public final int itemcount = 2; // the number of items on board at start
+	public final int dashspeed = 4;
 	public final int playerspeed = 8;
 	public final int jumpheight = 13;
 	public final int fallspeed = -10;
@@ -54,10 +55,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean LeftPressed;
 	public boolean RightPressed;
 	public boolean DownPressed;
-	public boolean EPressed;
-	public boolean EReleased;
-	public boolean ShiftPressed;
-	public boolean ShiftReleased;
+	public boolean LShiftPressed;
+	public boolean LShiftReleased;
+	public boolean RShiftPressed;
+	public boolean RShiftReleased;
 	public boolean jump1 = false; // if player1 is jumping
 	public boolean jump2 = false; // if player2 is jumping
 	public boolean fall[]; // if either player is falling
@@ -66,6 +67,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public Playspace(int i) { // Constructor, breaks Main from static.
 		// Sets up JPanel
 		super();
+		super.setPreferredSize(new Dimension(WIDTH, HEIGHT));
 		setLayout(null);
 		setLocation(0, 0);
 		setSize(WIDTH, HEIGHT);
@@ -116,9 +118,21 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			images[i] = scalePlayer(images[i], players[i]);
 
 		// Loads items, and by design, Item images
-		items.add(ITEMS[0]);
-		for (Item item : items)
-			item.setCurrentImage(scaleObject(item.getCurrentImage(), 80, 80));
+		for (int i = 0; i < itemcount; i++) {
+			items.add(new Stick());
+		}
+		for (int i = 0; i < itemcount; i++) {
+			double spawnVal = Math.random();
+			double locationVal = Math.random();
+			for (Item ITEM : ITEMS) {
+				if (ITEM.getDropRate() >= spawnVal) {
+					items.set(i, ITEM);
+					items.get(i).setX((int) ((WIDTH / 3) + (WIDTH / 3 * locationVal)));
+				}
+			}
+			items.get(i).setCurrentImage(scaleObject(items.get(i).getCurrentImage(), 80, 80));
+
+		}
 
 		// Sets health bars and indicators
 		for (int i = 0; i < healthBars.length; i++) {
@@ -248,10 +262,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
-		renderItems();
+		doMovement();
 		doGravity();
 		doAcceleration();
-		doMovement();
+		renderItems();
 		collide();
 		repaint();
 	}
@@ -459,8 +473,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 
 		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
-			ShiftPressed = true;
-			ShiftReleased = false;
+			RShiftPressed = true;
+			RShiftReleased = false;
 		}
 
 		// ULDR Controls
@@ -482,38 +496,54 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 
 		if (e.getKeyCode() == KeyEvent.VK_E) {
-			EPressed = true;
+			LShiftPressed = true;
+			LShiftReleased = false;
 		}
 	}
 
 	// Key Release detection
 	@Override
 	public void keyReleased(KeyEvent e) {
+
+		// WASD Controls
 		if (e.getKeyCode() == KeyEvent.VK_A) {
 			APressed = false;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_S) {
 			SPressed = false;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_D) {
 			DPressed = false;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_W) {
 			WPressed = false;
 			WReleased = true;
 		}
+
+		// ULDR Controls
 		if (e.getKeyCode() == KeyEvent.VK_UP) {
 			UpPressed = false;
 			UpReleased = true;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
 			DownPressed = false;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 			LeftPressed = false;
 		}
+
 		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
 			RightPressed = false;
+		}
+
+		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
+			LShiftPressed = false;
+			LShiftReleased = true;
 		}
 	}
 
