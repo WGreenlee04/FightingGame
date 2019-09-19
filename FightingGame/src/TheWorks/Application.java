@@ -12,10 +12,10 @@ public class Application extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setVisible(true);
-		pspace = new Playspace();
 	}
 
 	public void initiateFrame(int m) {
+		pspace = new Playspace(m);
 		add(pspace);
 		pspace.initSpace(m);
 	}

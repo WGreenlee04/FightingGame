@@ -50,7 +50,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public boolean fall[]; // if either player is falling
 
 	// Constructor, breaks Main from static.
-	public Playspace() {
+	public Playspace(int mode) {
 
 		// Sets up JPanel
 		super();
@@ -63,6 +63,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		backgroundColor = new Color(50, 50, 60);
 		backgroundColor.brighter();
 		setBackground(backgroundColor);
+
+		// Gotta make all of these the right size...
+		PLAYERCOUNT = mode;
 
 		// Array inits
 		players = new Player[PLAYERCOUNT];
@@ -208,7 +211,18 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	public void pickup() {
 
-		if (LShiftPressed && players[0].getItem() == null) {
+		boolean runnableP1;
+		try {
+			if (players[1] != null) {
+				runnableP1 = true;
+			} else {
+				runnableP1 = false;
+			}
+		} catch (ArrayIndexOutOfBoundsException e) {
+			runnableP1 = false;
+		}
+
+		if (LShiftPressed && players[0].getItem() == null && runnableP1) {
 			LShiftPressed = false;
 			Rectangle[] itemRectangles = new Rectangle[items.size()];
 			Rectangle p1 = new Rectangle(players[0].getX(), players[0].getY(), images[0].getWidth(this),
@@ -223,7 +237,18 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			}
 		}
 
-		if (RShiftPressed && players[1].getItem() == null) {
+		boolean runnableP2;
+		try {
+			if (players[2] != null) {
+				runnableP2 = true;
+			} else {
+				runnableP2 = false;
+			}
+		} catch (ArrayIndexOutOfBoundsException e) {
+			runnableP2 = false;
+		}
+
+		if (RShiftPressed && players[1].getItem() == null && runnableP2) {
 			RShiftPressed = false;
 			Rectangle[] itemRectangles = new Rectangle[items.size()];
 			Rectangle p2 = new Rectangle(players[1].getX(), players[1].getY(), images[1].getWidth(this),
@@ -256,101 +281,126 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public void doAccelerationP1() {
 		// p1
 		int i = 0;
-		// Left Movement w/ dash
-		if (APressed && !DPressed) {
-			if (pAccelX[i] == 0) {
-				pAccelX[i] = -DASHSPEED * 2;
+
+		boolean runnable;
+		try {
+			if (players[i] != null) {
+				runnable = true;
 			} else {
-				pAccelX[i] = -PLAYERSPEED * 2;
+				runnable = false;
 			}
-			players[i].setDirection(-1);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			runnable = false;
 		}
-
-		// Right Movement w/ dash
-		if (DPressed && !APressed) {
-			if (pAccelX[i] == 0) {
-				pAccelX[i] = DASHSPEED * 2;
-			} else {
-				pAccelX[i] = PLAYERSPEED * 2;
+		if (runnable) {
+			// Left Movement w/ dash
+			if (APressed && !DPressed) {
+				if (pAccelX[i] == 0) {
+					pAccelX[i] = -DASHSPEED * 2;
+				} else {
+					pAccelX[i] = -PLAYERSPEED * 2;
+				}
+				players[i].setDirection(-1);
 			}
-			players[i].setDirection(1);
-		}
 
-		// If you didn't just jump, and pressed jump, jump
-		if (WPressed && !jump1) {
-			jump1 = true;
-			pAccelY[i] = JUMPHEIGHT * 2;
-		}
+			// Right Movement w/ dash
+			if (DPressed && !APressed) {
+				if (pAccelX[i] == 0) {
+					pAccelX[i] = DASHSPEED * 2;
+				} else {
+					pAccelX[i] = PLAYERSPEED * 2;
+				}
+				players[i].setDirection(1);
+			}
 
-		// You just jumped, and we need to increase jump counter and reset jump
-		if (WReleased && jumps[i] <= 2) {
-			jump1 = false;
-			fall[i] = false;
-			jumps[i]++;
-			WReleased = false;
-		} else if (jumps[i] > 2 && !isDark[i]) { // darker color, out of jumps
-			images[i] = Tools.darkenObject(images[i], players[i]);
-			isDark[i] = true;
-		} else if (jumps[i] == 0 && isDark[i]) { // you can be light
-			images[i] = Tools.lightenObject(images[i], players[i]);
-			isDark[i] = false;
-		}
+			// If you didn't just jump, and pressed jump, jump
+			if (WPressed && !jump1) {
+				jump1 = true;
+				pAccelY[i] = JUMPHEIGHT * 2;
+			}
 
-		// Fast falling
-		if (SPressed || fall[i]) {
-			pAccelY[i] += FALLSPEED;
-			fall[i] = true;
+			// You just jumped, and we need to increase jump counter and reset jump
+			if (WReleased && jumps[i] <= 2) {
+				jump1 = false;
+				fall[i] = false;
+				jumps[i]++;
+				WReleased = false;
+			} else if (jumps[i] > 2 && !isDark[i]) { // darker color, out of jumps
+				images[i] = Tools.darkenObject(images[i], players[i]);
+				isDark[i] = true;
+			} else if (jumps[i] == 0 && isDark[i]) { // you can be light
+				images[i] = Tools.lightenObject(images[i], players[i]);
+				isDark[i] = false;
+			}
+
+			// Fast falling
+			if (SPressed || fall[i]) {
+				pAccelY[i] += FALLSPEED;
+				fall[i] = true;
+			}
 		}
 	}
 
 	public void doAccelerationP2() {
 		// p2
 		int i = 1;
-		// Left Movement w/ dash
-		if (LeftPressed && !RightPressed) {
-			if (pAccelX[i] == 0) {
-				pAccelX[i] = -DASHSPEED * 2;
+		boolean runnable;
+		try {
+			if (players[i] != null) {
+				runnable = true;
 			} else {
-				pAccelX[i] = -PLAYERSPEED * 2;
+				runnable = false;
 			}
-			players[i].setDirection(-1);
+		} catch (ArrayIndexOutOfBoundsException e) {
+			runnable = false;
 		}
-
-		// Right Movement w/ dash
-		if (RightPressed && !LeftPressed) {
-			if (pAccelX[i] == 0) {
-				pAccelX[i] = DASHSPEED * 2;
-			} else {
-				pAccelX[i] = PLAYERSPEED * 2;
+		if (runnable) {
+			// Left Movement w/ dash
+			if (LeftPressed && !RightPressed) {
+				if (pAccelX[i] == 0) {
+					pAccelX[i] = -DASHSPEED * 2;
+				} else {
+					pAccelX[i] = -PLAYERSPEED * 2;
+				}
+				players[i].setDirection(-1);
 			}
-			players[i].setDirection(1);
-		}
 
-		// If you didn't just jump, and pressed jump, then jump
-		if (UpPressed && !jump2) {
-			jump2 = true;
-			fall[i] = false;
-			pAccelY[i] = JUMPHEIGHT * 2;
-		}
+			// Right Movement w/ dash
+			if (RightPressed && !LeftPressed) {
+				if (pAccelX[i] == 0) {
+					pAccelX[i] = DASHSPEED * 2;
+				} else {
+					pAccelX[i] = PLAYERSPEED * 2;
+				}
+				players[i].setDirection(1);
+			}
 
-		// You just jumped, and we need to increase jump counter and reset jump
-		if (UpReleased && jumps[i] <= 2) {
-			jump2 = false;
-			jumps[i]++;
-			UpReleased = false;
-		} else if (jumps[i] > 2 && !isDark[i]) {// darker color, out of jumps
-			images[i] = Tools.darkenObject(images[i], players[i]);
-			isDark[i] = true;
+			// If you didn't just jump, and pressed jump, then jump
+			if (UpPressed && !jump2) {
+				jump2 = true;
+				fall[i] = false;
+				pAccelY[i] = JUMPHEIGHT * 2;
+			}
 
-		} else if (jumps[i] == 0 && isDark[i]) { // lighter color
-			images[i] = Tools.lightenObject(images[i], players[i]);
-			isDark[i] = false;
-		}
+			// You just jumped, and we need to increase jump counter and reset jump
+			if (UpReleased && jumps[i] <= 2) {
+				jump2 = false;
+				jumps[i]++;
+				UpReleased = false;
+			} else if (jumps[i] > 2 && !isDark[i]) {// darker color, out of jumps
+				images[i] = Tools.darkenObject(images[i], players[i]);
+				isDark[i] = true;
 
-		// Fast falling
-		if (DownPressed || fall[1]) {
-			pAccelY[i] += FALLSPEED;
-			fall[i] = true;
+			} else if (jumps[i] == 0 && isDark[i]) { // lighter color
+				images[i] = Tools.lightenObject(images[i], players[i]);
+				isDark[i] = false;
+			}
+
+			// Fast falling
+			if (DownPressed || fall[1]) {
+				pAccelY[i] += FALLSPEED;
+				fall[i] = true;
+			}
 		}
 	}
 
