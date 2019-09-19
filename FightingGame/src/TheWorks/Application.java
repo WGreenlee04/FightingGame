@@ -4,25 +4,20 @@ import javax.swing.JFrame;
 
 public class Application extends JFrame {
 
-	Playspace pspace;
+	private Playspace pspace;
 
-	public Application(int i) {
-
-		initUI(i);
-
-	}
-
-	private void initUI(int i) {
-
-		pspace = new Playspace(i);
-		add(pspace);
-
+	public Application() {
 		setSize(1000, 800);
-
 		setTitle("StickFight");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		setVisible(true);
+		pspace = new Playspace();
+	}
+
+	public void initiateFrame(int m) {
+		add(pspace);
+		pspace.initSpace(m);
 	}
 
 	public Playspace getPlayspace() {

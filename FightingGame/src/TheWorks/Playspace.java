@@ -2,38 +2,34 @@ package TheWorks;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener, KeyListener {
-	private static final int DELAY = 20;
-	private Timer timer;
-	public static final int GRAVITY = -4; // Quadratic gravity for players
-	public static final int ITEMGRAVITY = -6; // Linear gravity for items
-	public static final int FRICTION = 2;
 	public final int WIDTH = 1000;
 	public final int HEIGHT = 800;
-	public final int playercount = 2; // number of players throughout the game
-	public final int itemcount = 2; // the number of items on board at start
-	public final int dashspeed = 4;
-	public final int playerspeed = 8;
-	public final int jumpheight = 13;
-	public final int fallspeed = -10;
+	public Timer timer;
+	public ToolBox Tools;
+	public KeyListener keylistener = this;
+	public final int DELAY = 20;
+	public final int GRAVITY = -4; // Quadratic gravity for players
+	public final int ITEMGRAVITY = -6; // Linear gravity for items
+	public final int FRICTION = 2; // Deceleration on objects
+	public final int ITEMCOUNT = 2; // the number of items on board at start
+	public final int DASHSPEED = 4;
+	public final int PLAYERSPEED = 8;
+	public final int JUMPHEIGHT = 13;
+	public final int FALLSPEED = -10;
 	public final Item[] ITEMS = { new Stick() }; // all item types
 	public Player[] players; // Array of players
 	public Image[] images; // Player Images
@@ -44,30 +40,18 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public JLabel[] healthBarIndicators; // bar itself
 	public boolean[] direction;
 	public boolean[] isDark;
-	public ArrayList<Item> items = new ArrayList<Item>(); // currently displayed
-															// items
+	public ArrayList<Item> items = new ArrayList<Item>(); // current items
 	public Color backgroundColor;
-	public KeyListener keylistener = this;
-	public boolean APressed;
-	public boolean SPressed;
-	public boolean WPressed;
-	public boolean WReleased;
-	public boolean DPressed;
-	public boolean UpPressed;
-	public boolean UpReleased;
-	public boolean LeftPressed;
-	public boolean RightPressed;
-	public boolean DownPressed;
-	public boolean LShiftPressed;
-	public boolean LShiftReleased;
-	public boolean RShiftPressed;
-	public boolean RShiftReleased;
+	public boolean WPressed, WReleased, APressed, SPressed, DPressed, LShiftPressed, LShiftReleased, UpPressed,
+			UpReleased, LeftPressed, DownPressed, RightPressed, RShiftPressed, RShiftReleased;
+	public int PLAYERCOUNT = 2;
 	public boolean jump1 = false; // if player1 is jumping
 	public boolean jump2 = false; // if player2 is jumping
 	public boolean fall[]; // if either player is falling
 
 	// Constructor, breaks Main from static.
-	public Playspace(int i) {
+	public Playspace() {
+
 		// Sets up JPanel
 		super();
 		setLayout(null);
@@ -81,57 +65,58 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		setBackground(backgroundColor);
 
 		// Array inits
-		players = new Player[playercount];
-		images = new Image[playercount];
-		pAccelX = new int[playercount];
-		pAccelY = new int[playercount];
-		healthBars = new JLabel[playercount];
-		healthBarIndicators = new JLabel[playercount];
-		fall = new boolean[playercount];
-		direction = new boolean[playercount];
-		jumps = new int[playercount];
-		isDark = new boolean[playercount];
+		players = new Player[PLAYERCOUNT];
+		images = new Image[PLAYERCOUNT];
+		pAccelX = new int[PLAYERCOUNT];
+		pAccelY = new int[PLAYERCOUNT];
+		healthBars = new JLabel[PLAYERCOUNT];
+		healthBarIndicators = new JLabel[PLAYERCOUNT];
+		fall = new boolean[PLAYERCOUNT];
+		direction = new boolean[PLAYERCOUNT];
+		jumps = new int[PLAYERCOUNT];
+		isDark = new boolean[PLAYERCOUNT];
 
 		// Timer setup
 		timer = new Timer(DELAY, this);
 
-		// Space setup
-		initSpace(i);
-
-		// Timer start
-		timer.start(); // Starts timer
+		// Toolbox setup
+		Tools = new ToolBox(this);
 	}
 
-	public void initSpace(int m) { // loads both characters, and sets up space
+	// loads both characters, and sets up space
+	public void initSpace(int mode) {
 
 		// Adds both players to board array
-		switch (m) {
+		switch (mode) {
 		case 1:
 			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"));
+			PLAYERCOUNT = 1;
 			break;
 
 		case 2:
 			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"),
 					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png"));
+			PLAYERCOUNT = 2;
 			break;
 
 		default:
 			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"),
 					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png"));
+			PLAYERCOUNT = 2;
 			break;
 
 		}
 
 		// Loads ONLY images for PLAYERS
 		for (int i = 0; i < players.length; i++)
-			images[i] = loadObject(players[i].getImageDir());
+			images[i] = Tools.loadObject(players[i].getImageDir());
 
 		// Scales the images to correct size
 		for (int i = 0; i < images.length; i++)
-			images[i] = scalePlayer(images[i], players[i]);
+			images[i] = Tools.scalePlayer(images[i], players[i]);
 
 		// Loads items, and by design, Item images
-		for (int i = 0; i < itemcount; i++) {
+		for (int i = 0; i < ITEMCOUNT; i++) {
 			items.add(i, new Stick());
 		}
 
@@ -146,7 +131,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		for (Item item : items) {
 			item.setX((int) ((WIDTH / 3) + (WIDTH / 3 * Math.random())));
-			Image scaledImage = scaleObject(item.getCurrentImage(), item.getWidth(), item.getHeight());
+			Image scaledImage = Tools.scaleObject(item.getCurrentImage(), item.getWidth(), item.getHeight());
 			item.setCurrentImage(scaledImage);
 		}
 
@@ -180,12 +165,15 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			}
 
 		// Set default array values
-		for (int i = 0; i < playercount; i++) {
+		for (int i = 0; i < PLAYERCOUNT; i++) {
 			fall[i] = false;
 			direction[i] = true;
 			jumps[i] = 0;
 			isDark[i] = false;
 		}
+
+		// Timer start
+		timer.start(); // Starts timer
 	}
 
 	// Begin player add
@@ -201,26 +189,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 	// End player add
 
-	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		for (int i = 0; i < players.length; i++) {
-			// Draw players
-			g.drawImage(images[i], players[i].getX(), players[i].getY(), this);
-
-			// Draw health bars
-			healthBars[i].setText("" + players[i].getHealth());
-			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
-			healthBarIndicators[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
-			healthBarIndicators[i].setSize((int) 50 * (players[i].getHealth() / 1000), 10);
-		}
-
-		// Draw items
-		for (Item item : items) {
-			g.drawImage(item.getCurrentImage(), item.getX(), item.getY(), this);
-		}
-	}
-
+	// Triggered when "timer" completes a cycle
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
@@ -237,9 +206,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		repaint();
 	}
 
-	private void pickup() {
+	public void pickup() {
 
 		if (LShiftPressed && players[0].getItem() == null) {
+			LShiftPressed = false;
 			Rectangle[] itemRectangles = new Rectangle[items.size()];
 			Rectangle p1 = new Rectangle(players[0].getX(), players[0].getY(), images[0].getWidth(this),
 					images[0].getHeight(this));
@@ -254,6 +224,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 
 		if (RShiftPressed && players[1].getItem() == null) {
+			RShiftPressed = false;
 			Rectangle[] itemRectangles = new Rectangle[items.size()];
 			Rectangle p2 = new Rectangle(players[1].getX(), players[1].getY(), images[1].getWidth(this),
 					images[1].getHeight(this));
@@ -269,28 +240,28 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	}
 
-	private void renderItems() {
+	public void renderItems() {
 		for (Item item : items) {
 			if (item.getPlayer() != null) {
 				item.setX(item.getPlayer().getX());
 				item.setY(item.getPlayer().getY());
 				if (item.getDirection() != item.getPlayer().getDirection()) {
 					item.setDirection(item.getPlayer().getDirection());
-					item.setCurrentImage(flipObject(item.getCurrentImage()));
+					item.setCurrentImage(Tools.flipObject(item.getCurrentImage()));
 				}
 			}
 		}
 	}
 
-	private void doAccelerationP1() {
+	public void doAccelerationP1() {
 		// p1
 		int i = 0;
 		// Left Movement w/ dash
 		if (APressed && !DPressed) {
 			if (pAccelX[i] == 0) {
-				pAccelX[i] = -dashspeed * 2;
+				pAccelX[i] = -DASHSPEED * 2;
 			} else {
-				pAccelX[i] = -playerspeed * 2;
+				pAccelX[i] = -PLAYERSPEED * 2;
 			}
 			players[i].setDirection(-1);
 		}
@@ -298,9 +269,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// Right Movement w/ dash
 		if (DPressed && !APressed) {
 			if (pAccelX[i] == 0) {
-				pAccelX[i] = dashspeed * 2;
+				pAccelX[i] = DASHSPEED * 2;
 			} else {
-				pAccelX[i] = playerspeed * 2;
+				pAccelX[i] = PLAYERSPEED * 2;
 			}
 			players[i].setDirection(1);
 		}
@@ -308,7 +279,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// If you didn't just jump, and pressed jump, jump
 		if (WPressed && !jump1) {
 			jump1 = true;
-			pAccelY[i] = jumpheight * 2;
+			pAccelY[i] = JUMPHEIGHT * 2;
 		}
 
 		// You just jumped, and we need to increase jump counter and reset jump
@@ -318,29 +289,29 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			jumps[i]++;
 			WReleased = false;
 		} else if (jumps[i] > 2 && !isDark[i]) { // darker color, out of jumps
-			images[i] = darkenObject(images[i], players[i]);
+			images[i] = Tools.darkenObject(images[i], players[i]);
 			isDark[i] = true;
 		} else if (jumps[i] == 0 && isDark[i]) { // you can be light
-			images[i] = lightenObject(images[i], players[i]);
+			images[i] = Tools.lightenObject(images[i], players[i]);
 			isDark[i] = false;
 		}
 
 		// Fast falling
 		if (SPressed || fall[i]) {
-			pAccelY[i] += fallspeed;
+			pAccelY[i] += FALLSPEED;
 			fall[i] = true;
 		}
 	}
 
-	private void doAccelerationP2() {
+	public void doAccelerationP2() {
 		// p2
 		int i = 1;
 		// Left Movement w/ dash
 		if (LeftPressed && !RightPressed) {
 			if (pAccelX[i] == 0) {
-				pAccelX[i] = -dashspeed * 2;
+				pAccelX[i] = -DASHSPEED * 2;
 			} else {
-				pAccelX[i] = -playerspeed * 2;
+				pAccelX[i] = -PLAYERSPEED * 2;
 			}
 			players[i].setDirection(-1);
 		}
@@ -348,9 +319,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// Right Movement w/ dash
 		if (RightPressed && !LeftPressed) {
 			if (pAccelX[i] == 0) {
-				pAccelX[i] = dashspeed * 2;
+				pAccelX[i] = DASHSPEED * 2;
 			} else {
-				pAccelX[i] = playerspeed * 2;
+				pAccelX[i] = PLAYERSPEED * 2;
 			}
 			players[i].setDirection(1);
 		}
@@ -359,7 +330,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		if (UpPressed && !jump2) {
 			jump2 = true;
 			fall[i] = false;
-			pAccelY[i] = jumpheight * 2;
+			pAccelY[i] = JUMPHEIGHT * 2;
 		}
 
 		// You just jumped, and we need to increase jump counter and reset jump
@@ -368,22 +339,22 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			jumps[i]++;
 			UpReleased = false;
 		} else if (jumps[i] > 2 && !isDark[i]) {// darker color, out of jumps
-			images[i] = darkenObject(images[i], players[i]);
+			images[i] = Tools.darkenObject(images[i], players[i]);
 			isDark[i] = true;
 
 		} else if (jumps[i] == 0 && isDark[i]) { // lighter color
-			images[i] = lightenObject(images[i], players[i]);
+			images[i] = Tools.lightenObject(images[i], players[i]);
 			isDark[i] = false;
 		}
 
 		// Fast falling
 		if (DownPressed || fall[1]) {
-			pAccelY[i] += fallspeed;
+			pAccelY[i] += FALLSPEED;
 			fall[i] = true;
 		}
 	}
 
-	private void doGravity() {
+	public void doGravity() {
 
 		// Gravity Players 1 and 2
 		for (int i = 0; i < players.length; i++)
@@ -401,7 +372,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 	}
 
-	private void doCollision() {
+	public void doCollision() {
 
 		// looping through the number of players
 		for (int i = 0; i < players.length; i++) {
@@ -415,7 +386,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			// If at floor, don't move through
 			if (players[i].getY() + players[i].getHeight() + 35 > HEIGHT) {
 				players[i].setY(HEIGHT - (players[i].getHeight() + 35));
-				resetJumps(i);
+				jumps[i] = 0;
+				fall[i] = false;
 			}
 		}
 
@@ -427,7 +399,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 	}
 
-	private void doMovement() {
+	public void doMovement() {
 		// if acceleration of x, carry out acceleration, decreasing it by one
 		// each time.
 		for (int i = 0; i < players.length; i++) {
@@ -448,75 +420,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 
 	}
-
-	// IMAGE TOOLBOX START
-	private Image rotateObject(Image image, int degrees) {
-		double rotationRequired = Math.toRadians(degrees);
-		double locationX = image.getWidth(this) / 2;
-		double locationY = image.getHeight(this) / 2;
-		AffineTransform tx = AffineTransform.getRotateInstance(rotationRequired, locationX, locationY);
-		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
-		return op.filter((BufferedImage) image, null);
-	}
-
-	private Image loadObject(String Dir) {
-
-		ImageIcon iIcon = new ImageIcon(Dir);
-		Image i = iIcon.getImage();
-
-		return i;
-	}
-
-	private Image lightenObject(Image image, Player player) {
-		image = new ImageIcon(player.getImageDir()).getImage();
-		image = scalePlayer(image, player);
-		return image;
-	}
-
-	private Image darkenObject(Image image, Player player) {
-		image = new ImageIcon(player.getDarkImageDir()).getImage();
-		image = scalePlayer(image, player);
-		return image;
-	}
-
-	private Image flipObject(Image image) {
-		AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
-		tx.translate(-image.getWidth(null), 0);
-		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-		return (Image) op.filter(toBufferedImage(image), null);
-	}
-
-	private Image scaleObject(Image image, int width, int height) {
-		return image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-	}
-
-	private Image scalePlayer(Image image, Player player) {
-		return image.getScaledInstance(player.getWidth(), player.getHeight(), Image.SCALE_SMOOTH);
-
-	}
-
-	private static BufferedImage toBufferedImage(Image img) {
-		if (img instanceof BufferedImage) {
-			return (BufferedImage) img;
-		}
-
-		// Create a buffered image with transparency
-		BufferedImage bimage = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB);
-
-		// Draw the image on to the buffered image
-		Graphics2D bGr = bimage.createGraphics();
-		bGr.drawImage(img, 0, 0, null);
-		bGr.dispose();
-
-		// Return the buffered image
-		return bimage;
-	}
-
-	private void resetJumps(int i) {
-		jumps[i] = 0;
-		fall[i] = false;
-	}
-	// IMAGE TOOLBOX END
 
 	// Keypress detection
 	@Override
@@ -622,5 +525,33 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	// We need this, but would rather forget it...
 	@Override
 	public void keyTyped(KeyEvent e) {
+	}
+
+	// Draws everything on screen
+	@Override
+	public void paintComponent(Graphics g) {
+
+		// Draws main graphics
+		super.paintComponent(g);
+
+		// Loop for each player
+		for (int i = 0; i < players.length; i++) {
+
+			// Draw players
+			g.drawImage(images[i], players[i].getX(), players[i].getY(), this);
+
+			// Draw health bars
+			healthBars[i].setText("" + players[i].getHealth());
+			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
+			healthBarIndicators[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
+			healthBarIndicators[i].setSize((int) 50 * (players[i].getHealth() / 1000), 10);
+		}
+
+		// Draw items loop
+		for (Item item : items) {
+
+			// Draw item images
+			g.drawImage(item.getCurrentImage(), item.getX(), item.getY(), this);
+		}
 	}
 }
