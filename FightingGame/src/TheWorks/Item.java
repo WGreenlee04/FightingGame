@@ -9,12 +9,12 @@ public class Item {
 	int Width;
 	int Height;
 	int attackDelay;
-	double dropRate;
+	int dropRate;
 	int direction;
 	Player player;
 	Image currentImage;
 
-	public Item(int d, int x, int y, int aD, double dR) {
+	public Item(int d, int x, int y, int aD, int dR) {
 		damage = d;
 		X = x;
 		Y = y;
@@ -54,11 +54,11 @@ public class Item {
 		Y = y;
 	}
 
-	public double getDropRate() {
+	public int getDropRate() {
 		return dropRate;
 	}
 
-	public void setDropRate(double dropRate) {
+	public void setDropRate(int dropRate) {
 		this.dropRate = dropRate;
 	}
 
