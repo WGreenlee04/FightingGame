@@ -37,7 +37,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private ThreadAccelerationP2 doAccelerationP2;
 	private ThreadMovement doMovement;
 	private ThreadGravity doGravity;
-	private Thread doCollision;
+	private ThreadCollision doCollision;
 	private ThreadRenderItems doRenderItems;
 
 	// Variables
@@ -63,7 +63,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private boolean fall[]; // if either player is falling
 	private ArrayList<Item> items = new ArrayList<Item>(); // current items
 
-	// Constructor, breaks Main from static.
+	/** Constructor, sets up frame and arrays **/
 	public Playspace(int mode) {
 
 		// Sets up JPanel
@@ -100,7 +100,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		Tools = new ToolBox(this);
 	}
 
-	// loads both characters, and sets up space
+	/** Sets all array defaults and sets images **/
 	public void initSpace(int mode) {
 
 		// Adds both players to board array
@@ -124,19 +124,18 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		}
 
-		// Loads ONLY images for PLAYERS
-		for (int i = 0; i < players.length; i++)
+		// Loads images for players
+		for (int i = 0; i < players.length; i++) {
 			images[i] = Tools.loadObject(players[i].getImageDir());
-
-		// Scales the images to correct size
-		for (int i = 0; i < images.length; i++)
 			images[i] = Tools.scalePlayer(images[i], players[i]);
+		}
 
-		// Loads items, and by design, Item images
+		// Loads items
 		for (int i = 0; i < ITEMCOUNT; i++) {
 			items.add(i, new Stick());
 		}
 
+		// Replaces sticks with rarer items
 		for (Item item : items) {
 			int spawnVal = (int) (Math.random() * 100);
 			for (Item ITEM : ITEMS) {
@@ -146,6 +145,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			}
 		}
 
+		// Loads item images
 		for (Item item : items) {
 			item.setX((int) ((WIDTH / 3) + (WIDTH / 3 * Math.random())));
 			Image scaledImage = Tools.scaleObject(item.getCurrentImage(), item.getWidth(), item.getHeight());
@@ -154,6 +154,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Sets health bars and indicators
 		for (int i = 0; i < healthBars.length; i++) {
+
 			// Add bars
 			healthBars[i] = new JLabel();
 			this.add(healthBars[i]);
@@ -216,7 +217,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		timer.start(); // Starts timer
 	}
 
-	// Begin player add
 	// SinglePlayer
 	private void add(Player a) {
 		players[0] = a;
@@ -227,19 +227,19 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		players[0] = a;
 		players[1] = b;
 	}
-	// End player add
 
-	// Initiates threads for values
+	/** Initiates threads for values **/
 	private void initThreads() {
 		doPickup = new ThreadPickup(this);
 		doAccelerationP1 = new ThreadAccelerationP1(this);
 		doAccelerationP2 = new ThreadAccelerationP2(this);
 		doMovement = new ThreadMovement(this);
 		doGravity = new ThreadGravity(this);
+		doCollision = new ThreadCollision(this);
 		doRenderItems = new ThreadRenderItems(this);
 	}
 
-	// Triggered when "timer" completes a cycle
+	/** Triggered when "timer" completes a cycle **/
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
@@ -251,61 +251,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		doAccelerationP2.run();
 		doMovement.run();
 		doGravity.run();
-		doCollision();
+		doCollision.run();
 		doRenderItems.run();
 		repaint();
 	}
 
-	public void doCollision() {
-
-		// looping through the number of players
-		for (int i = 0; i < players.length; i++) {
-
-			// If at wall, loop
-			if (players[i].getX() < 0 - players[i].getWidth())
-				players[i].setX(WIDTH);
-			if (players[i].getX() > WIDTH)
-				players[i].setX(0 - players[i].getWidth());
-
-			// If at floor, don't move through
-			if (players[i].getY() + players[i].getHeight() + 35 > HEIGHT) {
-				players[i].setY(HEIGHT - (players[i].getHeight() + 35));
-				jumps[i] = 0;
-				fall[i] = false;
-			}
-		}
-
-		// When items hit the ground, stop motion
-		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getY() + items.get(i).getCurrentImage().getHeight(this) + 30 > HEIGHT) {
-				items.get(i).setY(HEIGHT - (items.get(i).getCurrentImage().getHeight(this) + 30));
-			}
-		}
-	}
-
-	public void doMovement() {
-		// if acceleration of x, carry out acceleration, decreasing it by one
-		// each time.
-		for (int i = 0; i < players.length; i++) {
-			if (pAccelX[i] > 0) {
-				players[i].setX(players[i].getX() + pAccelX[i]);
-				pAccelX[i] -= FRICTION;
-			}
-			if (pAccelX[i] < 0) {
-				players[i].setX(players[i].getX() + pAccelX[i]);
-				pAccelX[i] += FRICTION;
-			}
-			if (pAccelY[i] > 0) {
-				players[i].setY(players[i].getY() - pAccelY[i]);
-			}
-			if (pAccelY[i] < 0) {
-				players[i].setY(players[i].getY() - pAccelY[i]);
-			}
-		}
-
-	}
-
-	// Keypress detection
+	/** Keypress detection **/
 	@Override
 	public void keyPressed(KeyEvent e) {
 
@@ -364,7 +315,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 	}
 
-	// Key Release detection
+	/** Key Release detection **/
 	@Override
 	public void keyReleased(KeyEvent e) {
 
@@ -414,12 +365,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 	}
 
-	// We need this, but would rather forget it...
+	/** We need this, but would rather forget it... **/
 	@Override
 	public void keyTyped(KeyEvent e) {
 	}
 
-	// Draws everything on screen
+	/** Draws everything on screen **/
 	@Override
 	public void paintComponent(Graphics g) {
 
@@ -436,7 +387,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			healthBars[i].setText("" + players[i].getHealth());
 			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
 			healthBarIndicators[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
-			healthBarIndicators[i].setSize((int) 50 * (players[i].getHealth() / 1000), 10);
+			healthBarIndicators[i].setSize(50 * (players[i].getHealth() / 1000), 10);
 		}
 
 		// Draw items loop
@@ -447,6 +398,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 	}
 
+	/** ALL GETTERS AND SETTERS **/
 	public Timer getTimer() {
 		return timer;
 	}
@@ -507,7 +459,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		return doCollision;
 	}
 
-	public void setDoCollision(Thread doCollision) {
+	public void setDoCollision(ThreadCollision doCollision) {
 		this.doCollision = doCollision;
 	}
 
