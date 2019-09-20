@@ -8,16 +8,16 @@ public class ThreadGravity extends Thread {
 		super();
 		this.space = space;
 	}
-	
+
 	@Override
 	public void run() {
 
 		// Gravity Players 1 and 2
 		for (int i = 0; i < space.getPlayers().length; i++)
-			if (space.getpAccelY()[i] <= 0) {
-				space.setpAccelY(arrayEdit(space.getpAccelY(), i, space.getpAccelY()[i] + space.getGRAVITY()));
+			if (space.getPlayers()[i].getAccelY() <= 0) {
+				space.getPlayers()[i].setAccelY(space.getPlayers()[i].getAccelY() + space.getGRAVITY());
 			} else {
-				space.setpAccelY(arrayEdit(space.getpAccelY(), i, space.getpAccelY()[i] - 2));
+				space.getPlayers()[i].setAccelY(space.getPlayers()[i].getAccelY() - 2);
 			}
 
 		// Gravity on items
@@ -27,11 +27,4 @@ public class ThreadGravity extends Thread {
 			}
 		}
 	}
-	
-	// Returns edited array
-		private int[] arrayEdit(int[] array, int i, int value) {
-			int[] tempArray = array;
-			tempArray[i] = value;
-			return tempArray;
-		}
 }
