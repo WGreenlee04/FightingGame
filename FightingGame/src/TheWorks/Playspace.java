@@ -238,7 +238,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		doGravity = new ThreadGravity(this);
 		doCollision = new ThreadCollision(this);
 		doRenderItems = new ThreadRenderItems(this);
-		playMusic = new ThreadMusic("src/resources/Clayfighter (SNES) - Taffy's Theme.mp3");
+		playMusic = new ThreadMusic();
+		playMusic.run();
 	}
 
 	/** Triggered when "timer" completes a cycle **/

@@ -1,13 +1,16 @@
 package TheWorks;
 
-import java.io.InputStream;
+import java.io.File;
 
-import sun.audio.AudioPlayer;
-import sun.audio.AudioStream;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class ThreadMusic extends Thread {
 
-	public ThreadMusic(String fp) {
+	Clip clip;
+
+	public ThreadMusic() {
 	}
 
 	@Override
@@ -16,12 +19,22 @@ public class ThreadMusic extends Thread {
 			// get the sound file as a resource out of my jar file;
 			// the sound file must be in the same directory as this class file.
 			// the input stream portion of this recipe comes from a javaworld.com article.
-			InputStream inputStream = getClass()
-					.getResourceAsStream("/FightingGame/src/resources/Clayfighter (SNES) - Taffy's Theme.mp3");
-			AudioStream audioStream = new AudioStream(inputStream);
-			AudioPlayer.player.start(audioStream);
+			AudioInputStream inputStream = AudioSystem.getAudioInputStream(
+					new File("/FightingGame/src/resources/Clayfighter (SNES) - Taffy's Theme.wav").getAbsoluteFile());
+			clip = AudioSystem.getClip();
+			clip.open(inputStream);
+			clip.start();
 		} catch (Exception e) {
+			System.out.println(false);
 		}
+	}
+
+	public void play() {
+		clip.start();
+	}
+
+	public void pause() {
+		clip.stop();
 	}
 
 }
