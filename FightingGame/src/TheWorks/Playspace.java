@@ -39,6 +39,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private ThreadGravity doGravity;
 	private ThreadCollision doCollision;
 	private ThreadRenderItems doRenderItems;
+	private ThreadMusic playMusic;
 
 	// Variables
 	private boolean runnableP1, runnableP2; // If methods solely about p1 and 2 are runnable
@@ -237,6 +238,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		doGravity = new ThreadGravity(this);
 		doCollision = new ThreadCollision(this);
 		doRenderItems = new ThreadRenderItems(this);
+		playMusic = new ThreadMusic("src/resources/Clayfighter (SNES) - Taffy's Theme.mp3");
 	}
 
 	/** Triggered when "timer" completes a cycle **/
