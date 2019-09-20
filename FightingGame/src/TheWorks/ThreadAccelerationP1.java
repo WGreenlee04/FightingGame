@@ -26,7 +26,6 @@ public class ThreadAccelerationP1 extends Thread {
 				} else {
 					space.setpAccelX(arrayEdit(space.getpAccelX(), i, -space.getPLAYERSPEED() * 2));
 				}
-				space.getPlayers()[i].setDirection(-1);
 			}
 
 			// Right Movement w/ dash
