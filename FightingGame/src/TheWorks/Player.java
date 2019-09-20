@@ -1,20 +1,37 @@
 package TheWorks;
 
+import java.awt.Image;
+
+import javax.swing.ImageIcon;
+
 public class Player {
-	int health;
 	Item item;
+	Image image;
 	String imageDir;
 	String darkImageDir;
+	int health;
+	int accelX;
+	int accelY;
 	int X;
 	int Y;
 	int Width;
 	int Height;
 	int direction;
+	int jumps;
+	boolean falling;
+	boolean jumping;
+	boolean dark;
+	boolean directionBool;
 
 	public Player(String imageDir, String darkImageDir) {
 		health = 1000;
 		Width = 90;
 		Height = 150;
+		jumps = 0;
+		falling = false;
+		jumping = false;
+		dark = false;
+		image = new ImageIcon(imageDir).getImage();
 		this.imageDir = imageDir;
 		this.darkImageDir = darkImageDir;
 	}
@@ -92,6 +109,70 @@ public class Player {
 
 	public void setImageDir(String imageDir) {
 		this.imageDir = imageDir;
+	}
+
+	public int getAccelX() {
+		return accelX;
+	}
+
+	public Image getImage() {
+		return image;
+	}
+
+	public void setImage(Image image) {
+		this.image = image;
+	}
+
+	public void setAccelX(int accelX) {
+		this.accelX = accelX;
+	}
+
+	public int getAccelY() {
+		return accelY;
+	}
+
+	public void setAccelY(int accelY) {
+		this.accelY = accelY;
+	}
+
+	public int getJumps() {
+		return jumps;
+	}
+
+	public void setJumps(int jumps) {
+		this.jumps = jumps;
+	}
+
+	public boolean isFalling() {
+		return falling;
+	}
+
+	public void setFalling(boolean falling) {
+		this.falling = falling;
+	}
+
+	public boolean isJumping() {
+		return jumping;
+	}
+
+	public void setJumping(boolean jumping) {
+		this.jumping = jumping;
+	}
+
+	public boolean isDark() {
+		return dark;
+	}
+
+	public void setDark(boolean dark) {
+		this.dark = dark;
+	}
+
+	public boolean isDirectionBool() {
+		return directionBool;
+	}
+
+	public void setDirectionBool(boolean directionBool) {
+		this.directionBool = directionBool;
 	}
 
 }

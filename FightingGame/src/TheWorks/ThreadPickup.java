@@ -13,32 +13,35 @@ public class ThreadPickup extends Thread {
 
 	@Override
 	public void run() {
-		if (space.isLShiftPressed() && space.isRunnableP1() && space.getPlayers()[0].getItem() == null) {
+
+		int i = 0;
+		if (space.isLShiftPressed() && space.isRunnableP1() && space.getPlayers()[i].getItem() == null) {
 			space.setLShiftPressed(false);
 			Rectangle[] itemRectangles = new Rectangle[space.getItems().size()];
-			Rectangle p1 = new Rectangle(space.getPlayers()[0].getX(), space.getPlayers()[0].getY(),
-					space.getImages()[0].getWidth(space), space.getImages()[0].getHeight(space));
+			Rectangle p1 = new Rectangle(space.getPlayers()[i].getX(), space.getPlayers()[i].getY(),
+					space.getPlayers()[i].getWidth(), space.getPlayers()[i].getHeight());
 			for (Item item : space.getItems()) {
 				itemRectangles[space.getItems().indexOf(item)] = new Rectangle(item.getX(), item.getY(),
 						item.getWidth(), item.getHeight());
 				if (itemRectangles[space.getItems().indexOf(item)].intersects(p1) && item.getPlayer() == null) {
-					space.getPlayers()[0].setItem(item);
-					item.setPlayer(space.getPlayers()[0]);
+					space.getPlayers()[i].setItem(item);
+					item.setPlayer(space.getPlayers()[i]);
 				}
 			}
 		}
 
-		if (space.isRShiftPressed() && space.isRunnableP2() && space.getPlayers()[1].getItem() == null) {
+		i = 1;
+		if (space.isRShiftPressed() && space.isRunnableP2() && space.getPlayers()[i].getItem() == null) {
 			space.setRShiftPressed(false);
 			Rectangle[] itemRectangles = new Rectangle[space.getItems().size()];
-			Rectangle p2 = new Rectangle(space.getPlayers()[1].getX(), space.getPlayers()[1].getY(),
-					space.getImages()[1].getWidth(space), space.getImages()[1].getHeight(space));
+			Rectangle p2 = new Rectangle(space.getPlayers()[i].getX(), space.getPlayers()[i].getY(),
+					space.getPlayers()[i].getWidth(), space.getPlayers()[i].getHeight());
 			for (Item item : space.getItems()) {
 				itemRectangles[space.getItems().indexOf(item)] = new Rectangle(item.getX(), item.getY(),
 						item.getWidth(), item.getHeight());
 				if (itemRectangles[space.getItems().indexOf(item)].intersects(p2) && item.getPlayer() == null) {
-					space.getPlayers()[1].setItem(item);
-					item.setPlayer(space.getPlayers()[1]);
+					space.getPlayers()[i].setItem(item);
+					item.setPlayer(space.getPlayers()[i]);
 				}
 			}
 		}

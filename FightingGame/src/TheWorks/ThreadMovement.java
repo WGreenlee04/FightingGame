@@ -15,28 +15,22 @@ public class ThreadMovement extends Thread {
 		// if acceleration of x, carry out acceleration, decreasing it by one
 		// each time.
 		for (int i = 0; i < space.getPlayers().length; i++) {
-			if (space.getpAccelX()[i] > 0) {
-				space.getPlayers()[i].setX(space.getPlayers()[i].getX() + space.getpAccelX()[i]);
-				space.setpAccelX(arrayEdit(space.getpAccelX(), i, space.getpAccelX()[i] - space.getFRICTION()));
+			if (space.getPlayers()[i].getAccelX() > 0) {
+				space.getPlayers()[i].setX(space.getPlayers()[i].getX() + space.getPlayers()[i].getAccelX());
+				space.getPlayers()[i].setAccelX(space.getPlayers()[i].getAccelX() - space.getFRICTION());
 				;
 			}
-			if (space.getpAccelX()[i] < 0) {
-				space.getPlayers()[i].setX(space.getPlayers()[i].getX() + space.getpAccelX()[i]);
-				space.setpAccelX(arrayEdit(space.getpAccelX(), i, space.getpAccelX()[i] + space.getFRICTION()));
+			if (space.getPlayers()[i].getAccelX() < 0) {
+				space.getPlayers()[i].setX(space.getPlayers()[i].getX() + space.getPlayers()[i].getAccelX());
+				space.getPlayers()[i].setAccelX(space.getPlayers()[i].getAccelX() + space.getFRICTION());
 			}
-			if (space.getpAccelY()[i] > 0) {
-				space.getPlayers()[i].setY(space.getPlayers()[i].getY() - space.getpAccelY()[i]);
+			if (space.getPlayers()[i].getAccelY() > 0) {
+				space.getPlayers()[i].setY(space.getPlayers()[i].getY() - space.getPlayers()[i].getAccelY());
 			}
-			if (space.getpAccelY()[i] < 0) {
-				space.getPlayers()[i].setY(space.getPlayers()[i].getY() - space.getpAccelY()[i]);
+			if (space.getPlayers()[i].getAccelY() < 0) {
+				space.getPlayers()[i].setY(space.getPlayers()[i].getY() - space.getPlayers()[i].getAccelY());
 			}
 		}
-	}
-
-	private int[] arrayEdit(int[] array, int i, int value) {
-		int[] tempArray = array;
-		tempArray[i] = value;
-		return tempArray;
 	}
 
 }

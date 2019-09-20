@@ -24,8 +24,8 @@ public class ThreadCollision extends Thread {
 			// If at floor, don't move through
 			if (space.getPlayers()[i].getY() + space.getPlayers()[i].getHeight() + 35 > space.getHEIGHT()) {
 				space.getPlayers()[i].setY(space.getHEIGHT() - (space.getPlayers()[i].getHeight() + 35));
-				space.setJumps(arrayEdit(space.getJumps(), i, 0));
-				space.setFall(arrayEdit(space.getFall(), i, false));
+				space.getPlayers()[i].setJumps(0);
+				space.getPlayers()[i].setFalling(false);
 				;
 			}
 		}
@@ -38,19 +38,6 @@ public class ThreadCollision extends Thread {
 						.setY(space.getHEIGHT() - (space.getItems().get(i).getCurrentImage().getHeight(space) + 30));
 			}
 		}
-	}
-
-	// Returns edited array
-	private int[] arrayEdit(int[] array, int i, int value) {
-		int[] tempArray = array;
-		tempArray[i] = value;
-		return tempArray;
-	}
-
-	private boolean[] arrayEdit(boolean[] array, int i, boolean value) {
-		boolean[] tempArray = array;
-		tempArray[i] = value;
-		return tempArray;
 	}
 
 }

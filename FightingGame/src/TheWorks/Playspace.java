@@ -42,26 +42,18 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private ThreadMusic playMusic;
 
 	// Variables
-	private boolean runnableP1, runnableP2; // If methods solely about p1 and 2 are runnable
+	private boolean runnableP1, runnableP2; // If methods solely about p1 and 2
+											// are runnable
 	private Color backgroundColor;
 	private boolean WPressed, WReleased, APressed, SPressed, DPressed, LShiftPressed, LShiftReleased, UpPressed,
 			UpReleased, LeftPressed, DownPressed, RightPressed, RShiftPressed, RShiftReleased;
 	private int PLAYERCOUNT = 2;
-	private boolean jump1 = false; // if player1 is jumping
-	private boolean jump2 = false; // if player2 is jumping
 
 	// Arrays
 	private final Item[] ITEMS = { new Stick() }; // all item types
 	private Player[] players; // Array of players
-	private Image[] images; // Player Images
 	private JLabel[] healthBars; // number on bar
 	private JLabel[] healthBarIndicators; // bar itself
-	private int[] pAccelX; // acceleration of players X
-	private int[] pAccelY; // acceleration of players Y
-	private int[] jumps; // number of jumps for each player
-	private boolean[] direction;
-	private boolean[] isDark;
-	private boolean fall[]; // if either player is falling
 	private ArrayList<Item> items = new ArrayList<Item>(); // current items
 
 	/** Constructor, sets up frame and arrays **/
@@ -84,15 +76,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Array inits
 		players = new Player[PLAYERCOUNT];
-		images = new Image[PLAYERCOUNT];
-		pAccelX = new int[PLAYERCOUNT];
-		pAccelY = new int[PLAYERCOUNT];
 		healthBars = new JLabel[PLAYERCOUNT];
 		healthBarIndicators = new JLabel[PLAYERCOUNT];
-		fall = new boolean[PLAYERCOUNT];
-		direction = new boolean[PLAYERCOUNT];
-		jumps = new int[PLAYERCOUNT];
-		isDark = new boolean[PLAYERCOUNT];
 
 		// Timer setup
 		timer = new Timer(DELAY, this);
@@ -123,12 +108,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			PLAYERCOUNT = 2;
 			break;
 
-		}
-
-		// Loads images for players
-		for (int i = 0; i < players.length; i++) {
-			images[i] = Tools.loadObject(players[i].getImageDir());
-			images[i] = Tools.scalePlayer(images[i], players[i]);
 		}
 
 		// Loads items
@@ -179,17 +158,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setX(0);
 				players[i].setY(HEIGHT);
 			} else {
-				players[i].setX((WIDTH / (i) - 100) - images[i].getWidth(this));
+				players[i].setX((WIDTH / (i) - 100) - players[i].getImage().getWidth(this));
 				players[i].setY(HEIGHT);
 			}
-
-		// Set default array values
-		for (int i = 0; i < PLAYERCOUNT; i++) {
-			fall[i] = false;
-			direction[i] = true;
-			jumps[i] = 0;
-			isDark[i] = false;
-		}
 
 		// Try{}Catches
 		try {
@@ -384,7 +355,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		for (int i = 0; i < players.length; i++) {
 
 			// Draw players
-			g.drawImage(images[i], players[i].getX(), players[i].getY(), this);
+			g.drawImage(players[i].getImage(), players[i].getX(), players[i].getY(), this);
 
 			// Draw health bars
 			healthBars[i].setText("" + players[i].getHealth());
@@ -618,36 +589,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		PLAYERCOUNT = pLAYERCOUNT;
 	}
 
-	public boolean isJump1() {
-		return jump1;
-	}
-
-	public void setJump1(boolean jump1) {
-		this.jump1 = jump1;
-	}
-
-	public boolean isJump2() {
-		return jump2;
-	}
-
-	public void setJump2(boolean jump2) {
-		this.jump2 = jump2;
-	}
-
 	public Player[] getPlayers() {
 		return players;
 	}
 
 	public void setPlayers(Player[] players) {
 		this.players = players;
-	}
-
-	public Image[] getImages() {
-		return images;
-	}
-
-	public void setImages(Image[] images) {
-		this.images = images;
 	}
 
 	public JLabel[] getHealthBars() {
@@ -664,54 +611,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	public void setHealthBarIndicators(JLabel[] healthBarIndicators) {
 		this.healthBarIndicators = healthBarIndicators;
-	}
-
-	public int[] getpAccelX() {
-		return pAccelX;
-	}
-
-	public void setpAccelX(int[] pAccelX) {
-		this.pAccelX = pAccelX;
-	}
-
-	public int[] getpAccelY() {
-		return pAccelY;
-	}
-
-	public void setpAccelY(int[] pAccelY) {
-		this.pAccelY = pAccelY;
-	}
-
-	public int[] getJumps() {
-		return jumps;
-	}
-
-	public void setJumps(int[] jumps) {
-		this.jumps = jumps;
-	}
-
-	public boolean[] getDirection() {
-		return direction;
-	}
-
-	public void setDirection(boolean[] direction) {
-		this.direction = direction;
-	}
-
-	public boolean[] getIsDark() {
-		return isDark;
-	}
-
-	public void setIsDark(boolean[] isDark) {
-		this.isDark = isDark;
-	}
-
-	public boolean[] getFall() {
-		return fall;
-	}
-
-	public void setFall(boolean[] fall) {
-		this.fall = fall;
 	}
 
 	public ArrayList<Item> getItems() {
