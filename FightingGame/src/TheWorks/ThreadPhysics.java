@@ -55,7 +55,7 @@ public class ThreadPhysics extends Thread {
 				}
 			}
 		} else if (space.isLShiftPressed()) {
-			animateItem(space.getPlayers()[i].getItem(), 2, 40);
+			animateItem(space.getPlayers()[i].getItem(), 2, 20);
 		}
 
 		i = 1;
@@ -69,7 +69,7 @@ public class ThreadPhysics extends Thread {
 				}
 			}
 		} else if (space.isRShiftPressed()) {
-			animateItem(space.getPlayers()[i].getItem(), 2, 40);
+			animateItem(space.getPlayers()[i].getItem(), 2, 20);
 		}
 	}
 
