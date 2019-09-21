@@ -8,13 +8,20 @@ import javax.sound.sampled.Clip;
 
 public class ThreadMusic extends Thread {
 
-	Clip clip;
+	private Clip clip;
+	private boolean running;
 
 	public ThreadMusic() {
+		running = true;
+	}
+
+	public boolean isRunning() {
+		return running;
 	}
 
 	@Override
 	public void run() {
+
 		try {
 			// get the sound file as a resource out of my jar file;
 			// the sound file must be in the same directory as this class file.
@@ -27,6 +34,8 @@ public class ThreadMusic extends Thread {
 		} catch (Exception e) {
 			System.out.println(false);
 		}
+
+		running = false;
 	}
 
 	public void play() {

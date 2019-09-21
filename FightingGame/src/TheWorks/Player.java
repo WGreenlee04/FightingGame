@@ -5,6 +5,7 @@ import java.awt.Image;
 import javax.swing.ImageIcon;
 
 public class Player {
+	Playspace space;
 	Item item;
 	Image image;
 	String imageDir;
@@ -22,8 +23,11 @@ public class Player {
 	boolean jumping;
 	boolean dark;
 	boolean directionBool;
+	ToolBox Tools;
 
-	public Player(String imageDir, String darkImageDir) {
+	public Player(String imageDir, String darkImageDir, Playspace p) {
+		Tools = new ToolBox(p);
+		space = p;
 		health = 1000;
 		Width = 90;
 		Height = 150;
@@ -32,6 +36,7 @@ public class Player {
 		jumping = false;
 		dark = false;
 		image = new ImageIcon(imageDir).getImage();
+		image = Tools.scalePlayer(image, this);
 		this.imageDir = imageDir;
 		this.darkImageDir = darkImageDir;
 	}

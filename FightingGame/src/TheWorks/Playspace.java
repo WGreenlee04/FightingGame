@@ -19,6 +19,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	// Constants and Classes
 	private Timer timer;
 	private ToolBox Tools;
+	private final Item[] ITEMS = { new Stick() }; // all item types
 	private final int WIDTH = 1000; // Width of panel
 	private final int HEIGHT = 800; // Height of panel
 	private final int DELAY = 20; // Delay of actions in ms
@@ -42,19 +43,18 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private ThreadMusic playMusic;
 
 	// Variables
-	private boolean runnableP1, runnableP2; // If methods solely about p1 and 2
-											// are runnable
+	private int PLAYERCOUNT = 2;
+	private boolean runnableP1, runnableP2; // If methods about player are runnable
 	private Color backgroundColor;
 	private boolean WPressed, WReleased, APressed, SPressed, DPressed, LShiftPressed, LShiftReleased, UpPressed,
 			UpReleased, LeftPressed, DownPressed, RightPressed, RShiftPressed, RShiftReleased;
-	private int PLAYERCOUNT = 2;
 
 	// Arrays
-	private final Item[] ITEMS = { new Stick() }; // all item types
 	private Player[] players; // Array of players
 	private JLabel[] healthBars; // number on bar
 	private JLabel[] healthBarIndicators; // bar itself
-	private ArrayList<Item> items = new ArrayList<Item>(); // current items
+	private ArrayList<Item> items; // current items
+	private ArrayList<Thread> threads; // Active threads
 
 	/** Constructor, sets up frame and arrays **/
 	public Playspace(int mode) {
@@ -78,6 +78,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		players = new Player[PLAYERCOUNT];
 		healthBars = new JLabel[PLAYERCOUNT];
 		healthBarIndicators = new JLabel[PLAYERCOUNT];
+		items = new ArrayList<Item>();
+		threads = new ArrayList<Thread>();
 
 		// Timer setup
 		timer = new Timer(DELAY, this);
@@ -92,19 +94,19 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// Adds both players to board array
 		switch (mode) {
 		case 1:
-			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"));
+			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this));
 			PLAYERCOUNT = 1;
 			break;
 
 		case 2:
-			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"),
-					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png"));
+			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this),
+					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png", this));
 			PLAYERCOUNT = 2;
 			break;
 
 		default:
-			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"),
-					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png"));
+			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this),
+					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png", this));
 			PLAYERCOUNT = 2;
 			break;
 
@@ -163,6 +165,27 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			}
 
 		// Try{}Catches
+		checkPlayerMethodValidity();
+
+		initThreads();
+		playBackgroundMusic();
+
+		// Timer start
+		timer.start(); // Starts timer
+	}
+
+	// SinglePlayer
+	private void add(Player a) {
+		players[0] = a;
+	}
+
+	// 2 Player
+	private void add(Player a, Player b) {
+		players[0] = a;
+		players[1] = b;
+	}
+
+	private void checkPlayerMethodValidity() {
 		try {
 			if (players[0] != null) {
 				runnableP1 = true;
@@ -182,26 +205,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		} catch (ArrayIndexOutOfBoundsException ex) {
 			runnableP2 = false;
 		}
-
-		initThreads();
-
-		// Timer start
-		timer.start(); // Starts timer
-	}
-
-	// SinglePlayer
-	private void add(Player a) {
-		players[0] = a;
-	}
-
-	// 2 Player
-	private void add(Player a, Player b) {
-		players[0] = a;
-		players[1] = b;
 	}
 
 	/** Initiates threads for values **/
 	private void initThreads() {
+
+		// Thread Constructor Calls
 		doPickup = new ThreadPickup(this);
 		doAccelerationP1 = new ThreadAccelerationP1(this);
 		doAccelerationP2 = new ThreadAccelerationP2(this);
@@ -209,24 +218,45 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		doGravity = new ThreadGravity(this);
 		doCollision = new ThreadCollision(this);
 		doRenderItems = new ThreadRenderItems(this);
+
+		// Thread array setup
+		threads.add(doPickup);
+		threads.add(doAccelerationP1);
+		threads.add(doAccelerationP2);
+		threads.add(doMovement);
+		threads.add(doGravity);
+		threads.add(doCollision);
+		threads.add(doRenderItems);
+
+		// Start threads
+		doPickup.start();
+		doAccelerationP1.start();
+		doAccelerationP2.start();
+		doMovement.start();
+		doGravity.start();
+		doCollision.start();
+		doRenderItems.start();
+	}
+
+	private void playBackgroundMusic() {
+
 		playMusic = new ThreadMusic();
-		playMusic.run();
+		playMusic.start();
+	}
+
+	private boolean isCycleComplete() {
+		for (Thread t : threads)
+			if (t.isAlive()) {
+				return false;
+			}
+		return true;
 	}
 
 	/** Triggered when "timer" completes a cycle **/
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-
-		// Player status methods, including animations
-		doPickup.run();
-
-		// Position methods
-		doAccelerationP1.run();
-		doAccelerationP2.run();
-		doMovement.run();
-		doGravity.run();
-		doCollision.run();
-		doRenderItems.run();
+		if (isCycleComplete())
+			initThreads();
 		repaint();
 	}
 
