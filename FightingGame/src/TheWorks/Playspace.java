@@ -19,14 +19,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	// Constants and Classes
 	private Timer timer;
 	private ToolBox Tools;
-	private final Item[] ITEMS = { new Stick() }; // all item types
 	private final int WIDTH = 1000; // Width of panel
 	private final int HEIGHT = 800; // Height of panel
 	private final int DELAY = 20; // Delay of actions in ms
 	private final int GRAVITY = -4; // Quadratic gravity for players
 	private final int ITEMGRAVITY = -6; // Linear gravity for items
 	private final int FRICTION = 2; // Deceleration on objects
-	private final int ITEMCOUNT = 1; // The number of items on board at start
+	private final int ITEMCOUNT = 2; // The number of items on board at start
 	private final int DASHSPEED = 4; // Speed at which players change direction
 	private final int PLAYERSPEED = 8; // Speed of players
 	private final int JUMPHEIGHT = 13; // Height of jump
@@ -37,9 +36,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private ThreadMusic playMusic;
 
 	// Variables
-	private int PLAYERCOUNT = 2;
-	private boolean runnableP1, runnableP2; // If methods about player are runnable
 	private Color backgroundColor;
+	private int PLAYERCOUNT; // Changing amount of players
+	private boolean runnableP1, runnableP2; // If methods about player are runnable
 	private boolean WPressed, WReleased, APressed, SPressed, DPressed, LShiftPressed, LShiftReleased, UpPressed,
 			UpReleased, LeftPressed, DownPressed, RightPressed, RShiftPressed, RShiftReleased;
 
@@ -108,16 +107,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Loads items
 		for (int i = 0; i < ITEMCOUNT; i++) {
-			items.add(i, new Stick());
-		}
-
-		// Replaces sticks with rarer items
-		for (Item item : items) {
 			int spawnVal = (int) (Math.random() * 100);
-			for (Item ITEM : ITEMS) {
-				if (ITEM.getDropRate() >= spawnVal) {
-					items.set(items.indexOf(item), ITEM);
-				}
+			if (spawnVal < new Stick().getDropRate()) {
+				items.add(new Stick());
 			}
 		}
 
@@ -623,9 +615,4 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public int getFALLSPEED() {
 		return FALLSPEED;
 	}
-
-	public Item[] getITEMS() {
-		return ITEMS;
-	}
-
 }

@@ -20,11 +20,13 @@ public class ThreadPhysics extends Thread {
 
 		accel();
 
+		gravity();
+
 		move();
 
-		renderObjects();
-
 		collideAll();
+
+		renderObjects();
 
 		running = false;
 	}
@@ -169,45 +171,95 @@ public class ThreadPhysics extends Thread {
 				space.getPlayers()[i].setFalling(true);
 			}
 		}
+	}
+
+	private void gravity() {
 
 		// Gravity Players 1 and 2
-		for (i = 0; i < space.getPlayers().length; i++)
-			if (space.getPlayers()[i].getAccelY() <= 0) {
-				space.getPlayers()[i].setAccelY(space.getPlayers()[i].getAccelY() + space.getGRAVITY());
+		for (Player p : space.getPlayers())
+			if (p.getAccelY() <= 0) {
+				p.setAccelY(p.getAccelY() + space.getGRAVITY());
 			} else {
-				space.getPlayers()[i].setAccelY(space.getPlayers()[i].getAccelY() - 2);
+				p.setAccelY(p.getAccelY() - 2);
 			}
 
 		// Gravity on items
 		for (Item item : space.getItems()) {
-			if (item.getPlayer() == null)
-				item.setY(item.getY() - space.getITEMGRAVITY());
+			if (item.getPlayer() == null) {
+				item.setAccelY(space.getITEMGRAVITY());
+			}
 		}
 	}
 
-	public void move() {
+	private void move() {
 
 		// if acceleration of x, do acceleration, decreasing it by one each time.
-		for (int i = 0; i < space.getPlayers().length; i++) {
-			if (space.getPlayers()[i].getAccelX() > 0) {
-				space.getPlayers()[i].setX(space.getPlayers()[i].getX() + space.getPlayers()[i].getAccelX());
-				space.getPlayers()[i].setAccelX(space.getPlayers()[i].getAccelX() - space.getFRICTION());
+		for (Player p : space.getPlayers()) {
+			if (p.getAccelX() > 0) {
+				p.setX(p.getX() + p.getAccelX());
+				p.setAccelX(p.getAccelX() - space.getFRICTION());
 				;
 			}
-			if (space.getPlayers()[i].getAccelX() < 0) {
-				space.getPlayers()[i].setX(space.getPlayers()[i].getX() + space.getPlayers()[i].getAccelX());
-				space.getPlayers()[i].setAccelX(space.getPlayers()[i].getAccelX() + space.getFRICTION());
+			if (p.getAccelX() < 0) {
+				p.setX(p.getX() + p.getAccelX());
+				p.setAccelX(p.getAccelX() + space.getFRICTION());
 			}
-			if (space.getPlayers()[i].getAccelY() > 0) {
-				space.getPlayers()[i].setY(space.getPlayers()[i].getY() - space.getPlayers()[i].getAccelY());
+			if (p.getAccelY() > 0) {
+				p.setY(p.getY() - p.getAccelY());
 			}
-			if (space.getPlayers()[i].getAccelY() < 0) {
-				space.getPlayers()[i].setY(space.getPlayers()[i].getY() - space.getPlayers()[i].getAccelY());
+			if (p.getAccelY() < 0) {
+				p.setY(p.getY() - p.getAccelY());
+			}
+		}
+
+		for (Item i : space.getItems()) {
+			if (i.getAccelX() > 0) {
+				i.setX(i.getX() + i.getAccelX());
+				i.setAccelX(i.getAccelX() - space.getFRICTION());
+				;
+			}
+			if (i.getAccelX() < 0) {
+				i.setX(i.getX() + i.getAccelX());
+				i.setAccelX(i.getAccelX() + space.getFRICTION());
+			}
+			if (i.getAccelY() > 0) {
+				i.setY(i.getY() - i.getAccelY());
+			}
+			if (i.getAccelY() < 0) {
+				i.setY(i.getY() - i.getAccelY());
+			}
+		}
+	}
+
+	private void collideAll() {
+		// Collides objects
+		for (Player p : space.getPlayers()) {
+
+			// If at wall, loop over (haha)
+			if (p.getX() < 0 - p.getWidth())
+				p.setX(space.getWIDTH());
+			if (p.getX() > space.getWIDTH())
+				p.setX(0 - p.getWidth());
+
+			// If at floor, don't move through
+			if (p.getY() + p.getHeight() + 35 > space.getHEIGHT()) {
+				p.setY(space.getHEIGHT() - (p.getHeight() + 35));
+				p.setJumps(0);
+				p.setFalling(false);
+				;
+			}
+		}
+
+		// When items hit the ground, stop motion
+		for (Item i : space.getItems()) {
+			if (i.getY() + i.getHeight() + 35 > space.getHEIGHT()) {
+				i.setY(space.getHEIGHT() - (i.getHeight() + 35));
 			}
 		}
 	}
 
 	private void renderObjects() {
+
 		// Sets pos and image for Items
 		for (Item item : space.getItems()) {
 			if (item.getPlayer() != null) {
@@ -217,35 +269,6 @@ public class ThreadPhysics extends Thread {
 					item.setDirection(item.getPlayer().getDirection());
 					item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
 				}
-			}
-		}
-	}
-
-	private void collideAll() {
-		// Collides objects
-		for (int i = 0; i < space.getPlayers().length; i++) {
-
-			// If at wall, loop over (haha)
-			if (space.getPlayers()[i].getX() < 0 - space.getPlayers()[i].getWidth())
-				space.getPlayers()[i].setX(space.getWIDTH());
-			if (space.getPlayers()[i].getX() > space.getWIDTH())
-				space.getPlayers()[i].setX(0 - space.getPlayers()[i].getWidth());
-
-			// If at floor, don't move through
-			if (space.getPlayers()[i].getY() + space.getPlayers()[i].getHeight() + 35 > space.getHEIGHT()) {
-				space.getPlayers()[i].setY(space.getHEIGHT() - (space.getPlayers()[i].getHeight() + 35));
-				space.getPlayers()[i].setJumps(0);
-				space.getPlayers()[i].setFalling(false);
-				;
-			}
-		}
-
-		// When items hit the ground, stop motion
-		for (int i = 0; i < space.getItems().size(); i++) {
-			if (space.getItems().get(i).getY() + space.getItems().get(i).getCurrentImage().getHeight(space) + 30 > space
-					.getHEIGHT()) {
-				space.getItems().get(i)
-						.setY(space.getHEIGHT() - (space.getItems().get(i).getCurrentImage().getHeight(space) + 30));
 			}
 		}
 	}
