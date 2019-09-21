@@ -12,13 +12,11 @@ public class ThreadSound extends Thread {
 	private Playspace space;
 	private Clip clip;
 	private String soundDir;
-	private boolean muted;
 	private boolean running;
 
 	public ThreadSound(String soundDir, Playspace space) {
 		this.space = space;
 		this.soundDir = soundDir;
-		this.muted = false;
 		this.running = true;
 	}
 
@@ -57,30 +55,6 @@ public class ThreadSound extends Thread {
 
 	public void pause() {
 		clip.stop();
-	}
-
-	public void mute() {
-		clip.stop();
-		FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-		gainControl.setValue(-80.0f); // Reduce volume to -80 decibels.
-		muted = true;
-		clip.start();
-	}
-
-	public void unMute() {
-		clip.stop();
-		FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-		gainControl.setValue(1.0f); // Increase volume to 1 decibel.
-		muted = false;
-		clip.start();
-	}
-
-	public boolean isMuted() {
-		return muted;
-	}
-
-	public void setMuted(boolean muted) {
-		this.muted = muted;
 	}
 
 }
