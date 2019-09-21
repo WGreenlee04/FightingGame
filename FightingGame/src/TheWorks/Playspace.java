@@ -3,7 +3,6 @@ package TheWorks;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -16,40 +15,48 @@ import javax.swing.SwingConstants;
 import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener, KeyListener {
-	public final int WIDTH = 1000;
-	public final int HEIGHT = 800;
-	public Timer timer;
-	public ToolBox Tools;
-	public KeyListener keylistener = this;
-	public final int DELAY = 20;
-	public final int GRAVITY = -4; // Quadratic gravity for players
-	public final int ITEMGRAVITY = -6; // Linear gravity for items
-	public final int FRICTION = 2; // Deceleration on objects
-	public final int ITEMCOUNT = 2; // the number of items on board at start
-	public final int DASHSPEED = 4;
-	public final int PLAYERSPEED = 8;
-	public final int JUMPHEIGHT = 13;
-	public final int FALLSPEED = -10;
-	public final Item[] ITEMS = { new Stick() }; // all item types
-	public Player[] players; // Array of players
-	public Image[] images; // Player Images
-	public int[] pAccelX; // acceleration of players X
-	public int[] pAccelY; // acceleration of players Y
-	public int[] jumps; // number of jumps for each player
-	public JLabel[] healthBars; // number on bar
-	public JLabel[] healthBarIndicators; // bar itself
-	public boolean[] direction;
-	public boolean[] isDark;
-	public ArrayList<Item> items = new ArrayList<Item>(); // current items
-	public Color backgroundColor;
-	public boolean WPressed, WReleased, APressed, SPressed, DPressed, LShiftPressed, LShiftReleased, UpPressed,
-			UpReleased, LeftPressed, DownPressed, RightPressed, RShiftPressed, RShiftReleased;
-	public int PLAYERCOUNT = 2;
-	public boolean jump1 = false; // if player1 is jumping
-	public boolean jump2 = false; // if player2 is jumping
-	public boolean fall[]; // if either player is falling
 
-	// Constructor, breaks Main from static.
+	// Constants and Classes
+	private Timer timer;
+	private ToolBox Tools;
+	private final int WIDTH = 1000; // Width of panel
+	private final int HEIGHT = 800; // Height of panel
+	private final int DELAY = 20; // Delay of actions in ms
+	private final int GRAVITY = -4; // Quadratic gravity for players
+	private final int ITEMGRAVITY = -6; // Linear gravity for items
+	private final int FRICTION = 2; // Deceleration on objects
+	private final int ITEMCOUNT = 2; // The number of items on board at start
+	private final int DASHSPEED = 4; // Speed at which players change direction
+	private final int PLAYERSPEED = 8; // Speed of players
+	private final int JUMPHEIGHT = 13; // Height of jump
+	private final int FALLSPEED = -10; // Speed of fast fall
+
+	// Here we go... Threads...
+	private ThreadPickup doPickup;
+	private ThreadAccelerationP1 doAccelerationP1;
+	private ThreadAccelerationP2 doAccelerationP2;
+	private ThreadMovement doMovement;
+	private ThreadGravity doGravity;
+	private ThreadCollision doCollision;
+	private ThreadRenderItems doRenderItems;
+	private ThreadMusic playMusic;
+
+	// Variables
+	private boolean runnableP1, runnableP2; // If methods solely about p1 and 2
+											// are runnable
+	private Color backgroundColor;
+	private boolean WPressed, WReleased, APressed, SPressed, DPressed, LShiftPressed, LShiftReleased, UpPressed,
+			UpReleased, LeftPressed, DownPressed, RightPressed, RShiftPressed, RShiftReleased;
+	private int PLAYERCOUNT = 2;
+
+	// Arrays
+	private final Item[] ITEMS = { new Stick() }; // all item types
+	private Player[] players; // Array of players
+	private JLabel[] healthBars; // number on bar
+	private JLabel[] healthBarIndicators; // bar itself
+	private ArrayList<Item> items = new ArrayList<Item>(); // current items
+
+	/** Constructor, sets up frame and arrays **/
 	public Playspace(int mode) {
 
 		// Sets up JPanel
@@ -69,15 +76,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Array inits
 		players = new Player[PLAYERCOUNT];
-		images = new Image[PLAYERCOUNT];
-		pAccelX = new int[PLAYERCOUNT];
-		pAccelY = new int[PLAYERCOUNT];
 		healthBars = new JLabel[PLAYERCOUNT];
 		healthBarIndicators = new JLabel[PLAYERCOUNT];
-		fall = new boolean[PLAYERCOUNT];
-		direction = new boolean[PLAYERCOUNT];
-		jumps = new int[PLAYERCOUNT];
-		isDark = new boolean[PLAYERCOUNT];
 
 		// Timer setup
 		timer = new Timer(DELAY, this);
@@ -86,7 +86,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		Tools = new ToolBox(this);
 	}
 
-	// loads both characters, and sets up space
+	/** Sets all array defaults and sets images **/
 	public void initSpace(int mode) {
 
 		// Adds both players to board array
@@ -110,19 +110,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		}
 
-		// Loads ONLY images for PLAYERS
-		for (int i = 0; i < players.length; i++)
-			images[i] = Tools.loadObject(players[i].getImageDir());
-
-		// Scales the images to correct size
-		for (int i = 0; i < images.length; i++)
-			images[i] = Tools.scalePlayer(images[i], players[i]);
-
-		// Loads items, and by design, Item images
+		// Loads items
 		for (int i = 0; i < ITEMCOUNT; i++) {
 			items.add(i, new Stick());
 		}
 
+		// Replaces sticks with rarer items
 		for (Item item : items) {
 			int spawnVal = (int) (Math.random() * 100);
 			for (Item ITEM : ITEMS) {
@@ -132,6 +125,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			}
 		}
 
+		// Loads item images
 		for (Item item : items) {
 			item.setX((int) ((WIDTH / 3) + (WIDTH / 3 * Math.random())));
 			Image scaledImage = Tools.scaleObject(item.getCurrentImage(), item.getWidth(), item.getHeight());
@@ -140,6 +134,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Sets health bars and indicators
 		for (int i = 0; i < healthBars.length; i++) {
+
 			// Add bars
 			healthBars[i] = new JLabel();
 			this.add(healthBars[i]);
@@ -163,366 +158,138 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setX(0);
 				players[i].setY(HEIGHT);
 			} else {
-				players[i].setX((WIDTH / (i) - 100) - images[i].getWidth(this));
+				players[i].setX((WIDTH / (i) - 100) - players[i].getImage().getWidth(this));
 				players[i].setY(HEIGHT);
 			}
 
-		// Set default array values
-		for (int i = 0; i < PLAYERCOUNT; i++) {
-			fall[i] = false;
-			direction[i] = true;
-			jumps[i] = 0;
-			isDark[i] = false;
+		// Try{}Catches
+		try {
+			if (players[0] != null) {
+				runnableP1 = true;
+			} else {
+				runnableP1 = false;
+			}
+		} catch (ArrayIndexOutOfBoundsException ex) {
+			runnableP1 = false;
 		}
+
+		try {
+			if (players[1] != null) {
+				runnableP2 = true;
+			} else {
+				runnableP2 = false;
+			}
+		} catch (ArrayIndexOutOfBoundsException ex) {
+			runnableP2 = false;
+		}
+
+		initThreads();
 
 		// Timer start
 		timer.start(); // Starts timer
 	}
 
-	// Begin player add
 	// SinglePlayer
-	public void add(Player a) {
+	private void add(Player a) {
 		players[0] = a;
 	}
 
 	// 2 Player
-	public void add(Player a, Player b) {
+	private void add(Player a, Player b) {
 		players[0] = a;
 		players[1] = b;
 	}
-	// End player add
 
-	// Triggered when "timer" completes a cycle
+	/** Initiates threads for values **/
+	private void initThreads() {
+		doPickup = new ThreadPickup(this);
+		doAccelerationP1 = new ThreadAccelerationP1(this);
+		doAccelerationP2 = new ThreadAccelerationP2(this);
+		doMovement = new ThreadMovement(this);
+		doGravity = new ThreadGravity(this);
+		doCollision = new ThreadCollision(this);
+		doRenderItems = new ThreadRenderItems(this);
+		playMusic = new ThreadMusic();
+		playMusic.run();
+	}
+
+	/** Triggered when "timer" completes a cycle **/
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 
 		// Player status methods, including animations
-		pickup();
+		doPickup.run();
 
 		// Position methods
-		doAccelerationP1();
-		doAccelerationP2();
-		doMovement();
-		doGravity();
-		doCollision();
-		renderItems();
+		doAccelerationP1.run();
+		doAccelerationP2.run();
+		doMovement.run();
+		doGravity.run();
+		doCollision.run();
+		doRenderItems.run();
 		repaint();
 	}
 
-	public void pickup() {
-
-		boolean runnableP1;
-		try {
-			if (players[1] != null) {
-				runnableP1 = true;
-			} else {
-				runnableP1 = false;
-			}
-		} catch (ArrayIndexOutOfBoundsException e) {
-			runnableP1 = false;
-		}
-
-		if (LShiftPressed && players[0].getItem() == null && runnableP1) {
-			LShiftPressed = false;
-			Rectangle[] itemRectangles = new Rectangle[items.size()];
-			Rectangle p1 = new Rectangle(players[0].getX(), players[0].getY(), images[0].getWidth(this),
-					images[0].getHeight(this));
-			for (Item item : items) {
-				itemRectangles[items.indexOf(item)] = new Rectangle(item.getX(), item.getY(), item.getWidth(),
-						item.getHeight());
-				if (itemRectangles[items.indexOf(item)].intersects(p1) && item.getPlayer() == null) {
-					players[0].setItem(item);
-					item.setPlayer(players[0]);
-				}
-			}
-		}
-
-		boolean runnableP2;
-		try {
-			if (players[2] != null) {
-				runnableP2 = true;
-			} else {
-				runnableP2 = false;
-			}
-		} catch (ArrayIndexOutOfBoundsException e) {
-			runnableP2 = false;
-		}
-
-		if (RShiftPressed && players[1].getItem() == null && runnableP2) {
-			RShiftPressed = false;
-			Rectangle[] itemRectangles = new Rectangle[items.size()];
-			Rectangle p2 = new Rectangle(players[1].getX(), players[1].getY(), images[1].getWidth(this),
-					images[1].getHeight(this));
-			for (Item item : items) {
-				itemRectangles[items.indexOf(item)] = new Rectangle(item.getX(), item.getY(), item.getWidth(),
-						item.getHeight());
-				if (itemRectangles[items.indexOf(item)].intersects(p2) && item.getPlayer() == null) {
-					players[1].setItem(item);
-					item.setPlayer(players[1]);
-				}
-			}
-		}
-
-	}
-
-	public void renderItems() {
-		for (Item item : items) {
-			if (item.getPlayer() != null) {
-				item.setX(item.getPlayer().getX());
-				item.setY(item.getPlayer().getY());
-				if (item.getDirection() != item.getPlayer().getDirection()) {
-					item.setDirection(item.getPlayer().getDirection());
-					item.setCurrentImage(Tools.flipObject(item.getCurrentImage()));
-				}
-			}
-		}
-	}
-
-	public void doAccelerationP1() {
-		// p1
-		int i = 0;
-
-		boolean runnable;
-		try {
-			if (players[i] != null) {
-				runnable = true;
-			} else {
-				runnable = false;
-			}
-		} catch (ArrayIndexOutOfBoundsException e) {
-			runnable = false;
-		}
-		if (runnable) {
-			// Left Movement w/ dash
-			if (APressed && !DPressed) {
-				if (pAccelX[i] == 0) {
-					pAccelX[i] = -DASHSPEED * 2;
-				} else {
-					pAccelX[i] = -PLAYERSPEED * 2;
-				}
-				players[i].setDirection(-1);
-			}
-
-			// Right Movement w/ dash
-			if (DPressed && !APressed) {
-				if (pAccelX[i] == 0) {
-					pAccelX[i] = DASHSPEED * 2;
-				} else {
-					pAccelX[i] = PLAYERSPEED * 2;
-				}
-				players[i].setDirection(1);
-			}
-
-			// If you didn't just jump, and pressed jump, jump
-			if (WPressed && !jump1) {
-				jump1 = true;
-				pAccelY[i] = JUMPHEIGHT * 2;
-			}
-
-			// You just jumped, and we need to increase jump counter and reset jump
-			if (WReleased && jumps[i] <= 2) {
-				jump1 = false;
-				fall[i] = false;
-				jumps[i]++;
-				WReleased = false;
-			} else if (jumps[i] > 2 && !isDark[i]) { // darker color, out of jumps
-				images[i] = Tools.darkenObject(images[i], players[i]);
-				isDark[i] = true;
-			} else if (jumps[i] == 0 && isDark[i]) { // you can be light
-				images[i] = Tools.lightenObject(images[i], players[i]);
-				isDark[i] = false;
-			}
-
-			// Fast falling
-			if (SPressed || fall[i]) {
-				pAccelY[i] += FALLSPEED;
-				fall[i] = true;
-			}
-		}
-	}
-
-	public void doAccelerationP2() {
-		// p2
-		int i = 1;
-		boolean runnable;
-		try {
-			if (players[i] != null) {
-				runnable = true;
-			} else {
-				runnable = false;
-			}
-		} catch (ArrayIndexOutOfBoundsException e) {
-			runnable = false;
-		}
-		if (runnable) {
-			// Left Movement w/ dash
-			if (LeftPressed && !RightPressed) {
-				if (pAccelX[i] == 0) {
-					pAccelX[i] = -DASHSPEED * 2;
-				} else {
-					pAccelX[i] = -PLAYERSPEED * 2;
-				}
-				players[i].setDirection(-1);
-			}
-
-			// Right Movement w/ dash
-			if (RightPressed && !LeftPressed) {
-				if (pAccelX[i] == 0) {
-					pAccelX[i] = DASHSPEED * 2;
-				} else {
-					pAccelX[i] = PLAYERSPEED * 2;
-				}
-				players[i].setDirection(1);
-			}
-
-			// If you didn't just jump, and pressed jump, then jump
-			if (UpPressed && !jump2) {
-				jump2 = true;
-				fall[i] = false;
-				pAccelY[i] = JUMPHEIGHT * 2;
-			}
-
-			// You just jumped, and we need to increase jump counter and reset jump
-			if (UpReleased && jumps[i] <= 2) {
-				jump2 = false;
-				jumps[i]++;
-				UpReleased = false;
-			} else if (jumps[i] > 2 && !isDark[i]) {// darker color, out of jumps
-				images[i] = Tools.darkenObject(images[i], players[i]);
-				isDark[i] = true;
-
-			} else if (jumps[i] == 0 && isDark[i]) { // lighter color
-				images[i] = Tools.lightenObject(images[i], players[i]);
-				isDark[i] = false;
-			}
-
-			// Fast falling
-			if (DownPressed || fall[1]) {
-				pAccelY[i] += FALLSPEED;
-				fall[i] = true;
-			}
-		}
-	}
-
-	public void doGravity() {
-
-		// Gravity Players 1 and 2
-		for (int i = 0; i < players.length; i++)
-			if (pAccelY[i] <= 0) {
-				pAccelY[i] += GRAVITY;
-			} else {
-				pAccelY[i] -= 2;
-			}
-
-		// Gravity on items
-		for (Item item : items) {
-			if (item.getPlayer() == null) {
-				item.setY(item.getY() - ITEMGRAVITY);
-			}
-		}
-	}
-
-	public void doCollision() {
-
-		// looping through the number of players
-		for (int i = 0; i < players.length; i++) {
-
-			// If at wall, loop
-			if (players[i].getX() < 0 - players[i].getWidth())
-				players[i].setX(WIDTH);
-			if (players[i].getX() > WIDTH)
-				players[i].setX(0 - players[i].getWidth());
-
-			// If at floor, don't move through
-			if (players[i].getY() + players[i].getHeight() + 35 > HEIGHT) {
-				players[i].setY(HEIGHT - (players[i].getHeight() + 35));
-				jumps[i] = 0;
-				fall[i] = false;
-			}
-		}
-
-		// When items hit the ground, stop motion
-		for (int i = 0; i < items.size(); i++) {
-			if (items.get(i).getY() + items.get(i).getCurrentImage().getHeight(this) + 30 > HEIGHT) {
-				items.get(i).setY(HEIGHT - (items.get(i).getCurrentImage().getHeight(this) + 30));
-			}
-		}
-	}
-
-	public void doMovement() {
-		// if acceleration of x, carry out acceleration, decreasing it by one
-		// each time.
-		for (int i = 0; i < players.length; i++) {
-			if (pAccelX[i] > 0) {
-				players[i].setX(players[i].getX() + pAccelX[i]);
-				pAccelX[i] -= FRICTION;
-			}
-			if (pAccelX[i] < 0) {
-				players[i].setX(players[i].getX() + pAccelX[i]);
-				pAccelX[i] += FRICTION;
-			}
-			if (pAccelY[i] > 0) {
-				players[i].setY(players[i].getY() - pAccelY[i]);
-			}
-			if (pAccelY[i] < 0) {
-				players[i].setY(players[i].getY() - pAccelY[i]);
-			}
-		}
-
-	}
-
-	// Keypress detection
+	/** Keypress detection **/
 	@Override
 	public void keyPressed(KeyEvent e) {
 
-		// WASD Controls
-		if (e.getKeyCode() == KeyEvent.VK_A) {
-			APressed = true;
+		if (runnableP1) {
+			// WASD Controls
+			if (e.getKeyCode() == KeyEvent.VK_A) {
+				APressed = true;
+				players[0].setDirection(-1);
+			}
+
+			if (e.getKeyCode() == KeyEvent.VK_D) {
+				DPressed = true;
+				players[0].setDirection(1);
+			}
+
+			if (e.getKeyCode() == KeyEvent.VK_S) {
+				SPressed = true;
+			}
+
+			if (e.getKeyCode() == KeyEvent.VK_W) {
+				WPressed = true;
+				WReleased = false;
+			}
+
+			if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
+				LShiftPressed = true;
+				LShiftReleased = false;
+			}
 		}
 
-		if (e.getKeyCode() == KeyEvent.VK_D) {
-			DPressed = true;
-		}
+		if (runnableP2) {
+			// ULDR Controls
+			if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+				LeftPressed = true;
+				players[1].setDirection(-1);
+			}
 
-		if (e.getKeyCode() == KeyEvent.VK_S) {
-			SPressed = true;
-		}
+			if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+				RightPressed = true;
+				players[1].setDirection(1);
+			}
 
-		if (e.getKeyCode() == KeyEvent.VK_W) {
-			WPressed = true;
-			WReleased = false;
-		}
+			if (e.getKeyCode() == KeyEvent.VK_UP) {
+				UpPressed = true;
+				UpReleased = false;
+			}
 
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
-			LShiftPressed = true;
-			LShiftReleased = false;
-		}
+			if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+				DownPressed = true;
+			}
 
-		// ULDR Controls
-		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			LeftPressed = true;
-		}
-
-		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			RightPressed = true;
-		}
-
-		if (e.getKeyCode() == KeyEvent.VK_UP) {
-			UpPressed = true;
-			UpReleased = false;
-		}
-
-		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-			DownPressed = true;
-		}
-
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
-			RShiftPressed = true;
-			RShiftReleased = false;
+			if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
+				RShiftPressed = true;
+				RShiftReleased = false;
+			}
 		}
 	}
 
-	// Key Release detection
+	/** Key Release detection **/
 	@Override
 	public void keyReleased(KeyEvent e) {
 
@@ -572,12 +339,12 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 	}
 
-	// We need this, but would rather forget it...
+	/** We need this, but would rather forget it... **/
 	@Override
 	public void keyTyped(KeyEvent e) {
 	}
 
-	// Draws everything on screen
+	/** Draws everything on screen **/
 	@Override
 	public void paintComponent(Graphics g) {
 
@@ -588,13 +355,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		for (int i = 0; i < players.length; i++) {
 
 			// Draw players
-			g.drawImage(images[i], players[i].getX(), players[i].getY(), this);
+			g.drawImage(players[i].getImage(), players[i].getX(), players[i].getY(), this);
 
 			// Draw health bars
 			healthBars[i].setText("" + players[i].getHealth());
 			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
 			healthBarIndicators[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
-			healthBarIndicators[i].setSize((int) 50 * (players[i].getHealth() / 1000), 10);
+			healthBarIndicators[i].setSize(50 * (players[i].getHealth() / 1000), 10);
 		}
 
 		// Draw items loop
@@ -604,4 +371,302 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			g.drawImage(item.getCurrentImage(), item.getX(), item.getY(), this);
 		}
 	}
+
+	/** ALL GETTERS AND SETTERS **/
+	public Timer getTimer() {
+		return timer;
+	}
+
+	public void setTimer(Timer timer) {
+		this.timer = timer;
+	}
+
+	public ToolBox getTools() {
+		return Tools;
+	}
+
+	public void setTools(ToolBox tools) {
+		Tools = tools;
+	}
+
+	public Thread getDoPickup() {
+		return doPickup;
+	}
+
+	public void setDoPickup(ThreadPickup doPickup) {
+		this.doPickup = doPickup;
+	}
+
+	public Thread getDoAccelerationP1() {
+		return doAccelerationP1;
+	}
+
+	public void setDoAccelerationP1(ThreadAccelerationP1 doAccelerationP1) {
+		this.doAccelerationP1 = doAccelerationP1;
+	}
+
+	public Thread getDoAccelerationP2() {
+		return doAccelerationP2;
+	}
+
+	public void setDoAccelerationP2(ThreadAccelerationP2 doAccelerationP2) {
+		this.doAccelerationP2 = doAccelerationP2;
+	}
+
+	public Thread getDoMovement() {
+		return doMovement;
+	}
+
+	public void setDoMovement(ThreadMovement doMovement) {
+		this.doMovement = doMovement;
+	}
+
+	public Thread getDoGravity() {
+		return doGravity;
+	}
+
+	public void setDoGravity(ThreadGravity doGravity) {
+		this.doGravity = doGravity;
+	}
+
+	public Thread getDoCollision() {
+		return doCollision;
+	}
+
+	public void setDoCollision(ThreadCollision doCollision) {
+		this.doCollision = doCollision;
+	}
+
+	public Thread getDoRenderItems() {
+		return doRenderItems;
+	}
+
+	public void setDoRenderItems(ThreadRenderItems doRenderItems) {
+		this.doRenderItems = doRenderItems;
+	}
+
+	public boolean isRunnableP1() {
+		return runnableP1;
+	}
+
+	public void setRunnableP1(boolean runnableP1) {
+		this.runnableP1 = runnableP1;
+	}
+
+	public boolean isRunnableP2() {
+		return runnableP2;
+	}
+
+	public void setRunnableP2(boolean runnableP2) {
+		this.runnableP2 = runnableP2;
+	}
+
+	public Color getBackgroundColor() {
+		return backgroundColor;
+	}
+
+	public void setBackgroundColor(Color backgroundColor) {
+		this.backgroundColor = backgroundColor;
+	}
+
+	public boolean isWPressed() {
+		return WPressed;
+	}
+
+	public void setWPressed(boolean wPressed) {
+		WPressed = wPressed;
+	}
+
+	public boolean isWReleased() {
+		return WReleased;
+	}
+
+	public void setWReleased(boolean wReleased) {
+		WReleased = wReleased;
+	}
+
+	public boolean isAPressed() {
+		return APressed;
+	}
+
+	public void setAPressed(boolean aPressed) {
+		APressed = aPressed;
+	}
+
+	public boolean isSPressed() {
+		return SPressed;
+	}
+
+	public void setSPressed(boolean sPressed) {
+		SPressed = sPressed;
+	}
+
+	public boolean isDPressed() {
+		return DPressed;
+	}
+
+	public void setDPressed(boolean dPressed) {
+		DPressed = dPressed;
+	}
+
+	public boolean isLShiftPressed() {
+		return LShiftPressed;
+	}
+
+	public void setLShiftPressed(boolean lShiftPressed) {
+		LShiftPressed = lShiftPressed;
+	}
+
+	public boolean isLShiftReleased() {
+		return LShiftReleased;
+	}
+
+	public void setLShiftReleased(boolean lShiftReleased) {
+		LShiftReleased = lShiftReleased;
+	}
+
+	public boolean isUpPressed() {
+		return UpPressed;
+	}
+
+	public void setUpPressed(boolean upPressed) {
+		UpPressed = upPressed;
+	}
+
+	public boolean isUpReleased() {
+		return UpReleased;
+	}
+
+	public void setUpReleased(boolean upReleased) {
+		UpReleased = upReleased;
+	}
+
+	public boolean isLeftPressed() {
+		return LeftPressed;
+	}
+
+	public void setLeftPressed(boolean leftPressed) {
+		LeftPressed = leftPressed;
+	}
+
+	public boolean isDownPressed() {
+		return DownPressed;
+	}
+
+	public void setDownPressed(boolean downPressed) {
+		DownPressed = downPressed;
+	}
+
+	public boolean isRightPressed() {
+		return RightPressed;
+	}
+
+	public void setRightPressed(boolean rightPressed) {
+		RightPressed = rightPressed;
+	}
+
+	public boolean isRShiftPressed() {
+		return RShiftPressed;
+	}
+
+	public void setRShiftPressed(boolean rShiftPressed) {
+		RShiftPressed = rShiftPressed;
+	}
+
+	public boolean isRShiftReleased() {
+		return RShiftReleased;
+	}
+
+	public void setRShiftReleased(boolean rShiftReleased) {
+		RShiftReleased = rShiftReleased;
+	}
+
+	public int getPLAYERCOUNT() {
+		return PLAYERCOUNT;
+	}
+
+	public void setPLAYERCOUNT(int pLAYERCOUNT) {
+		PLAYERCOUNT = pLAYERCOUNT;
+	}
+
+	public Player[] getPlayers() {
+		return players;
+	}
+
+	public void setPlayers(Player[] players) {
+		this.players = players;
+	}
+
+	public JLabel[] getHealthBars() {
+		return healthBars;
+	}
+
+	public void setHealthBars(JLabel[] healthBars) {
+		this.healthBars = healthBars;
+	}
+
+	public JLabel[] getHealthBarIndicators() {
+		return healthBarIndicators;
+	}
+
+	public void setHealthBarIndicators(JLabel[] healthBarIndicators) {
+		this.healthBarIndicators = healthBarIndicators;
+	}
+
+	public ArrayList<Item> getItems() {
+		return items;
+	}
+
+	public void setItems(ArrayList<Item> items) {
+		this.items = items;
+	}
+
+	public int getWIDTH() {
+		return WIDTH;
+	}
+
+	public int getHEIGHT() {
+		return HEIGHT;
+	}
+
+	public int getDELAY() {
+		return DELAY;
+	}
+
+	public int getGRAVITY() {
+		return GRAVITY;
+	}
+
+	public int getITEMGRAVITY() {
+		return ITEMGRAVITY;
+	}
+
+	public int getFRICTION() {
+		return FRICTION;
+	}
+
+	public int getITEMCOUNT() {
+		return ITEMCOUNT;
+	}
+
+	public int getDASHSPEED() {
+		return DASHSPEED;
+	}
+
+	public int getPLAYERSPEED() {
+		return PLAYERSPEED;
+	}
+
+	public int getJUMPHEIGHT() {
+		return JUMPHEIGHT;
+	}
+
+	public int getFALLSPEED() {
+		return FALLSPEED;
+	}
+
+	public Item[] getITEMS() {
+		return ITEMS;
+	}
+
 }
