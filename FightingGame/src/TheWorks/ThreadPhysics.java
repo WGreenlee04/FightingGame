@@ -1,7 +1,5 @@
 package TheWorks;
 
-import java.awt.Rectangle;
-
 public class ThreadPhysics extends Thread {
 
 	private Playspace space;
@@ -15,6 +13,8 @@ public class ThreadPhysics extends Thread {
 
 	@Override
 	public void run() {
+
+		space.createHitboxes();
 
 		pickup();
 
@@ -34,15 +34,11 @@ public class ThreadPhysics extends Thread {
 	private void pickup() {
 		// The... Pickup... line?
 		int i = 0;
-		if (space.isLShiftPressed() && space.isRunnableP1() && space.getPlayers()[i].getItem() == null) {
+		if (space.isLShiftPressed() && space.isRunnableP1()) {
 			space.setLShiftPressed(false);
-			Rectangle[] itemRectangles = new Rectangle[space.getItems().size()];
-			Rectangle p1 = new Rectangle(space.getPlayers()[i].getX(), space.getPlayers()[i].getY(),
-					space.getPlayers()[i].getWidth(), space.getPlayers()[i].getHeight());
 			for (Item item : space.getItems()) {
-				itemRectangles[space.getItems().indexOf(item)] = new Rectangle(item.getX(), item.getY(),
-						item.getWidth(), item.getHeight());
-				if (itemRectangles[space.getItems().indexOf(item)].intersects(p1) && item.getPlayer() == null) {
+				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
+						&& space.getPlayers()[i].getItem() == null) {
 					space.getPlayers()[i].setItem(item);
 					item.setPlayer(space.getPlayers()[i]);
 				}
@@ -50,15 +46,11 @@ public class ThreadPhysics extends Thread {
 		}
 
 		i = 1;
-		if (space.isRShiftPressed() && space.isRunnableP2() && space.getPlayers()[i].getItem() == null) {
+		if (space.isRShiftPressed() && space.isRunnableP2()) {
 			space.setRShiftPressed(false);
-			Rectangle[] itemRectangles = new Rectangle[space.getItems().size()];
-			Rectangle p2 = new Rectangle(space.getPlayers()[i].getX(), space.getPlayers()[i].getY(),
-					space.getPlayers()[i].getWidth(), space.getPlayers()[i].getHeight());
 			for (Item item : space.getItems()) {
-				itemRectangles[space.getItems().indexOf(item)] = new Rectangle(item.getX(), item.getY(),
-						item.getWidth(), item.getHeight());
-				if (itemRectangles[space.getItems().indexOf(item)].intersects(p2) && item.getPlayer() == null) {
+				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
+						&& space.getPlayers()[i].getItem() == null) {
 					space.getPlayers()[i].setItem(item);
 					item.setPlayer(space.getPlayers()[i]);
 				}
@@ -263,11 +255,17 @@ public class ThreadPhysics extends Thread {
 		// Sets pos and image for Items
 		for (Item item : space.getItems()) {
 			if (item.getPlayer() != null) {
-				item.setX(item.getPlayer().getX());
-				item.setY(item.getPlayer().getY());
 				if (item.getDirection() != item.getPlayer().getDirection()) {
 					item.setDirection(item.getPlayer().getDirection());
 					item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
+				}
+				if (item.getDirection() == -1) {
+					item.setX((int) item.getPlayer().leftHandLocation().getX());
+					item.setY((int) item.getPlayer().leftHandLocation().getY());
+				}
+				if (item.getDirection() == 1) {
+					item.setX((int) item.getPlayer().rightHandLocation().getX());
+					item.setY((int) item.getPlayer().rightHandLocation().getY());
 				}
 			}
 		}

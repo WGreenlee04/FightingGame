@@ -1,8 +1,13 @@
 package TheWorks;
 
 import java.awt.Image;
+import java.awt.Rectangle;
 
 public class Item {
+	private Player player;
+	private Playspace space;
+	private Image currentImage;
+	private Rectangle hitbox;
 	private int damage;
 	private int x;
 	private int y;
@@ -13,9 +18,6 @@ public class Item {
 	private int attackDelay;
 	private int dropRate;
 	private int direction;
-	private Player player;
-	private Playspace space;
-	private Image currentImage;
 
 	public Item() {
 	}
@@ -29,6 +31,7 @@ public class Item {
 		this.currentImage = img;
 		this.width = width;
 		this.height = height;
+		this.direction = 1;
 	}
 
 	public int getDamage() {
@@ -133,6 +136,14 @@ public class Item {
 
 	public void setCurrentImage(Image currentImage) {
 		this.currentImage = currentImage;
+	}
+
+	public Rectangle getHitbox() {
+		return hitbox;
+	}
+
+	public void setHitbox(Rectangle hitbox) {
+		this.hitbox = hitbox;
 	}
 
 }

@@ -1,36 +1,39 @@
 package TheWorks;
 
 import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
 
 import javax.swing.ImageIcon;
 
 public class Player {
-	Playspace space;
-	Item item;
-	Image image;
-	String imageDir;
-	String darkImageDir;
-	int health;
-	int accelX;
-	int accelY;
-	int X;
-	int Y;
-	int Width;
-	int Height;
-	int direction;
-	int jumps;
-	boolean falling;
-	boolean jumping;
-	boolean dark;
-	boolean directionBool;
-	ToolBox Tools;
+	private Playspace space;
+	private Item item;
+	private Image image;
+	private String imageDir;
+	private String darkImageDir;
+	private Rectangle hitbox;
+	private int health;
+	private int accelX;
+	private int accelY;
+	private int x;
+	private int y;
+	private int width;
+	private int height;
+	private int direction;
+	private int jumps;
+	private boolean falling;
+	private boolean jumping;
+	private boolean dark;
+	private boolean directionBool;
+	private ToolBox Tools;
 
 	public Player(String imageDir, String darkImageDir, Playspace p) {
 		Tools = new ToolBox(p);
 		space = p;
 		health = 1000;
-		Width = 90;
-		Height = 150;
+		width = 90;
+		height = 150;
 		jumps = 0;
 		falling = false;
 		jumping = false;
@@ -41,20 +44,32 @@ public class Player {
 		this.darkImageDir = darkImageDir;
 	}
 
+	public Point leftHandLocation() {
+		int x = (this.x - width) + 22;
+		int y = (this.y + 11);
+		return new Point(x, y);
+	}
+
+	public Point rightHandLocation() {
+		int x = (this.x + width) - 12;
+		int y = (this.y + 10);
+		return new Point(x, y);
+	}
+
 	public int getWidth() {
-		return Width;
+		return width;
 	}
 
 	public void setWidth(int width) {
-		Width = width;
+		this.width = width;
 	}
 
 	public int getHeight() {
-		return Height;
+		return height;
 	}
 
 	public void setHeight(int height) {
-		Height = height;
+		this.height = height;
 	}
 
 	public void setHealth(int h) {
@@ -80,19 +95,19 @@ public class Player {
 	}
 
 	public int getX() {
-		return X;
+		return x;
 	}
 
 	public void setX(int x) {
-		X = x;
+		this.x = x;
 	}
 
 	public int getY() {
-		return Y;
+		return y;
 	}
 
 	public void setY(int y) {
-		Y = y;
+		this.y = y;
 	}
 
 	public void setDirection(int i) {
@@ -178,6 +193,22 @@ public class Player {
 
 	public void setDirectionBool(boolean directionBool) {
 		this.directionBool = directionBool;
+	}
+
+	public Rectangle getHitbox() {
+		return hitbox;
+	}
+
+	public void setHitbox(Rectangle hitbox) {
+		this.hitbox = hitbox;
+	}
+
+	public Playspace getSpace() {
+		return space;
+	}
+
+	public void setSpace(Playspace space) {
+		this.space = space;
 	}
 
 }
