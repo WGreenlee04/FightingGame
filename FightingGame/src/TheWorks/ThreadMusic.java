@@ -8,13 +8,14 @@ import javax.sound.sampled.Clip;
 
 public class ThreadMusic extends Thread {
 
-	Clip clip;
+	private Clip clip;
 
 	public ThreadMusic() {
 	}
 
 	@Override
 	public void run() {
+
 		try {
 			// get the sound file as a resource out of my jar file;
 			// the sound file must be in the same directory as this class file.

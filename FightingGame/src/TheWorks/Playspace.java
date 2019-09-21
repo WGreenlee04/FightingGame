@@ -32,29 +32,22 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private final int FALLSPEED = -10; // Speed of fast fall
 
 	// Here we go... Threads...
-	private ThreadPickup doPickup;
-	private ThreadAccelerationP1 doAccelerationP1;
-	private ThreadAccelerationP2 doAccelerationP2;
-	private ThreadMovement doMovement;
-	private ThreadGravity doGravity;
-	private ThreadCollision doCollision;
-	private ThreadRenderItems doRenderItems;
+	private ThreadPhysics doPhysics;
 	private ThreadMusic playMusic;
 
 	// Variables
-	private boolean runnableP1, runnableP2; // If methods solely about p1 and 2
-											// are runnable
 	private Color backgroundColor;
+	private int PLAYERCOUNT; // Changing amount of players
+	private boolean runnableP1, runnableP2; // If methods about player are runnable
 	private boolean WPressed, WReleased, APressed, SPressed, DPressed, LShiftPressed, LShiftReleased, UpPressed,
 			UpReleased, LeftPressed, DownPressed, RightPressed, RShiftPressed, RShiftReleased;
-	private int PLAYERCOUNT = 2;
 
 	// Arrays
-	private final Item[] ITEMS = { new Stick() }; // all item types
 	private Player[] players; // Array of players
 	private JLabel[] healthBars; // number on bar
 	private JLabel[] healthBarIndicators; // bar itself
-	private ArrayList<Item> items = new ArrayList<Item>(); // current items
+	private ArrayList<Item> items; // current items
+	private ArrayList<Thread> threads; // Active threads
 
 	/** Constructor, sets up frame and arrays **/
 	public Playspace(int mode) {
@@ -78,6 +71,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		players = new Player[PLAYERCOUNT];
 		healthBars = new JLabel[PLAYERCOUNT];
 		healthBarIndicators = new JLabel[PLAYERCOUNT];
+		items = new ArrayList<Item>();
+		threads = new ArrayList<Thread>();
 
 		// Timer setup
 		timer = new Timer(DELAY, this);
@@ -92,19 +87,19 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// Adds both players to board array
 		switch (mode) {
 		case 1:
-			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"));
+			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this));
 			PLAYERCOUNT = 1;
 			break;
 
 		case 2:
-			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"),
-					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png"));
+			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this),
+					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png", this));
 			PLAYERCOUNT = 2;
 			break;
 
 		default:
-			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png"),
-					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png"));
+			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this),
+					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png", this));
 			PLAYERCOUNT = 2;
 			break;
 
@@ -112,16 +107,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Loads items
 		for (int i = 0; i < ITEMCOUNT; i++) {
-			items.add(i, new Stick());
-		}
-
-		// Replaces sticks with rarer items
-		for (Item item : items) {
 			int spawnVal = (int) (Math.random() * 100);
-			for (Item ITEM : ITEMS) {
-				if (ITEM.getDropRate() >= spawnVal) {
-					items.set(items.indexOf(item), ITEM);
-				}
+			if (spawnVal < new Stick().getDropRate()) {
+				items.add(new Stick());
 			}
 		}
 
@@ -163,6 +151,27 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			}
 
 		// Try{}Catches
+		checkPlayerMethodValidity();
+
+		initThreads();
+		playBackgroundMusic();
+
+		// Timer start
+		timer.start(); // Starts timer
+	}
+
+	// SinglePlayer
+	private void add(Player a) {
+		players[0] = a;
+	}
+
+	// 2 Player
+	private void add(Player a, Player b) {
+		players[0] = a;
+		players[1] = b;
+	}
+
+	private void checkPlayerMethodValidity() {
 		try {
 			if (players[0] != null) {
 				runnableP1 = true;
@@ -182,51 +191,53 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		} catch (ArrayIndexOutOfBoundsException ex) {
 			runnableP2 = false;
 		}
-
-		initThreads();
-
-		// Timer start
-		timer.start(); // Starts timer
-	}
-
-	// SinglePlayer
-	private void add(Player a) {
-		players[0] = a;
-	}
-
-	// 2 Player
-	private void add(Player a, Player b) {
-		players[0] = a;
-		players[1] = b;
 	}
 
 	/** Initiates threads for values **/
 	private void initThreads() {
-		doPickup = new ThreadPickup(this);
-		doAccelerationP1 = new ThreadAccelerationP1(this);
-		doAccelerationP2 = new ThreadAccelerationP2(this);
-		doMovement = new ThreadMovement(this);
-		doGravity = new ThreadGravity(this);
-		doCollision = new ThreadCollision(this);
-		doRenderItems = new ThreadRenderItems(this);
+
+		// Thread Constructor Call
+		doPhysics = new ThreadPhysics(this);
+
+		// Thread array setup
+		threads.add(doPhysics);
+	}
+
+	/** Initiates threads for values **/
+	private void resetThread() {
+
+		// Old Thread for replacing
+		Thread Acceleration = doPhysics;
+
+		// Thread Constructor Call
+		doPhysics = new ThreadPhysics(this);
+
+		// Updates Array
+		threads.set(threads.indexOf(Acceleration), doPhysics);
+
+		// Start thread
+		for (Thread t : threads) {
+			if (!t.equals(playMusic))
+				t.start();
+		}
+	}
+
+	private void playBackgroundMusic() {
+
 		playMusic = new ThreadMusic();
-		playMusic.run();
+		threads.add(playMusic);
+		playMusic.start();
 	}
 
 	/** Triggered when "timer" completes a cycle **/
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-
-		// Player status methods, including animations
-		doPickup.run();
-
-		// Position methods
-		doAccelerationP1.run();
-		doAccelerationP2.run();
-		doMovement.run();
-		doGravity.run();
-		doCollision.run();
-		doRenderItems.run();
+		resetThread();
+		try {
+			doPhysics.join();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 		repaint();
 	}
 
@@ -383,66 +394,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	public ToolBox getTools() {
 		return Tools;
-	}
-
-	public void setTools(ToolBox tools) {
-		Tools = tools;
-	}
-
-	public Thread getDoPickup() {
-		return doPickup;
-	}
-
-	public void setDoPickup(ThreadPickup doPickup) {
-		this.doPickup = doPickup;
-	}
-
-	public Thread getDoAccelerationP1() {
-		return doAccelerationP1;
-	}
-
-	public void setDoAccelerationP1(ThreadAccelerationP1 doAccelerationP1) {
-		this.doAccelerationP1 = doAccelerationP1;
-	}
-
-	public Thread getDoAccelerationP2() {
-		return doAccelerationP2;
-	}
-
-	public void setDoAccelerationP2(ThreadAccelerationP2 doAccelerationP2) {
-		this.doAccelerationP2 = doAccelerationP2;
-	}
-
-	public Thread getDoMovement() {
-		return doMovement;
-	}
-
-	public void setDoMovement(ThreadMovement doMovement) {
-		this.doMovement = doMovement;
-	}
-
-	public Thread getDoGravity() {
-		return doGravity;
-	}
-
-	public void setDoGravity(ThreadGravity doGravity) {
-		this.doGravity = doGravity;
-	}
-
-	public Thread getDoCollision() {
-		return doCollision;
-	}
-
-	public void setDoCollision(ThreadCollision doCollision) {
-		this.doCollision = doCollision;
-	}
-
-	public Thread getDoRenderItems() {
-		return doRenderItems;
-	}
-
-	public void setDoRenderItems(ThreadRenderItems doRenderItems) {
-		this.doRenderItems = doRenderItems;
 	}
 
 	public boolean isRunnableP1() {
@@ -664,9 +615,4 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public int getFALLSPEED() {
 		return FALLSPEED;
 	}
-
-	public Item[] getITEMS() {
-		return ITEMS;
-	}
-
 }

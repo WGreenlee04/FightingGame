@@ -3,31 +3,32 @@ package TheWorks;
 import java.awt.Image;
 
 public class Item {
-	int damage;
-	int X;
-	int Y;
-	int Width;
-	int Height;
-	int attackDelay;
-	int dropRate;
-	int direction;
-	Player player;
-	Image currentImage;
+	private int damage;
+	private int x;
+	private int y;
+	private int accelX;
+	private int accelY;
+	private int width;
+	private int height;
+	private int attackDelay;
+	private int dropRate;
+	private int direction;
+	private Player player;
+	private Playspace space;
+	private Image currentImage;
 
-	public Item(int d, int x, int y, int aD, int dR) {
-		damage = d;
-		X = x;
-		Y = y;
-		attackDelay = aD;
-		dropRate = dR;
+	public Item() {
 	}
 
-	public Image getCurrentImage() {
-		return currentImage;
-	}
-
-	public void setCurrentImage(Image currentImage) {
-		this.currentImage = currentImage;
+	public Item(int damage, int x, int y, int attackDelay, int dropRate, Image img, int width, int height) {
+		this.damage = damage;
+		this.x = x;
+		this.y = y;
+		this.attackDelay = attackDelay;
+		this.dropRate = dropRate;
+		this.currentImage = img;
+		this.width = width;
+		this.height = height;
 	}
 
 	public int getDamage() {
@@ -39,19 +40,59 @@ public class Item {
 	}
 
 	public int getX() {
-		return X;
+		return x;
 	}
 
 	public void setX(int x) {
-		X = x;
+		this.x = x;
 	}
 
 	public int getY() {
-		return Y;
+		return y;
 	}
 
 	public void setY(int y) {
-		Y = y;
+		this.y = y;
+	}
+
+	public int getAccelX() {
+		return accelX;
+	}
+
+	public void setAccelX(int accelX) {
+		this.accelX = accelX;
+	}
+
+	public int getAccelY() {
+		return accelY;
+	}
+
+	public void setAccelY(int accelY) {
+		this.accelY = accelY;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	public int getAttackDelay() {
+		return attackDelay;
+	}
+
+	public void setAttackDelay(int attackDelay) {
+		this.attackDelay = attackDelay;
 	}
 
 	public int getDropRate() {
@@ -62,14 +103,6 @@ public class Item {
 		this.dropRate = dropRate;
 	}
 
-	public Player getPlayer() {
-		return player;
-	}
-
-	public void setPlayer(Player player) {
-		this.player = player;
-	}
-
 	public int getDirection() {
 		return direction;
 	}
@@ -78,20 +111,28 @@ public class Item {
 		this.direction = direction;
 	}
 
-	public int getWidth() {
-		return Width;
+	public Player getPlayer() {
+		return player;
 	}
 
-	public void setWidth(int width) {
-		Width = width;
+	public void setPlayer(Player player) {
+		this.player = player;
 	}
 
-	public int getHeight() {
-		return Height;
+	public Playspace getSpace() {
+		return space;
 	}
 
-	public void setHeight(int height) {
-		Height = height;
+	public void setSpace(Playspace space) {
+		this.space = space;
+	}
+
+	public Image getCurrentImage() {
+		return currentImage;
+	}
+
+	public void setCurrentImage(Image currentImage) {
+		this.currentImage = currentImage;
 	}
 
 }
