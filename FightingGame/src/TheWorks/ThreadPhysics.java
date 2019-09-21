@@ -1,14 +1,25 @@
 package TheWorks;
 
+import java.util.ArrayList;
+
 public class ThreadPhysics extends Thread {
 
 	private Playspace space;
 	private boolean running;
+	private ArrayList<ThreadAnimate> animations; // Active animation threads
 
 	public ThreadPhysics(Playspace p) {
 		super();
 		this.space = p;
-		running = true;
+		this.running = true;
+		this.animations = new ArrayList<ThreadAnimate>();
+	}
+
+	private void animateItem(Item object, int speed, int length) {
+		ThreadAnimate animation = new ThreadAnimate(object, space, speed, length);
+		animations.add(animation);
+		animation.start();
+
 	}
 
 	@Override
@@ -34,7 +45,7 @@ public class ThreadPhysics extends Thread {
 	private void pickup() {
 		// The... Pickup... line?
 		int i = 0;
-		if (space.isLShiftPressed() && space.isRunnableP1()) {
+		if (space.isLShiftPressed() && space.isRunnableP1() && space.getPlayers()[i].getItem() == null) {
 			space.setLShiftPressed(false);
 			for (Item item : space.getItems()) {
 				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
@@ -43,10 +54,12 @@ public class ThreadPhysics extends Thread {
 					item.setPlayer(space.getPlayers()[i]);
 				}
 			}
+		} else if (space.isLShiftPressed()) {
+			animateItem(space.getPlayers()[i].getItem(), 2, 40);
 		}
 
 		i = 1;
-		if (space.isRShiftPressed() && space.isRunnableP2()) {
+		if (space.isRShiftPressed() && space.isRunnableP2() && space.getPlayers()[i].getItem() == null) {
 			space.setRShiftPressed(false);
 			for (Item item : space.getItems()) {
 				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
@@ -55,6 +68,8 @@ public class ThreadPhysics extends Thread {
 					item.setPlayer(space.getPlayers()[i]);
 				}
 			}
+		} else if (space.isRShiftPressed()) {
+			animateItem(space.getPlayers()[i].getItem(), 2, 40);
 		}
 	}
 
@@ -95,7 +110,7 @@ public class ThreadPhysics extends Thread {
 				space.getPlayers()[i].setFalling(false);
 				space.getPlayers()[i].setJumps(space.getPlayers()[i].getJumps() + 1);
 				space.setWReleased(false);
-			} else if (space.getPlayers()[i].getJumps() > 2 && !space.getPlayers()[i].isDark()) { // Darker
+			} else if (space.isWReleased() && space.getPlayers()[i].getJumps() > 2 && !space.getPlayers()[i].isDark()) { // Darker
 				space.getPlayers()[i].setImage(
 						space.getTools().darkenObject(space.getPlayers()[i].getImage(), space.getPlayers()[i]));
 				space.getPlayers()[i].setDark(true);
@@ -147,7 +162,8 @@ public class ThreadPhysics extends Thread {
 				space.getPlayers()[i].setFalling(false);
 				space.getPlayers()[i].setJumps(space.getPlayers()[i].getJumps() + 1);
 				space.setUpReleased(false);
-			} else if (space.getPlayers()[i].getJumps() > 2 && !space.getPlayers()[i].isDark()) { // darker
+			} else if (space.isUpReleased() && space.getPlayers()[i].getJumps() > 2
+					&& !space.getPlayers()[i].isDark()) { // darker
 				space.getPlayers()[i].setImage(
 						space.getTools().darkenObject(space.getPlayers()[i].getImage(), space.getPlayers()[i]));
 				space.getPlayers()[i].setDark(true);
@@ -260,12 +276,12 @@ public class ThreadPhysics extends Thread {
 					item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
 				}
 				if (item.getDirection() == -1) {
-					item.setX((int) item.getPlayer().leftHandLocation().getX());
-					item.setY((int) item.getPlayer().leftHandLocation().getY());
+					item.setX((int) item.getPlayer().leftHandItemLocation().getX());
+					item.setY((int) item.getPlayer().leftHandItemLocation().getY());
 				}
 				if (item.getDirection() == 1) {
-					item.setX((int) item.getPlayer().rightHandLocation().getX());
-					item.setY((int) item.getPlayer().rightHandLocation().getY());
+					item.setX((int) item.getPlayer().rightHandItemLocation().getX());
+					item.setY((int) item.getPlayer().rightHandItemLocation().getY());
 				}
 			}
 		}
