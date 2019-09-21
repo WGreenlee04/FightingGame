@@ -44,13 +44,13 @@ public class Player {
 		this.darkImageDir = darkImageDir;
 	}
 
-	public Point leftHandLocation() {
+	public Point leftHandItemLocation() {
 		int x = (this.x - width) + 22;
 		int y = (this.y + 11);
 		return new Point(x, y);
 	}
 
-	public Point rightHandLocation() {
+	public Point rightHandItemLocation() {
 		int x = (this.x + width) - 12;
 		int y = (this.y + 10);
 		return new Point(x, y);
