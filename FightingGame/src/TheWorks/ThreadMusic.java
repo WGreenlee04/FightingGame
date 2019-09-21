@@ -9,14 +9,8 @@ import javax.sound.sampled.Clip;
 public class ThreadMusic extends Thread {
 
 	private Clip clip;
-	private boolean running;
 
 	public ThreadMusic() {
-		running = true;
-	}
-
-	public boolean isRunning() {
-		return running;
 	}
 
 	@Override
@@ -34,8 +28,6 @@ public class ThreadMusic extends Thread {
 		} catch (Exception e) {
 			System.out.println(false);
 		}
-
-		running = false;
 	}
 
 	public void play() {

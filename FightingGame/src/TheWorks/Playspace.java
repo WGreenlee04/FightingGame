@@ -26,20 +26,14 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private final int GRAVITY = -4; // Quadratic gravity for players
 	private final int ITEMGRAVITY = -6; // Linear gravity for items
 	private final int FRICTION = 2; // Deceleration on objects
-	private final int ITEMCOUNT = 2; // The number of items on board at start
+	private final int ITEMCOUNT = 1; // The number of items on board at start
 	private final int DASHSPEED = 4; // Speed at which players change direction
 	private final int PLAYERSPEED = 8; // Speed of players
 	private final int JUMPHEIGHT = 13; // Height of jump
 	private final int FALLSPEED = -10; // Speed of fast fall
 
 	// Here we go... Threads...
-	private ThreadPickup doPickup;
-	private ThreadAccelerationP1 doAccelerationP1;
-	private ThreadAccelerationP2 doAccelerationP2;
-	private ThreadMovement doMovement;
-	private ThreadGravity doGravity;
-	private ThreadCollision doCollision;
-	private ThreadRenderItems doRenderItems;
+	private ThreadPhysics doPhysics;
 	private ThreadMusic playMusic;
 
 	// Variables
@@ -210,53 +204,48 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	/** Initiates threads for values **/
 	private void initThreads() {
 
-		// Thread Constructor Calls
-		doPickup = new ThreadPickup(this);
-		doAccelerationP1 = new ThreadAccelerationP1(this);
-		doAccelerationP2 = new ThreadAccelerationP2(this);
-		doMovement = new ThreadMovement(this);
-		doGravity = new ThreadGravity(this);
-		doCollision = new ThreadCollision(this);
-		doRenderItems = new ThreadRenderItems(this);
+		// Thread Constructor Call
+		doPhysics = new ThreadPhysics(this);
 
 		// Thread array setup
-		threads.add(doPickup);
-		threads.add(doAccelerationP1);
-		threads.add(doAccelerationP2);
-		threads.add(doMovement);
-		threads.add(doGravity);
-		threads.add(doCollision);
-		threads.add(doRenderItems);
+		threads.add(doPhysics);
+	}
 
-		// Start threads
-		doPickup.start();
-		doAccelerationP1.start();
-		doAccelerationP2.start();
-		doMovement.start();
-		doGravity.start();
-		doCollision.start();
-		doRenderItems.start();
+	/** Initiates threads for values **/
+	private void resetThread() {
+
+		// Old Thread for replacing
+		Thread Acceleration = doPhysics;
+
+		// Thread Constructor Call
+		doPhysics = new ThreadPhysics(this);
+
+		// Updates Array
+		threads.set(threads.indexOf(Acceleration), doPhysics);
+
+		// Start thread
+		for (Thread t : threads) {
+			if (!t.equals(playMusic))
+				t.start();
+		}
 	}
 
 	private void playBackgroundMusic() {
 
 		playMusic = new ThreadMusic();
+		threads.add(playMusic);
 		playMusic.start();
-	}
-
-	private boolean isCycleComplete() {
-		for (Thread t : threads)
-			if (t.isAlive()) {
-				return false;
-			}
-		return true;
 	}
 
 	/** Triggered when "timer" completes a cycle **/
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		if (isCycleComplete())
-			initThreads();
+		resetThread();
+		try {
+			doPhysics.join();
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 		repaint();
 	}
 
@@ -413,66 +402,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	public ToolBox getTools() {
 		return Tools;
-	}
-
-	public void setTools(ToolBox tools) {
-		Tools = tools;
-	}
-
-	public Thread getDoPickup() {
-		return doPickup;
-	}
-
-	public void setDoPickup(ThreadPickup doPickup) {
-		this.doPickup = doPickup;
-	}
-
-	public Thread getDoAccelerationP1() {
-		return doAccelerationP1;
-	}
-
-	public void setDoAccelerationP1(ThreadAccelerationP1 doAccelerationP1) {
-		this.doAccelerationP1 = doAccelerationP1;
-	}
-
-	public Thread getDoAccelerationP2() {
-		return doAccelerationP2;
-	}
-
-	public void setDoAccelerationP2(ThreadAccelerationP2 doAccelerationP2) {
-		this.doAccelerationP2 = doAccelerationP2;
-	}
-
-	public Thread getDoMovement() {
-		return doMovement;
-	}
-
-	public void setDoMovement(ThreadMovement doMovement) {
-		this.doMovement = doMovement;
-	}
-
-	public Thread getDoGravity() {
-		return doGravity;
-	}
-
-	public void setDoGravity(ThreadGravity doGravity) {
-		this.doGravity = doGravity;
-	}
-
-	public Thread getDoCollision() {
-		return doCollision;
-	}
-
-	public void setDoCollision(ThreadCollision doCollision) {
-		this.doCollision = doCollision;
-	}
-
-	public Thread getDoRenderItems() {
-		return doRenderItems;
-	}
-
-	public void setDoRenderItems(ThreadRenderItems doRenderItems) {
-		this.doRenderItems = doRenderItems;
 	}
 
 	public boolean isRunnableP1() {
