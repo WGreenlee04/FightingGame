@@ -30,7 +30,7 @@ public class ThreadAnimate extends Thread {
 				animationSubjectItem
 						.setCurrentImage(Tools.rotateObject(animationSubjectItem.getCurrentImage(), animationSpeed));
 				try {
-					Thread.sleep(50);
+					this.sleep(50);
 				} catch (Exception e) {
 					System.out.print("AnimationSleeping");
 				}
