@@ -255,11 +255,17 @@ public class ThreadPhysics extends Thread {
 		// Sets pos and image for Items
 		for (Item item : space.getItems()) {
 			if (item.getPlayer() != null) {
-				item.setX(item.getPlayer().getX());
-				item.setY(item.getPlayer().getY());
 				if (item.getDirection() != item.getPlayer().getDirection()) {
 					item.setDirection(item.getPlayer().getDirection());
 					item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
+				}
+				if (item.getDirection() == -1) {
+					item.setX((int) item.getPlayer().leftHandLocation().getX());
+					item.setY((int) item.getPlayer().leftHandLocation().getY());
+				}
+				if (item.getDirection() == 1) {
+					item.setX((int) item.getPlayer().rightHandLocation().getX());
+					item.setY((int) item.getPlayer().rightHandLocation().getY());
 				}
 			}
 		}

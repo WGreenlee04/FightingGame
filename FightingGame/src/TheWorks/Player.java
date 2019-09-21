@@ -1,6 +1,7 @@
 package TheWorks;
 
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import javax.swing.ImageIcon;
@@ -15,10 +16,10 @@ public class Player {
 	private int health;
 	private int accelX;
 	private int accelY;
-	private int X;
-	private int Y;
-	private int Width;
-	private int Height;
+	private int x;
+	private int y;
+	private int width;
+	private int height;
 	private int direction;
 	private int jumps;
 	private boolean falling;
@@ -31,8 +32,8 @@ public class Player {
 		Tools = new ToolBox(p);
 		space = p;
 		health = 1000;
-		Width = 90;
-		Height = 150;
+		width = 90;
+		height = 150;
 		jumps = 0;
 		falling = false;
 		jumping = false;
@@ -43,20 +44,32 @@ public class Player {
 		this.darkImageDir = darkImageDir;
 	}
 
+	public Point leftHandLocation() {
+		int x = (this.x - width) + 22;
+		int y = (this.y + 11);
+		return new Point(x, y);
+	}
+
+	public Point rightHandLocation() {
+		int x = (this.x + width) - 12;
+		int y = (this.y + 10);
+		return new Point(x, y);
+	}
+
 	public int getWidth() {
-		return Width;
+		return width;
 	}
 
 	public void setWidth(int width) {
-		Width = width;
+		this.width = width;
 	}
 
 	public int getHeight() {
-		return Height;
+		return height;
 	}
 
 	public void setHeight(int height) {
-		Height = height;
+		this.height = height;
 	}
 
 	public void setHealth(int h) {
@@ -82,19 +95,19 @@ public class Player {
 	}
 
 	public int getX() {
-		return X;
+		return x;
 	}
 
 	public void setX(int x) {
-		X = x;
+		this.x = x;
 	}
 
 	public int getY() {
-		return Y;
+		return y;
 	}
 
 	public void setY(int y) {
-		Y = y;
+		this.y = y;
 	}
 
 	public void setDirection(int i) {
