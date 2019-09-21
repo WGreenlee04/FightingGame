@@ -1,7 +1,5 @@
 package TheWorks;
 
-import java.awt.Rectangle;
-
 public class ThreadPhysics extends Thread {
 
 	private Playspace space;
@@ -15,6 +13,8 @@ public class ThreadPhysics extends Thread {
 
 	@Override
 	public void run() {
+
+		space.createHitboxes();
 
 		pickup();
 
@@ -34,15 +34,11 @@ public class ThreadPhysics extends Thread {
 	private void pickup() {
 		// The... Pickup... line?
 		int i = 0;
-		if (space.isLShiftPressed() && space.isRunnableP1() && space.getPlayers()[i].getItem() == null) {
+		if (space.isLShiftPressed() && space.isRunnableP1()) {
 			space.setLShiftPressed(false);
-			Rectangle[] itemRectangles = new Rectangle[space.getItems().size()];
-			Rectangle p1 = new Rectangle(space.getPlayers()[i].getX(), space.getPlayers()[i].getY(),
-					space.getPlayers()[i].getWidth(), space.getPlayers()[i].getHeight());
 			for (Item item : space.getItems()) {
-				itemRectangles[space.getItems().indexOf(item)] = new Rectangle(item.getX(), item.getY(),
-						item.getWidth(), item.getHeight());
-				if (itemRectangles[space.getItems().indexOf(item)].intersects(p1) && item.getPlayer() == null) {
+				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
+						&& space.getPlayers()[i].getItem() == null) {
 					space.getPlayers()[i].setItem(item);
 					item.setPlayer(space.getPlayers()[i]);
 				}
@@ -50,15 +46,11 @@ public class ThreadPhysics extends Thread {
 		}
 
 		i = 1;
-		if (space.isRShiftPressed() && space.isRunnableP2() && space.getPlayers()[i].getItem() == null) {
+		if (space.isRShiftPressed() && space.isRunnableP2()) {
 			space.setRShiftPressed(false);
-			Rectangle[] itemRectangles = new Rectangle[space.getItems().size()];
-			Rectangle p2 = new Rectangle(space.getPlayers()[i].getX(), space.getPlayers()[i].getY(),
-					space.getPlayers()[i].getWidth(), space.getPlayers()[i].getHeight());
 			for (Item item : space.getItems()) {
-				itemRectangles[space.getItems().indexOf(item)] = new Rectangle(item.getX(), item.getY(),
-						item.getWidth(), item.getHeight());
-				if (itemRectangles[space.getItems().indexOf(item)].intersects(p2) && item.getPlayer() == null) {
+				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
+						&& space.getPlayers()[i].getItem() == null) {
 					space.getPlayers()[i].setItem(item);
 					item.setPlayer(space.getPlayers()[i]);
 				}

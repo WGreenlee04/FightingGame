@@ -1,29 +1,31 @@
 package TheWorks;
 
 import java.awt.Image;
+import java.awt.Rectangle;
 
 import javax.swing.ImageIcon;
 
 public class Player {
-	Playspace space;
-	Item item;
-	Image image;
-	String imageDir;
-	String darkImageDir;
-	int health;
-	int accelX;
-	int accelY;
-	int X;
-	int Y;
-	int Width;
-	int Height;
-	int direction;
-	int jumps;
-	boolean falling;
-	boolean jumping;
-	boolean dark;
-	boolean directionBool;
-	ToolBox Tools;
+	private Playspace space;
+	private Item item;
+	private Image image;
+	private String imageDir;
+	private String darkImageDir;
+	private Rectangle hitbox;
+	private int health;
+	private int accelX;
+	private int accelY;
+	private int X;
+	private int Y;
+	private int Width;
+	private int Height;
+	private int direction;
+	private int jumps;
+	private boolean falling;
+	private boolean jumping;
+	private boolean dark;
+	private boolean directionBool;
+	private ToolBox Tools;
 
 	public Player(String imageDir, String darkImageDir, Playspace p) {
 		Tools = new ToolBox(p);
@@ -178,6 +180,22 @@ public class Player {
 
 	public void setDirectionBool(boolean directionBool) {
 		this.directionBool = directionBool;
+	}
+
+	public Rectangle getHitbox() {
+		return hitbox;
+	}
+
+	public void setHitbox(Rectangle hitbox) {
+		this.hitbox = hitbox;
+	}
+
+	public Playspace getSpace() {
+		return space;
+	}
+
+	public void setSpace(Playspace space) {
+		this.space = space;
 	}
 
 }

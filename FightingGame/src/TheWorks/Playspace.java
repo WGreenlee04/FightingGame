@@ -3,6 +3,7 @@ package TheWorks;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -33,12 +34,13 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	// Here we go... Threads...
 	private ThreadPhysics doPhysics;
-	private ThreadMusic playMusic;
+	private ThreadSound playSound;
 
 	// Variables
 	private Color backgroundColor;
 	private int PLAYERCOUNT; // Changing amount of players
 	private boolean runnableP1, runnableP2; // If methods about player are runnable
+	private boolean soundUpdate;
 	private boolean WPressed, WReleased, APressed, SPressed, DPressed, LShiftPressed, LShiftReleased, UpPressed,
 			UpReleased, LeftPressed, DownPressed, RightPressed, RShiftPressed, RShiftReleased;
 
@@ -153,8 +155,11 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// Try{}Catches
 		checkPlayerMethodValidity();
 
+		// Thread setup
 		initThreads();
-		playBackgroundMusic();
+		playSound("src/resources/Clayfighter (SNES) - Taffy's Theme.wav");
+
+		createHitboxes();
 
 		// Timer start
 		timer.start(); // Starts timer
@@ -171,6 +176,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		players[1] = b;
 	}
 
+	/** Checks if each player exists to prevent null pointers **/
 	private void checkPlayerMethodValidity() {
 		try {
 			if (players[0] != null) {
@@ -217,16 +223,29 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Start thread
 		for (Thread t : threads) {
-			if (!t.equals(playMusic))
+			if (!t.equals(playSound))
 				t.start();
 		}
 	}
 
-	private void playBackgroundMusic() {
+	/** Begins background music player **/
+	public void playSound(String soundFile) {
 
-		playMusic = new ThreadMusic();
-		threads.add(playMusic);
-		playMusic.start();
+		playSound = new ThreadSound(soundFile, this);
+		threads.add(playSound);
+		playSound.start();
+	}
+
+	/** Creates new hitboxes for Items and Players **/
+	public void createHitboxes() {
+
+		for (Player p : players) {
+			p.setHitbox(new Rectangle(p.getX(), p.getY(), p.getWidth(), p.getHeight()));
+		}
+
+		for (Item i : items) {
+			i.setHitbox(new Rectangle(i.getX(), i.getY(), i.getWidth(), i.getHeight()));
+		}
 	}
 
 	/** Triggered when "timer" completes a cycle **/
@@ -245,16 +264,17 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 
+		int i = 0;
 		if (runnableP1) {
 			// WASD Controls
 			if (e.getKeyCode() == KeyEvent.VK_A) {
 				APressed = true;
-				players[0].setDirection(-1);
+				players[i].setDirection(-1);
 			}
 
 			if (e.getKeyCode() == KeyEvent.VK_D) {
 				DPressed = true;
-				players[0].setDirection(1);
+				players[i].setDirection(1);
 			}
 
 			if (e.getKeyCode() == KeyEvent.VK_S) {
@@ -272,16 +292,17 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			}
 		}
 
+		i = 1;
 		if (runnableP2) {
 			// ULDR Controls
 			if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 				LeftPressed = true;
-				players[1].setDirection(-1);
+				players[i].setDirection(-1);
 			}
 
 			if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
 				RightPressed = true;
-				players[1].setDirection(1);
+				players[i].setDirection(1);
 			}
 
 			if (e.getKeyCode() == KeyEvent.VK_UP) {
@@ -530,6 +551,22 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	public void setRShiftReleased(boolean rShiftReleased) {
 		RShiftReleased = rShiftReleased;
+	}
+
+	public boolean isSoundUpdate() {
+		return soundUpdate;
+	}
+
+	public void setSoundUpdate(boolean soundUpdate) {
+		this.soundUpdate = soundUpdate;
+	}
+
+	public ArrayList<Thread> getThreads() {
+		return threads;
+	}
+
+	public void setThreads(ArrayList<Thread> threads) {
+		this.threads = threads;
 	}
 
 	public int getPLAYERCOUNT() {
