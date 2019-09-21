@@ -19,18 +19,11 @@ public class ToolBox {
 
 	// IMAGE TOOLBOX START
 	public Image rotateObject(Image image, int degrees) {
-		final double rads = Math.toRadians(degrees);
-		final double sin = Math.abs(Math.sin(rads));
-		final double cos = Math.abs(Math.cos(rads));
-		final int w = (int) Math.floor(image.getWidth(I) * cos + image.getHeight(I) * sin);
-		final int h = (int) Math.floor(image.getHeight(I) * cos + image.getWidth(I) * sin);
-		final BufferedImage rotatedImage = new BufferedImage(w, h, image.getType());
-		final AffineTransform at = new AffineTransform();
-		at.translate(w / 2, h / 2);
-		at.rotate(rads, 0, 0);
-		at.translate(-image.getWidth(I) / 2, -image.getHeight(I) / 2);
-		final AffineTransformOp rotateOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-		rotatedImage = rotateOp.filter(image, after);
+		BufferedImage bufferedImage = toBufferedImage(image);
+		AffineTransform tx = new AffineTransform();
+		tx.rotate(Math.toRadians(degrees), bufferedImage.getWidth() / 2, bufferedImage.getHeight() / 2);
+		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
+		return (Image) op.filter(bufferedImage, null);
 	}
 
 	public Image loadObject(String Dir) {

@@ -15,10 +15,13 @@ public class ThreadPhysics extends Thread {
 		this.animations = new ArrayList<ThreadAnimate>();
 	}
 
-	private void animateItem(Item object, int speed, int length) {
-		ThreadAnimate animation = new ThreadAnimate(object, space, speed, length);
-		animations.add(animation);
-		animation.start();
+	private void animateItem(Item object) {
+		ThreadAnimate animation = new ThreadAnimate(object, space);
+		if (!animations.contains(animation)
+				|| (animations.contains(animation) && !(animations.get(animations.indexOf(animation)).isAlive()))) {
+			animations.add(animation);
+			animation.start();
+		}
 
 	}
 
@@ -55,7 +58,8 @@ public class ThreadPhysics extends Thread {
 				}
 			}
 		} else if (space.isLShiftPressed()) {
-			animateItem(space.getPlayers()[i].getItem(), 2, 20);
+			space.setLShiftPressed(false);
+			animateItem(space.getPlayers()[i].getItem());
 		}
 
 		i = 1;
@@ -69,7 +73,8 @@ public class ThreadPhysics extends Thread {
 				}
 			}
 		} else if (space.isRShiftPressed()) {
-			animateItem(space.getPlayers()[i].getItem(), 2, 20);
+			space.setRShiftPressed(false);
+			animateItem(space.getPlayers()[i].getItem());
 		}
 	}
 
@@ -273,7 +278,8 @@ public class ThreadPhysics extends Thread {
 			if (item.getPlayer() != null) {
 				if (item.getDirection() != item.getPlayer().getDirection()) {
 					item.setDirection(item.getPlayer().getDirection());
-					item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
+					if (item.getCurrentImage().getHeight(space) > 0 && item.getCurrentImage().getWidth(space) > 0)
+						item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
 				}
 				if (item.getDirection() == -1) {
 					item.setX((int) item.getPlayer().leftHandItemLocation().getX());

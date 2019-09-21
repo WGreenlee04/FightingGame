@@ -34,6 +34,10 @@ public class Item {
 		this.direction = 1;
 	}
 
+	public String getName() {
+		return "";
+	}
+
 	public int getDamage() {
 		return damage;
 	}
