@@ -35,9 +35,9 @@ public class ThreadAnimate extends Thread {
 		while (running) {
 			if (animationSubjectItem != null) {
 				Image original = animationSubjectItem.getCurrentImage();
-				for (int i = 0; i <= endRotation; i += degrees) {
-					animationSubjectItem
-							.setCurrentImage(new ImageIcon(animationSubjectItem.getName() + i + ".png").getImage());
+				for (int i = 5; i <= endRotation; i += degrees) {
+					animationSubjectItem.setCurrentImage(
+							new ImageIcon("src/resources/" + animationSubjectItem.getName() + i + ".png").getImage());
 
 					try {
 						this.sleep(delay);
