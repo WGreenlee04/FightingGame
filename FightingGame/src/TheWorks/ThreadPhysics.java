@@ -2,6 +2,8 @@ package TheWorks;
 
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
+
 public class ThreadPhysics extends Thread {
 
 	private Playspace space;
@@ -286,6 +288,11 @@ public class ThreadPhysics extends Thread {
 					if (item.getCurrentImage().getHeight(space) > 0 && item.getCurrentImage().getWidth(space) > 0)
 						item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
 				}
+
+				if (item.getDirection() == 1 && item
+						.getCurrentImage() != new ImageIcon("src/resources/" + item.getName() + ".png").getImage())
+					item.setCurrentImage(new ImageIcon("src/resources/" + item.getName() + ".png").getImage());
+
 				if (item.getDirection() == -1) {
 					item.setX((int) item.getPlayer().leftHandItemLocation().getX());
 					item.setY((int) item.getPlayer().leftHandItemLocation().getY());
