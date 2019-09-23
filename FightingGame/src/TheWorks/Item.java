@@ -7,7 +7,9 @@ public class Item {
 	private Player player;
 	private Playspace space;
 	private Image currentImage;
+	private Image originalImage;
 	private Rectangle hitbox;
+	private ToolBox Tools = new ToolBox(space);
 	private int damage;
 	private int force;
 	private int x;
@@ -23,7 +25,8 @@ public class Item {
 	public Item() {
 	}
 
-	public Item(int damage, int force, int x, int y, int attackDelay, int dropRate, Image img, int width, int height) {
+	public Item(int damage, int force, int x, int y, int attackDelay, int dropRate, Image img, int width, int height,
+			Playspace space) {
 		this.damage = damage;
 		this.force = force;
 		this.x = x;
@@ -31,9 +34,12 @@ public class Item {
 		this.attackDelay = attackDelay;
 		this.dropRate = dropRate;
 		this.currentImage = img;
+		;
 		this.width = width;
 		this.height = height;
+		this.originalImage = Tools.scaleObject(img, width, height);
 		this.direction = 1;
+		this.space = space;
 	}
 
 	public String getName() {
@@ -158,5 +164,13 @@ public class Item {
 
 	public void setForce(int force) {
 		this.force = force;
+	}
+
+	public Image getOriginalImage() {
+		return originalImage;
+	}
+
+	public void setOriginalImage(Image originalImage) {
+		this.originalImage = originalImage;
 	}
 }

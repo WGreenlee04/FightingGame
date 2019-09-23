@@ -33,7 +33,8 @@ public class ThreadSound extends Thread {
 					clip = AudioSystem.getClip();
 					clip.open(inputStream);
 					FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-					gainControl.setValue(-10.0f); // Reduce volume by 10 decibels.
+					if (soundDir.equals("src/resources/Clayfighter (SNES) - Taffy's Theme.wav"))
+						gainControl.setValue(-10.0f); // Reduce volume by 10 decibels.
 					clip.start();
 				} catch (Exception e) {
 					e.printStackTrace();

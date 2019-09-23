@@ -18,6 +18,32 @@ public class ToolBox {
 	}
 
 	// IMAGE TOOLBOX START
+
+	public boolean CompareImages(Image imgA, Image imgB) {
+
+		if (imgA.getWidth(I) != imgB.getWidth(I) || imgA.getHeight(I) != imgB.getHeight(I)) {
+			return false;
+		}
+
+		BufferedImage ImgA = toBufferedImage(imgA);
+		BufferedImage ImgB = toBufferedImage(imgB);
+
+		int width = imgA.getWidth(I);
+		int height = imgA.getHeight(I);
+
+		// Loop over every pixel.
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				// Compare the pixels for equality.
+				if (ImgA.getRGB(x, y) != ImgB.getRGB(x, y)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
 	public Image rotateObject(Image image, int degrees) {
 		BufferedImage bufferedImage = toBufferedImage(image);
 		AffineTransform tx = new AffineTransform();

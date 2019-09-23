@@ -22,8 +22,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	// Constants and Classes
 	private Timer timer;
 	private ToolBox Tools;
-	private final int WIDTH = 1000; // Width of panel
-	private final int HEIGHT = 800; // Height of panel
+	private Application app;
+	private final int WIDTH; // Width of panel
+	private final int HEIGHT; // Height of panel
 	private final int DELAY = 20; // Delay of actions in ms
 	private final int GRAVITY = -4; // Quadratic gravity for players
 	private final int ITEMGRAVITY = -6; // Linear gravity for items
@@ -54,10 +55,16 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private ArrayList<Thread> threads; // Active threads
 
 	/** Constructor, sets up frame and arrays **/
-	public Playspace(int mode) {
+	public Playspace(int mode, Application app) {
 
 		// Sets up JPanel
 		super();
+
+		// Application variable
+		this.app = app;
+		HEIGHT = this.app.getHeight();
+		WIDTH = this.app.getWidth();
+
 		setLayout(null);
 		setLocation(0, 0);
 		setSize(WIDTH, HEIGHT);
@@ -112,8 +119,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// Loads items
 		for (int i = 0; i < ITEMCOUNT; i++) {
 			int spawnVal = (int) (Math.random() * 100);
-			if (spawnVal < new Stick().getDropRate()) {
-				items.add(new Stick());
+			if (spawnVal < new Stick(this).getDropRate()) {
+				items.add(new Stick(this));
 			}
 		}
 

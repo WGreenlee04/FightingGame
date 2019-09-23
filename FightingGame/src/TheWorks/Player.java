@@ -46,14 +46,14 @@ public class Player {
 	}
 
 	public Point leftHandItemLocation() {
-		int x = (this.x - width) + 22;
-		int y = (this.y + 11);
+		int x = (this.x + 10);
+		int y = (this.y + this.height / 2 + 16);
 		return new Point(x, y);
 	}
 
 	public Point rightHandItemLocation() {
-		int x = (this.x + width) - 12;
-		int y = (this.y + 10);
+		int x = (this.x - 4);
+		int y = (this.y + this.height / 2 + 14);
 		return new Point(x, y);
 	}
 
