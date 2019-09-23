@@ -43,6 +43,11 @@ public class Player {
 		image = Tools.scalePlayer(image, this);
 		this.imageDir = imageDir;
 		this.darkImageDir = darkImageDir;
+
+		if (item == null) {
+			item = new Fist(space);
+			item.setPlayer(this);
+		}
 	}
 
 	public Point leftHandItemLocation() {
