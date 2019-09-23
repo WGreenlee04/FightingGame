@@ -9,13 +9,11 @@ import javax.sound.sampled.FloatControl;
 
 public class ThreadSound extends Thread {
 
-	private Playspace space;
 	private Clip clip;
 	private String soundDir;
 	private boolean running;
 
-	public ThreadSound(String soundDir, Playspace space) {
-		this.space = space;
+	public ThreadSound(String soundDir) {
 		this.soundDir = soundDir;
 		this.running = true;
 	}
@@ -38,7 +36,7 @@ public class ThreadSound extends Thread {
 					gainControl.setValue(-10.0f); // Reduce volume by 10 decibels.
 					clip.start();
 				} catch (Exception e) {
-					System.out.println(false);
+					e.printStackTrace();
 				}
 			}
 			if (clip != null && soundDir.equals("src/resources/Clayfighter (SNES) - Taffy's Theme.wav")

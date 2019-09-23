@@ -79,4 +79,12 @@ public class ToolBox {
 		return bimage;
 	}
 	// IMAGE TOOLBOX END
+
+	public ImageObserver getI() {
+		return I;
+	}
+
+	public void setI(ImageObserver i) {
+		I = i;
+	}
 }

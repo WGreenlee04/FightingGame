@@ -43,7 +43,7 @@ public class ThreadAnimate extends Thread {
 							ThreadDamage damage = new ThreadDamage(animationSubjectItem, p, space);
 							damage.start();
 							ThreadSound sound = new ThreadSound(
-									"src/resources/" + animationSubjectItem.getName() + "Hit.wav", space);
+									"src/resources/" + animationSubjectItem.getName() + "Hit.wav");
 							sound.start();
 						}
 

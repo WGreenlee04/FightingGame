@@ -17,6 +17,8 @@ import javax.swing.Timer;
 
 public class Playspace extends JPanel implements ActionListener, KeyListener {
 
+	private static final long serialVersionUID = 2089638191057847879L;
+
 	// Constants and Classes
 	private Timer timer;
 	private ToolBox Tools;
@@ -231,7 +233,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	/** Begins background music player **/
 	public void playSound(String soundFile) {
 
-		playSound = new ThreadSound(soundFile, this);
+		playSound = new ThreadSound(soundFile);
 		threads.add(playSound);
 		playSound.start();
 	}

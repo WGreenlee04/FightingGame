@@ -4,6 +4,7 @@ import javax.swing.JFrame;
 
 public class Application extends JFrame {
 
+	private static final long serialVersionUID = 4651748800360341847L;
 	private Playspace pspace;
 
 	public Application() {
