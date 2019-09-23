@@ -1,5 +1,6 @@
 package TheWorks;
 
+import java.awt.Image;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
@@ -289,9 +290,12 @@ public class ThreadPhysics extends Thread {
 						item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
 				}
 
-				if (item.getDirection() == 1 && item
-						.getCurrentImage() != new ImageIcon("src/resources/" + item.getName() + ".png").getImage())
-					item.setCurrentImage(new ImageIcon("src/resources/" + item.getName() + ".png").getImage());
+				if (item.getDirection() == -1 && item
+						.getCurrentImage() != new ImageIcon("src/resources/" + item.getName() + ".png").getImage()) {
+					Image img = new ImageIcon("src/resources/" + item.getName() + ".png").getImage();
+					img = space.getTools().scaleObject(img, item.getWidth(), item.getHeight());
+					item.setCurrentImage(img);
+				}
 
 				if (item.getDirection() == -1) {
 					item.setX((int) item.getPlayer().leftHandItemLocation().getX());
