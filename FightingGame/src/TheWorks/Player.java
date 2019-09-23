@@ -22,6 +22,7 @@ public class Player {
 	private int height;
 	private int direction;
 	private int jumps;
+	private boolean stunned;
 	private boolean falling;
 	private boolean jumping;
 	private boolean dark;
@@ -209,6 +210,14 @@ public class Player {
 
 	public void setSpace(Playspace space) {
 		this.space = space;
+	}
+
+	public boolean isStunned() {
+		return stunned;
+	}
+
+	public void setStunned(boolean stunned) {
+		this.stunned = stunned;
 	}
 
 }

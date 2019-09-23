@@ -9,6 +9,7 @@ public class Item {
 	private Image currentImage;
 	private Rectangle hitbox;
 	private int damage;
+	private int force;
 	private int x;
 	private int y;
 	private int accelX;
@@ -22,8 +23,9 @@ public class Item {
 	public Item() {
 	}
 
-	public Item(int damage, int x, int y, int attackDelay, int dropRate, Image img, int width, int height) {
+	public Item(int damage, int force, int x, int y, int attackDelay, int dropRate, Image img, int width, int height) {
 		this.damage = damage;
+		this.force = force;
 		this.x = x;
 		this.y = y;
 		this.attackDelay = attackDelay;
@@ -150,4 +152,11 @@ public class Item {
 		this.hitbox = hitbox;
 	}
 
+	public int getForce() {
+		return force;
+	}
+
+	public void setForce(int force) {
+		this.force = force;
+	}
 }

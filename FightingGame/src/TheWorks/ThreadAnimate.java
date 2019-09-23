@@ -6,20 +6,19 @@ import javax.swing.ImageIcon;
 
 public class ThreadAnimate extends Thread {
 
-	private final int degrees = 5;
-	private final int endRotation = 90;
-	private int delay;
-	private boolean running;
 	private Playspace space;
-	private final ToolBox Tools = new ToolBox(space);
 	private Item animationSubjectItem;
 	private Player animationSubjectPlayer;
+	private final int degrees = 5;
+	private final int endRotation = 90;
+	private final int delay = 20;
+	private final ToolBox Tools = new ToolBox(space);
+	private boolean running;
 
 	public ThreadAnimate(Item o, Playspace p) {
 
 		this.space = p;
 		this.animationSubjectItem = o;
-		this.delay = o.getAttackDelay();
 		this.running = true;
 	}
 
@@ -35,9 +34,18 @@ public class ThreadAnimate extends Thread {
 		while (running) {
 			if (animationSubjectItem != null) {
 				Image original = animationSubjectItem.getCurrentImage();
-				for (int i = 5; i <= endRotation; i += degrees) {
+				for (int i = degrees; i <= endRotation; i += degrees) {
 					animationSubjectItem.setCurrentImage(
 							new ImageIcon("src/resources/" + animationSubjectItem.getName() + i + ".png").getImage());
+					for (Player p : space.getPlayers())
+						if (!(p.equals(animationSubjectItem.getPlayer()))
+								&& p.getHitbox().intersects(animationSubjectItem.getHitbox()) && !(p.isStunned())) {
+							ThreadDamage damage = new ThreadDamage(animationSubjectItem, p, space);
+							damage.start();
+							ThreadSound sound = new ThreadSound(
+									"src/resources/" + animationSubjectItem.getName() + "Hit.wav", space);
+							sound.start();
+						}
 
 					try {
 						this.sleep(delay);

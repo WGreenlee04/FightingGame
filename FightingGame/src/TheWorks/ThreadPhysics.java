@@ -84,21 +84,24 @@ public class ThreadPhysics extends Thread {
 
 		if (space.isRunnableP1()) {
 
-			// Left Movement w/ dash
-			if (space.isAPressed() && !space.isDPressed()) {
-				if (space.getPlayers()[i].getAccelX() == 0) {
-					space.getPlayers()[i].setAccelX(-space.getDASHSPEED() * 2);
-				} else {
-					space.getPlayers()[i].setAccelX(-space.getPLAYERSPEED() * 2);
-				}
-			}
+			if (!space.getPlayers()[i].isStunned()) {
 
-			// Right Movement w/ dash
-			if (space.isDPressed() && !space.isAPressed()) {
-				if (space.getPlayers()[i].getAccelX() == 0) {
-					space.getPlayers()[i].setAccelX(space.getDASHSPEED() * 2);
-				} else {
-					space.getPlayers()[i].setAccelX(space.getPLAYERSPEED() * 2);
+				// Left Movement w/ dash
+				if (space.isAPressed() && !space.isDPressed()) {
+					if (space.getPlayers()[i].getAccelX() == 0) {
+						space.getPlayers()[i].setAccelX(-space.getDASHSPEED() * 2);
+					} else {
+						space.getPlayers()[i].setAccelX(-space.getPLAYERSPEED() * 2);
+					}
+				}
+
+				// Right Movement w/ dash
+				if (space.isDPressed() && !space.isAPressed()) {
+					if (space.getPlayers()[i].getAccelX() == 0) {
+						space.getPlayers()[i].setAccelX(space.getDASHSPEED() * 2);
+					} else {
+						space.getPlayers()[i].setAccelX(space.getPLAYERSPEED() * 2);
+					}
 				}
 			}
 
@@ -137,21 +140,23 @@ public class ThreadPhysics extends Thread {
 
 		if (space.isRunnableP2()) {
 
-			// Left Movement w/ dash
-			if (space.isLeftPressed() && !space.isRightPressed()) {
-				if (space.getPlayers()[i].getAccelX() == 0) {
-					space.getPlayers()[i].setAccelX(-space.getDASHSPEED() * 2);
-				} else {
-					space.getPlayers()[i].setAccelX(-space.getPLAYERSPEED() * 2);
+			if (!space.getPlayers()[i].isStunned()) {
+				// Left Movement w/ dash
+				if (space.isLeftPressed() && !space.isRightPressed()) {
+					if (space.getPlayers()[i].getAccelX() == 0) {
+						space.getPlayers()[i].setAccelX(-space.getDASHSPEED() * 2);
+					} else {
+						space.getPlayers()[i].setAccelX(-space.getPLAYERSPEED() * 2);
+					}
 				}
-			}
 
-			// Right Movement w/ dash
-			if (space.isRightPressed() && !space.isLeftPressed()) {
-				if (space.getPlayers()[i].getAccelX() == 0) {
-					space.getPlayers()[i].setAccelX(space.getDASHSPEED() * 2);
-				} else {
-					space.getPlayers()[i].setAccelX(space.getPLAYERSPEED() * 2);
+				// Right Movement w/ dash
+				if (space.isRightPressed() && !space.isLeftPressed()) {
+					if (space.getPlayers()[i].getAccelX() == 0) {
+						space.getPlayers()[i].setAccelX(space.getDASHSPEED() * 2);
+					} else {
+						space.getPlayers()[i].setAccelX(space.getPLAYERSPEED() * 2);
+					}
 				}
 			}
 
