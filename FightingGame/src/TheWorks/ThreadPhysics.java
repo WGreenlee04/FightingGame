@@ -30,7 +30,7 @@ public class ThreadPhysics extends Thread {
 
 		space.createHitboxes();
 
-		pickup();
+		pickupOrHit();
 
 		accel();
 
@@ -43,16 +43,18 @@ public class ThreadPhysics extends Thread {
 		renderObjects();
 
 		running = false;
+
+		space.repaint();
 	}
 
-	private void pickup() {
+	private void pickupOrHit() {
 		// The... Pickup... line?
 		int i = 0;
 		if (space.isLShiftPressed() && space.isRunnableP1() && space.getPlayers()[i].getItem() == null) {
 			space.setLShiftPressed(false);
 			for (Item item : space.getItems()) {
 				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
-						&& space.getPlayers()[i].getItem() == null) {
+						&& space.getPlayers()[i].getItem() == null && !space.getPlayers()[i].isStunned()) {
 					space.getPlayers()[i].setItem(item);
 					item.setPlayer(space.getPlayers()[i]);
 				}
@@ -67,7 +69,7 @@ public class ThreadPhysics extends Thread {
 			space.setRShiftPressed(false);
 			for (Item item : space.getItems()) {
 				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
-						&& space.getPlayers()[i].getItem() == null) {
+						&& space.getPlayers()[i].getItem() == null && !space.getPlayers()[i].isStunned()) {
 					space.getPlayers()[i].setItem(item);
 					item.setPlayer(space.getPlayers()[i]);
 				}
@@ -166,7 +168,8 @@ public class ThreadPhysics extends Thread {
 				space.getPlayers()[i].setAccelY(space.getJUMPHEIGHT() * 2);
 			}
 
-			// You just jumped, and we need to increase jump counter and reset jump
+			// You just jumped, and we need to increase jump counter and reset
+			// jump
 			if (space.isUpReleased() && space.getPlayers()[i].getJumps() <= 2) {
 				space.getPlayers()[i].setJumping(false);
 				space.getPlayers()[i].setFalling(false);
@@ -211,7 +214,8 @@ public class ThreadPhysics extends Thread {
 
 	private void move() {
 
-		// if acceleration of x, do acceleration, decreasing it by one each time.
+		// if acceleration of x, do acceleration, decreasing it by one each
+		// time.
 		for (Player p : space.getPlayers()) {
 			if (p.getAccelX() > 0) {
 				p.setX(p.getX() + p.getAccelX());

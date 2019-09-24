@@ -42,7 +42,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	// Variables
 	private Color backgroundColor;
 	private int PLAYERCOUNT; // Changing amount of players
-	private boolean runnableP1, runnableP2; // If methods about player are runnable
+	private boolean runnableP1, runnableP2; // If methods about player are
+											// runnable
 	private boolean soundUpdate;
 	private boolean WPressed, WReleased, APressed, SPressed, DPressed, LShiftPressed, LShiftReleased, UpPressed,
 			UpReleased, LeftPressed, DownPressed, RightPressed, RShiftPressed, RShiftReleased;
@@ -261,12 +262,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		resetThread();
-		try {
-			doPhysics.join();
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		repaint();
 	}
 
 	/** Keypress detection **/
