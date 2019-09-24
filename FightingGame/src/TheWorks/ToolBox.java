@@ -62,13 +62,13 @@ public class ToolBox {
 
 	public Image lightenObject(Image image, Player player) {
 		image = new ImageIcon(player.getImageDir()).getImage();
-		image = scalePlayer(image, player);
+		image = scaleObject(image, player.getWidth(), player.getHeight());
 		return image;
 	}
 
 	public Image darkenObject(Image image, Player player) {
 		image = new ImageIcon(player.getDarkImageDir()).getImage();
-		image = scalePlayer(image, player);
+		image = scaleObject(image, player.getWidth(), player.getHeight());
 		return image;
 	}
 
@@ -81,11 +81,6 @@ public class ToolBox {
 
 	public Image scaleObject(Image image, int width, int height) {
 		return image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-	}
-
-	public Image scalePlayer(Image image, Player player) {
-		return image.getScaledInstance(player.getWidth(), player.getHeight(), Image.SCALE_SMOOTH);
-
 	}
 
 	public BufferedImage toBufferedImage(Image img) {

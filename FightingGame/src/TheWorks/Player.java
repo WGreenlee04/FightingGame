@@ -40,7 +40,7 @@ public class Player {
 		jumping = false;
 		dark = false;
 		image = new ImageIcon(imageDir).getImage();
-		image = Tools.scalePlayer(image, this);
+		image = Tools.scaleObject(image, width, height);
 		this.imageDir = imageDir;
 		this.darkImageDir = darkImageDir;
 	}

@@ -21,6 +21,7 @@ public class Item {
 	private int attackDelay;
 	private int dropRate;
 	private int direction;
+	private boolean animated;
 
 	public Item() {
 	}
@@ -34,12 +35,14 @@ public class Item {
 		this.attackDelay = attackDelay;
 		this.dropRate = dropRate;
 		this.currentImage = img;
-		;
 		this.width = width;
 		this.height = height;
 		this.originalImage = Tools.scaleObject(img, width, height);
 		this.direction = 1;
 		this.space = space;
+		this.animated = false;
+		Tools.scaleObject(originalImage, width, height);
+
 	}
 
 	public String getName() {
@@ -172,5 +175,13 @@ public class Item {
 
 	public void setOriginalImage(Image originalImage) {
 		this.originalImage = originalImage;
+	}
+
+	public boolean isAnimated() {
+		return animated;
+	}
+
+	public void setAnimated(boolean animated) {
+		this.animated = animated;
 	}
 }

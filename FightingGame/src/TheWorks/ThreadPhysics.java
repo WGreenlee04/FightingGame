@@ -7,23 +7,31 @@ public class ThreadPhysics extends Thread {
 	private Playspace space;
 	private boolean running;
 	private ArrayList<ThreadAnimate> animations; // Active animation threads
-	private ArrayList<ThreadDamage> damage; // Active damage threads
+	private ArrayList<ThreadDamage> damages; // Active damage threads
 
 	public ThreadPhysics(Playspace p) {
 		super();
 		this.space = p;
-		this.running = true;
 		this.animations = new ArrayList<ThreadAnimate>();
+		this.damages = new ArrayList<ThreadDamage>();
+		this.running = true;
 	}
 
 	private void animateItem(Item object) {
 		ThreadAnimate animation = new ThreadAnimate(object, space);
-		if (!animations.contains(animation)
-				|| (animations.contains(animation) && !(animations.get(animations.indexOf(animation)).isAlive()))) {
+		if (!object.isAnimated()) {
 			animations.add(animation);
+			object.setAnimated(true);
 			animation.start();
 		}
+	}
 
+	private void damagePlayer(Player player, Item item) {
+		ThreadDamage damage = new ThreadDamage(item, player, space);
+		damages.add(damage);
+		ThreadSound sound = new ThreadSound("src/resources/" + item.getName() + "Hit.wav");
+		damage.start();
+		sound.start();
 	}
 
 	@Override
@@ -32,8 +40,6 @@ public class ThreadPhysics extends Thread {
 		space.createHitboxes();
 
 		pickupOrHit();
-
-		setUnarmed();
 
 		accel();
 
@@ -45,21 +51,16 @@ public class ThreadPhysics extends Thread {
 
 		renderObjects();
 
-		running = false;
-
 		space.repaint();
+
+		running = false;
 	}
 
 	private void pickupOrHit() {
 		// The... Pickup... line?
 		int i = 0;
-		if (space.isLShiftPressed() && space.isRunnableP1() && space.getPlayers()[i].getItem() instanceof Fist) {
+		if (space.isLShiftPressed() && space.isRunnableP1() && space.getPlayers()[i].getItem() == null) {
 			space.setLShiftPressed(false);
-			Item tempItem = space.getPlayers()[i].getItem();
-			space.getPlayers()[i].setItem(null);
-			ArrayList<Item> tempArray = space.getItems();
-			tempArray.remove(tempArray.indexOf(tempItem));
-			space.setItems(tempArray);
 			space.getPlayers()[i].setItem(null);
 			for (Item item : space.getItems()) {
 				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
@@ -74,23 +75,13 @@ public class ThreadPhysics extends Thread {
 			for (Player p : space.getPlayers())
 				if (!p.equals(space.getPlayers()[i]) && p.getHitbox().intersects(space.getPlayers()[i].getHitbox())
 						&& !(p.isStunned())) {
-					ThreadDamage damage = new ThreadDamage(space.getPlayers()[i].getItem(), p, space);
-					ThreadSound sound = new ThreadSound(
-							"src/resources/" + space.getPlayers()[i].getItem().getName() + "Hit.wav");
-					damage.start();
-					sound.start();
+					damagePlayer(p, space.getPlayers()[i].getItem());
 				}
 		}
 
 		i = 1;
-		if (space.isRShiftPressed() && space.isRunnableP2() && space.getPlayers()[i].getItem() instanceof Fist) {
+		if (space.isRShiftPressed() && space.isRunnableP2() && space.getPlayers()[i].getItem() == null) {
 			space.setRShiftPressed(false);
-			Item tempItem = space.getPlayers()[i].getItem();
-			space.getPlayers()[i].setItem(null);
-			ArrayList<Item> tempArray = space.getItems();
-			tempArray.remove(tempArray.indexOf(tempItem));
-			space.setItems(tempArray);
-			space.getPlayers()[i].setItem(null);
 			for (Item item : space.getItems()) {
 				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
 						&& space.getPlayers()[i].getItem() == null && !space.getPlayers()[i].isStunned()) {
@@ -104,11 +95,7 @@ public class ThreadPhysics extends Thread {
 			for (Player p : space.getPlayers())
 				if (!p.equals(space.getPlayers()[i]) && p.getHitbox().intersects(space.getPlayers()[i].getHitbox())
 						&& !(p.isStunned())) {
-					ThreadDamage damage = new ThreadDamage(space.getPlayers()[i].getItem(), p, space);
-					ThreadSound sound = new ThreadSound(
-							"src/resources/" + space.getPlayers()[i].getItem().getName() + "Hit.wav");
-					damage.start();
-					sound.start();
+					damagePlayer(p, space.getPlayers()[i].getItem());
 				}
 		}
 	}

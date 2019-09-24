@@ -18,7 +18,7 @@ public class Application extends JFrame {
 	public void initiateFrame(int m) {
 		pspace = new Playspace(m, this);
 		add(pspace);
-		pspace.initSpace(m);
+		pspace.initSpace();
 	}
 
 	public Playspace getPlayspace() {

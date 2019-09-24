@@ -44,7 +44,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private int PLAYERCOUNT; // Changing amount of players
 	private boolean runnableP1, runnableP2; // If methods about player are
 											// runnable
-	private boolean soundUpdate;
 	private boolean WPressed, WReleased, APressed, SPressed, DPressed, LShiftPressed, LShiftReleased, UpPressed,
 			UpReleased, LeftPressed, DownPressed, RightPressed, RShiftPressed, RShiftReleased;
 
@@ -61,11 +60,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// Sets up JPanel
 		super();
 
-		// Application variable
+		// Application variables
 		this.app = app;
 		HEIGHT = this.app.getHeight();
 		WIDTH = this.app.getWidth();
-
 		setLayout(null);
 		setLocation(0, 0);
 		setSize(WIDTH, HEIGHT);
@@ -91,10 +89,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Toolbox setup
 		Tools = new ToolBox(this);
-	}
-
-	/** Sets all array defaults and sets images **/
-	public void initSpace(int mode) {
 
 		// Adds both players to board array
 		switch (mode) {
@@ -161,6 +155,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				players[i].setX((WIDTH / (i) - 100) - players[i].getImage().getWidth(this));
 				players[i].setY(HEIGHT);
 			}
+	}
+
+	/** Sets all array defaults and sets images **/
+	public void initSpace() {
 
 		// Try{}Catches
 		checkPlayerMethodValidity();
@@ -168,8 +166,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		// Thread setup
 		initThreads();
 		playSound("src/resources/Clayfighter (SNES) - Taffy's Theme.wav");
-
-		createHitboxes();
 
 		// Timer start
 		timer.start(); // Starts timer
@@ -220,7 +216,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	}
 
 	/** Initiates threads for values **/
-	private void resetThread() {
+	private void resetThreads() {
 
 		// Old Thread for replacing
 		Thread Acceleration = doPhysics;
@@ -261,7 +257,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	/** Triggered when "timer" completes a cycle **/
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		resetThread();
+		resetThreads();
 	}
 
 	/** Keypress detection **/
@@ -557,14 +553,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	public void setRShiftReleased(boolean rShiftReleased) {
 		RShiftReleased = rShiftReleased;
-	}
-
-	public boolean isSoundUpdate() {
-		return soundUpdate;
-	}
-
-	public void setSoundUpdate(boolean soundUpdate) {
-		this.soundUpdate = soundUpdate;
 	}
 
 	public ArrayList<Thread> getThreads() {

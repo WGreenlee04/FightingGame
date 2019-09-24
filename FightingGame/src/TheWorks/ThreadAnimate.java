@@ -31,23 +31,22 @@ public class ThreadAnimate extends Thread {
 
 	@Override
 	public void run() {
-		while (running) {
-			if (animationSubjectItem != null) {
-				Image original = animationSubjectItem.getCurrentImage();
-				for (int i = degrees; i <= endRotation; i += degrees) {
-					animationSubjectItem.setCurrentImage(
-							new ImageIcon("src/resources/" + animationSubjectItem.getName() + i + ".png").getImage());
-					try {
-						this.sleep(delay);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
+		if (animationSubjectItem != null) {
+			Image original = animationSubjectItem.getCurrentImage();
+			for (int i = degrees; i <= endRotation; i += degrees) {
+				animationSubjectItem.setCurrentImage(
+						new ImageIcon("src/resources/" + animationSubjectItem.getName() + i + ".png").getImage());
+				try {
+					this.sleep(delay);
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				animationSubjectItem.setCurrentImage(original);
+
 			}
-			running = false;
+			animationSubjectItem.setCurrentImage(original);
 		}
+		animationSubjectItem.setAnimated(false);
+		running = false;
 	}
 
 	public boolean isRunning() {
