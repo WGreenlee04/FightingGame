@@ -26,15 +26,18 @@ public class ThreadSound extends Thread {
 			if (clip == null) {
 				try {
 					// get the sound file as a resource out of my jar file;
-					// the sound file must be in the same directory as this class file.
-					// the input stream portion of this recipe comes from a javaworld.com article.
+					// the sound file must be in the same directory as this
+					// class file.
+					// the input stream portion of this recipe comes from a
+					// javaworld.com article.
 					AudioInputStream inputStream = AudioSystem
 							.getAudioInputStream(new File(soundDir).getAbsoluteFile());
 					clip = AudioSystem.getClip();
 					clip.open(inputStream);
 					FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-					if (soundDir.equals("src/resources/Clayfighter (SNES) - Taffy's Theme.wav"))
-						gainControl.setValue(-10.0f); // Reduce volume by 10 decibels.
+					if (clip != null && soundDir.equals("src/resources/Clayfighter (SNES) - Taffy's Theme.wav"))
+						gainControl.setValue(-10.0f); // Reduce volume by 10
+														// decibels.
 					clip.start();
 				} catch (Exception e) {
 					e.printStackTrace();
