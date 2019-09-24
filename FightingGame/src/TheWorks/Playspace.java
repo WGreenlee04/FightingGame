@@ -290,7 +290,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				WReleased = false;
 			}
 
-			if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
+			if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT
+					&& LShiftReleased) {
 				LShiftPressed = true;
 				LShiftReleased = false;
 			}
@@ -318,7 +319,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 				DownPressed = true;
 			}
 
-			if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
+			if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT
+					&& RShiftReleased) {
 				RShiftPressed = true;
 				RShiftReleased = false;
 			}

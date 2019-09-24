@@ -7,6 +7,7 @@ public class ThreadPhysics extends Thread {
 	private Playspace space;
 	private boolean running;
 	private ArrayList<ThreadAnimate> animations; // Active animation threads
+	private ArrayList<ThreadDamage> damage; // Active damage threads
 
 	public ThreadPhysics(Playspace p) {
 		super();
@@ -32,6 +33,8 @@ public class ThreadPhysics extends Thread {
 
 		pickupOrHit();
 
+		setUnarmed();
+
 		accel();
 
 		gravity();
@@ -50,8 +53,14 @@ public class ThreadPhysics extends Thread {
 	private void pickupOrHit() {
 		// The... Pickup... line?
 		int i = 0;
-		if (space.isLShiftPressed() && space.isRunnableP1() && space.getPlayers()[i].getItem() == null) {
+		if (space.isLShiftPressed() && space.isRunnableP1() && space.getPlayers()[i].getItem() instanceof Fist) {
 			space.setLShiftPressed(false);
+			Item tempItem = space.getPlayers()[i].getItem();
+			space.getPlayers()[i].setItem(null);
+			ArrayList<Item> tempArray = space.getItems();
+			tempArray.remove(tempArray.indexOf(tempItem));
+			space.setItems(tempArray);
+			space.getPlayers()[i].setItem(null);
 			for (Item item : space.getItems()) {
 				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
 						&& space.getPlayers()[i].getItem() == null && !space.getPlayers()[i].isStunned()) {
@@ -62,11 +71,26 @@ public class ThreadPhysics extends Thread {
 		} else if (space.isLShiftPressed()) {
 			space.setLShiftPressed(false);
 			animateItem(space.getPlayers()[i].getItem());
+			for (Player p : space.getPlayers())
+				if (!p.equals(space.getPlayers()[i]) && p.getHitbox().intersects(space.getPlayers()[i].getHitbox())
+						&& !(p.isStunned())) {
+					ThreadDamage damage = new ThreadDamage(space.getPlayers()[i].getItem(), p, space);
+					ThreadSound sound = new ThreadSound(
+							"src/resources/" + space.getPlayers()[i].getItem().getName() + "Hit.wav");
+					damage.start();
+					sound.start();
+				}
 		}
 
 		i = 1;
-		if (space.isRShiftPressed() && space.isRunnableP2() && space.getPlayers()[i].getItem() == null) {
+		if (space.isRShiftPressed() && space.isRunnableP2() && space.getPlayers()[i].getItem() instanceof Fist) {
 			space.setRShiftPressed(false);
+			Item tempItem = space.getPlayers()[i].getItem();
+			space.getPlayers()[i].setItem(null);
+			ArrayList<Item> tempArray = space.getItems();
+			tempArray.remove(tempArray.indexOf(tempItem));
+			space.setItems(tempArray);
+			space.getPlayers()[i].setItem(null);
 			for (Item item : space.getItems()) {
 				if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
 						&& space.getPlayers()[i].getItem() == null && !space.getPlayers()[i].isStunned()) {
@@ -77,6 +101,32 @@ public class ThreadPhysics extends Thread {
 		} else if (space.isRShiftPressed()) {
 			space.setRShiftPressed(false);
 			animateItem(space.getPlayers()[i].getItem());
+			for (Player p : space.getPlayers())
+				if (!p.equals(space.getPlayers()[i]) && p.getHitbox().intersects(space.getPlayers()[i].getHitbox())
+						&& !(p.isStunned())) {
+					ThreadDamage damage = new ThreadDamage(space.getPlayers()[i].getItem(), p, space);
+					ThreadSound sound = new ThreadSound(
+							"src/resources/" + space.getPlayers()[i].getItem().getName() + "Hit.wav");
+					damage.start();
+					sound.start();
+				}
+		}
+	}
+
+	private void setUnarmed() {
+		for (Player p : space.getPlayers()) {
+			if (p.getItem() == null) {
+				Item unarmed = new Fist(space);
+				unarmed.setCurrentImage(space.getTools().scaleObject(unarmed.getCurrentImage(), unarmed.getWidth(),
+						unarmed.getHeight()));
+				unarmed.setPlayer(p);
+				p.setItem(unarmed);
+				ArrayList<Item> tempArray = space.getItems();
+				tempArray.add(unarmed);
+				space.setItems(tempArray);
+				renderObjects();
+
+			}
 		}
 	}
 
@@ -294,6 +344,11 @@ public class ThreadPhysics extends Thread {
 				if (item.getDirection() == 1
 						&& !space.getTools().CompareImages(item.getCurrentImage(), item.getOriginalImage())) {
 					item.setCurrentImage(item.getOriginalImage());
+				}
+
+				if (item.getDirection() == -1
+						&& space.getTools().CompareImages(item.getCurrentImage(), item.getOriginalImage())) {
+					item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
 				}
 
 				if (item.getDirection() == -1) {

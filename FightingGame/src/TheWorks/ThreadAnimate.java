@@ -37,16 +37,6 @@ public class ThreadAnimate extends Thread {
 				for (int i = degrees; i <= endRotation; i += degrees) {
 					animationSubjectItem.setCurrentImage(
 							new ImageIcon("src/resources/" + animationSubjectItem.getName() + i + ".png").getImage());
-					for (Player p : space.getPlayers())
-						if (!(p.equals(animationSubjectItem.getPlayer()))
-								&& p.getHitbox().intersects(animationSubjectItem.getHitbox()) && !(p.isStunned())) {
-							ThreadDamage damage = new ThreadDamage(animationSubjectItem, p, space);
-							damage.start();
-							ThreadSound sound = new ThreadSound(
-									"src/resources/" + animationSubjectItem.getName() + "Hit.wav");
-							sound.start();
-						}
-
 					try {
 						this.sleep(delay);
 					} catch (Exception e) {
