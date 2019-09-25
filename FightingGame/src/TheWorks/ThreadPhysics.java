@@ -83,7 +83,7 @@ public class ThreadPhysics extends Thread {
 				animateItem(space.getPlayers()[i].getItem());
 				for (Player p : space.getPlayers()) {
 					if (!p.equals(space.getPlayers()[i]) && p.getHitbox().intersects(space.getPlayers()[i].getHitbox())
-							&& !(p.isStunned())) {
+							&& !p.isStunned()) {
 						damagePlayer(p, space.getPlayers()[i].getItem());
 					}
 				}
