@@ -29,6 +29,12 @@ public class ThreadAnimate extends Thread {
 		this.running = true;
 	}
 
+	private void closeThread() {
+		animationSubjectItem.setAnimated(false);
+		running = false;
+		this.interrupt();
+	}
+
 	@Override
 	public void run() {
 		if (animationSubjectItem != null) {
@@ -45,8 +51,7 @@ public class ThreadAnimate extends Thread {
 			}
 			animationSubjectItem.setCurrentImage(original);
 		}
-		animationSubjectItem.setAnimated(false);
-		running = false;
+		closeThread();
 	}
 
 	public boolean isRunning() {

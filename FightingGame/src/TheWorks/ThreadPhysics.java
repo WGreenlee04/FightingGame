@@ -19,11 +19,9 @@ public class ThreadPhysics extends Thread {
 
 	private void animateItem(Item object) {
 		ThreadAnimate animation = new ThreadAnimate(object, space);
-		if (!object.isAnimated()) {
-			animations.add(animation);
-			object.setAnimated(true);
-			animation.start();
-		}
+		animations.add(animation);
+		object.setAnimated(true);
+		animation.start();
 	}
 
 	private void damagePlayer(Player player, Item item) {
@@ -56,6 +54,8 @@ public class ThreadPhysics extends Thread {
 		space.repaint();
 
 		running = false;
+
+		this.interrupt();
 	}
 
 	private void pickup() {
@@ -80,10 +80,12 @@ public class ThreadPhysics extends Thread {
 		for (int i = 0; i < space.getPLAYERCOUNT(); i++) {
 			if (space.getPlayers()[i].isShiftPressed() && space.getPlayers()[i].getItem() != null) {
 				space.getPlayers()[i].setShiftPressed(false);
-				animateItem(space.getPlayers()[i].getItem());
+				if (!space.getPlayers()[i].getItem().isAnimated()) {
+					animateItem(space.getPlayers()[i].getItem());
+				}
 				for (Player p : space.getPlayers()) {
 					if (!p.equals(space.getPlayers()[i]) && p.getHitbox().intersects(space.getPlayers()[i].getHitbox())
-							&& !p.isStunned()) {
+							&& !p.isBeingDamaged()) {
 						damagePlayer(p, space.getPlayers()[i].getItem());
 					}
 				}

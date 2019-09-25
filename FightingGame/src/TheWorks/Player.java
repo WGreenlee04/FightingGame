@@ -29,6 +29,7 @@ public class Player {
 	private boolean jumping;
 	private boolean dark;
 	private boolean directionBool;
+	private boolean beingDamaged;
 
 	public Player(String imageDir, String darkImageDir, Playspace space) {
 		this.Tools = new ToolBox(space);
@@ -40,6 +41,7 @@ public class Player {
 		this.falling = false;
 		this.jumping = false;
 		this.dark = false;
+		this.beingDamaged = false;
 		this.image = new ImageIcon(imageDir).getImage();
 		this.image = Tools.scaleObject(image, width, height);
 		this.imageDir = imageDir;
@@ -279,6 +281,14 @@ public class Player {
 
 	public void setShiftReleased(boolean shiftReleased) {
 		ShiftReleased = shiftReleased;
+	}
+
+	public boolean isBeingDamaged() {
+		return beingDamaged;
+	}
+
+	public void setBeingDamaged(boolean beingDamaged) {
+		this.beingDamaged = beingDamaged;
 	}
 
 }

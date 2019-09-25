@@ -11,7 +11,18 @@ public class ThreadDamage extends Thread {
 		this.target = playerHit;
 		this.space = space;
 		this.item = item;
+		target.setBeingDamaged(true);
 		this.running = true;
+	}
+
+	private void closeThread() {
+		target.setBeingDamaged(false);
+		running = false;
+		this.interrupt();
+	}
+
+	private void stunPlayer() {
+
 	}
 
 	@Override
@@ -19,16 +30,13 @@ public class ThreadDamage extends Thread {
 
 		if (item.getDirection() == -1) {
 			target.setAccelX(target.getAccelX() - item.getForce());
-			target.setStunned(true);
+			stunPlayer();
 		} else {
 			target.setAccelX(target.getAccelX() + item.getForce());
-			target.setStunned(true);
+			stunPlayer();
 		}
-		while (Math.abs(target.getAccelX()) > space.getPLAYERSPEED()) {
-			target.setStunned(true);
-		}
-		target.setStunned(false);
-		running = false;
+
+		closeThread();
 	}
 
 	public boolean isRunning() {

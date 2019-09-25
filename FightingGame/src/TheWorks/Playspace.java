@@ -43,6 +43,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	// Variables
 	private boolean[] runnable; // We don't want null pointers
+	private boolean developerMode;
 
 	// Arrays
 	private Player[] players; // Array of players
@@ -87,6 +88,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Toolbox setup
 		Tools = new ToolBox(this);
+
+		// Dev mode
+		this.developerMode = false;
 
 		// Adds both players to board array
 		switch (mode) {
@@ -313,6 +317,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void keyReleased(KeyEvent e) {
 
+		if (e.getKeyCode() == KeyEvent.VK_F11) {
+			developerMode = !developerMode;
+		}
+
 		int i = 0;
 		// WASD Controls
 		if (e.getKeyCode() == KeyEvent.VK_A) {
@@ -379,6 +387,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			// Draw players
 			g.drawImage(players[i].getImage(), players[i].getX(), players[i].getY(), this);
 
+			if (developerMode) {
+				g.draw3DRect(players[i].getX(), players[i].getY(), players[i].getWidth(), players[i].getHeight(), true);
+			}
+
 			// Draw health bars
 			healthBars[i].setText("" + players[i].getHealth());
 			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
@@ -391,6 +403,10 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 			// Draw item images
 			g.drawImage(item.getCurrentImage(), item.getX(), item.getY(), this);
+
+			if (developerMode) {
+				g.draw3DRect(item.getX(), item.getY(), item.getWidth(), item.getHeight(), true);
+			}
 		}
 	}
 
