@@ -39,7 +39,9 @@ public class ThreadPhysics extends Thread {
 
 		space.createHitboxes();
 
-		pickupOrHit();
+		pickup();
+
+		hit();
 
 		accel();
 
@@ -56,11 +58,11 @@ public class ThreadPhysics extends Thread {
 		running = false;
 	}
 
-	private void pickupOrHit() {
+	private void pickup() {
 		// The... Pickup... line?
 		for (int i = 0; i < space.getPLAYERCOUNT(); i++) {
 			if (space.getPlayers()[i].isShiftPressed() && space.getRunnable()[i]
-					&& space.getPlayers()[i].getItem() == null) {
+					&& (space.getPlayers()[i].getItem() == null || space.getPlayers()[i].getItem() instanceof Fist)) {
 				space.getPlayers()[i].setShiftPressed(false);
 				space.getPlayers()[i].setItem(null);
 				for (Item item : space.getItems()) {
@@ -70,14 +72,21 @@ public class ThreadPhysics extends Thread {
 						item.setPlayer(space.getPlayers()[i]);
 					}
 				}
-			} else if (space.getPlayers()[i].isShiftPressed()) {
+			}
+		}
+	}
+
+	private void hit() {
+		for (int i = 0; i < space.getPLAYERCOUNT(); i++) {
+			if (space.getPlayers()[i].isShiftPressed() && space.getPlayers()[i].getItem() != null) {
 				space.getPlayers()[i].setShiftPressed(false);
 				animateItem(space.getPlayers()[i].getItem());
-				for (Player p : space.getPlayers())
+				for (Player p : space.getPlayers()) {
 					if (!p.equals(space.getPlayers()[i]) && p.getHitbox().intersects(space.getPlayers()[i].getHitbox())
 							&& !(p.isStunned())) {
 						damagePlayer(p, space.getPlayers()[i].getItem());
 					}
+				}
 			}
 		}
 	}
