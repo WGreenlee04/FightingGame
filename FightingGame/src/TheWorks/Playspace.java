@@ -20,9 +20,9 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private static final long serialVersionUID = 2089638191057847879L;
 
 	// Constants and Classes
+	private Application app;
 	private Timer timer;
 	private ToolBox Tools;
-	private Application app;
 	private final int WIDTH; // Width of panel
 	private final int HEIGHT; // Height of panel
 	private final int DELAY = 20; // Delay of actions in ms
@@ -34,18 +34,15 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	private final int PLAYERSPEED = 8; // Speed of players
 	private final int JUMPHEIGHT = 13; // Height of jump
 	private final int FALLSPEED = -10; // Speed of fast fall
+	private final Color backgroundColor; // Color of backdrop
+	private final int PLAYERCOUNT; // Changing amount of players
 
 	// Here we go... Threads...
 	private ThreadPhysics doPhysics;
 	private ThreadSound playSound;
 
 	// Variables
-	private Color backgroundColor;
-	private int PLAYERCOUNT; // Changing amount of players
-	private boolean runnableP1, runnableP2; // If methods about player are
-											// runnable
-	private boolean WPressed, WReleased, APressed, SPressed, DPressed, LShiftPressed, LShiftReleased, UpPressed,
-			UpReleased, LeftPressed, DownPressed, RightPressed, RShiftPressed, RShiftReleased;
+	private boolean[] runnable; // We don't want null pointers
 
 	// Arrays
 	private Player[] players; // Array of players
@@ -81,6 +78,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		players = new Player[PLAYERCOUNT];
 		healthBars = new JLabel[PLAYERCOUNT];
 		healthBarIndicators = new JLabel[PLAYERCOUNT];
+		runnable = new boolean[PLAYERCOUNT];
 		items = new ArrayList<Item>();
 		threads = new ArrayList<Thread>();
 
@@ -94,19 +92,16 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		switch (mode) {
 		case 1:
 			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this));
-			PLAYERCOUNT = 1;
 			break;
 
 		case 2:
 			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this),
 					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png", this));
-			PLAYERCOUNT = 2;
 			break;
 
 		default:
 			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this),
 					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png", this));
-			PLAYERCOUNT = 2;
 			break;
 
 		}
@@ -184,25 +179,16 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	/** Checks if each player exists to prevent null pointers **/
 	private void checkPlayerMethodValidity() {
-		try {
-			if (players[0] != null) {
-				runnableP1 = true;
-			} else {
-				runnableP1 = false;
+		for (int i = 0; i < players.length; i++)
+			try {
+				if (players[i] != null) {
+					runnable[i] = true;
+				} else {
+					runnable[i] = false;
+				}
+			} catch (ArrayIndexOutOfBoundsException ex) {
+				runnable[i] = false;
 			}
-		} catch (ArrayIndexOutOfBoundsException ex) {
-			runnableP1 = false;
-		}
-
-		try {
-			if (players[1] != null) {
-				runnableP2 = true;
-			} else {
-				runnableP2 = false;
-			}
-		} catch (ArrayIndexOutOfBoundsException ex) {
-			runnableP2 = false;
-		}
 	}
 
 	/** Initiates threads for values **/
@@ -265,60 +251,60 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public void keyPressed(KeyEvent e) {
 
 		int i = 0;
-		if (runnableP1) {
+		if (runnable[i]) {
 			// WASD Controls
 			if (e.getKeyCode() == KeyEvent.VK_A) {
-				APressed = true;
+				players[i].setLeftPressed(true);
 				players[i].setDirection(-1);
 			}
 
 			if (e.getKeyCode() == KeyEvent.VK_D) {
-				DPressed = true;
+				players[i].setRightPressed(true);
 				players[i].setDirection(1);
 			}
 
 			if (e.getKeyCode() == KeyEvent.VK_S) {
-				SPressed = true;
+				players[i].setDownPressed(true);
 			}
 
 			if (e.getKeyCode() == KeyEvent.VK_W) {
-				WPressed = true;
-				WReleased = false;
+				players[i].setUpPressed(true);
+				players[i].setUpReleased(false);
 			}
 
 			if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT
-					&& LShiftReleased) {
-				LShiftPressed = true;
-				LShiftReleased = false;
+					&& players[i].isShiftReleased()) {
+				players[i].setShiftPressed(true);
+				players[i].setShiftReleased(false);
 			}
 		}
 
 		i = 1;
-		if (runnableP2) {
+		if (runnable[i]) {
 			// ULDR Controls
 			if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-				LeftPressed = true;
+				players[i].setLeftPressed(true);
 				players[i].setDirection(-1);
 			}
 
 			if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-				RightPressed = true;
+				players[i].setRightPressed(true);
 				players[i].setDirection(1);
 			}
 
-			if (e.getKeyCode() == KeyEvent.VK_UP) {
-				UpPressed = true;
-				UpReleased = false;
+			if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+				players[i].setDownPressed(true);
 			}
 
-			if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-				DownPressed = true;
+			if (e.getKeyCode() == KeyEvent.VK_UP) {
+				players[i].setUpPressed(true);
+				players[i].setUpReleased(false);
 			}
 
 			if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT
-					&& RShiftReleased) {
-				RShiftPressed = true;
-				RShiftReleased = false;
+					&& players[i].isShiftReleased()) {
+				players[i].setShiftPressed(true);
+				players[i].setShiftReleased(false);
 			}
 		}
 	}
@@ -327,49 +313,51 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	@Override
 	public void keyReleased(KeyEvent e) {
 
+		int i = 0;
 		// WASD Controls
 		if (e.getKeyCode() == KeyEvent.VK_A) {
-			APressed = false;
+			players[i].setLeftPressed(false);
 		}
 
 		if (e.getKeyCode() == KeyEvent.VK_S) {
-			SPressed = false;
+			players[i].setDownPressed(false);
 		}
 
 		if (e.getKeyCode() == KeyEvent.VK_D) {
-			DPressed = false;
+			players[i].setRightPressed(false);
 		}
 
 		if (e.getKeyCode() == KeyEvent.VK_W) {
-			WPressed = false;
-			WReleased = true;
+			players[i].setUpPressed(false);
+			players[i].setUpReleased(true);
 		}
 		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
-			LShiftPressed = false;
-			LShiftReleased = true;
+			players[i].setShiftPressed(false);
+			players[i].setShiftReleased(true);
 		}
 
+		i = 1;
 		// ULDR Controls
 		if (e.getKeyCode() == KeyEvent.VK_UP) {
-			UpPressed = false;
-			UpReleased = true;
+			players[i].setUpPressed(false);
+			players[i].setUpReleased(true);
 		}
 
 		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-			DownPressed = false;
+			players[i].setDownPressed(false);
 		}
 
 		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			LeftPressed = false;
+			players[i].setLeftPressed(false);
 		}
 
 		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			RightPressed = false;
+			players[i].setRightPressed(false);
 		}
 
 		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
-			RShiftPressed = false;
-			RShiftReleased = true;
+			players[i].setShiftPressed(false);
+			players[i].setShiftReleased(true);
 		}
 	}
 
@@ -419,140 +407,16 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		return Tools;
 	}
 
-	public boolean isRunnableP1() {
-		return runnableP1;
+	public boolean[] getRunnable() {
+		return runnable;
 	}
 
-	public void setRunnableP1(boolean runnableP1) {
-		this.runnableP1 = runnableP1;
-	}
-
-	public boolean isRunnableP2() {
-		return runnableP2;
-	}
-
-	public void setRunnableP2(boolean runnableP2) {
-		this.runnableP2 = runnableP2;
+	public void setRunnable(boolean[] runnable) {
+		this.runnable = runnable;
 	}
 
 	public Color getBackgroundColor() {
 		return backgroundColor;
-	}
-
-	public void setBackgroundColor(Color backgroundColor) {
-		this.backgroundColor = backgroundColor;
-	}
-
-	public boolean isWPressed() {
-		return WPressed;
-	}
-
-	public void setWPressed(boolean wPressed) {
-		WPressed = wPressed;
-	}
-
-	public boolean isWReleased() {
-		return WReleased;
-	}
-
-	public void setWReleased(boolean wReleased) {
-		WReleased = wReleased;
-	}
-
-	public boolean isAPressed() {
-		return APressed;
-	}
-
-	public void setAPressed(boolean aPressed) {
-		APressed = aPressed;
-	}
-
-	public boolean isSPressed() {
-		return SPressed;
-	}
-
-	public void setSPressed(boolean sPressed) {
-		SPressed = sPressed;
-	}
-
-	public boolean isDPressed() {
-		return DPressed;
-	}
-
-	public void setDPressed(boolean dPressed) {
-		DPressed = dPressed;
-	}
-
-	public boolean isLShiftPressed() {
-		return LShiftPressed;
-	}
-
-	public void setLShiftPressed(boolean lShiftPressed) {
-		LShiftPressed = lShiftPressed;
-	}
-
-	public boolean isLShiftReleased() {
-		return LShiftReleased;
-	}
-
-	public void setLShiftReleased(boolean lShiftReleased) {
-		LShiftReleased = lShiftReleased;
-	}
-
-	public boolean isUpPressed() {
-		return UpPressed;
-	}
-
-	public void setUpPressed(boolean upPressed) {
-		UpPressed = upPressed;
-	}
-
-	public boolean isUpReleased() {
-		return UpReleased;
-	}
-
-	public void setUpReleased(boolean upReleased) {
-		UpReleased = upReleased;
-	}
-
-	public boolean isLeftPressed() {
-		return LeftPressed;
-	}
-
-	public void setLeftPressed(boolean leftPressed) {
-		LeftPressed = leftPressed;
-	}
-
-	public boolean isDownPressed() {
-		return DownPressed;
-	}
-
-	public void setDownPressed(boolean downPressed) {
-		DownPressed = downPressed;
-	}
-
-	public boolean isRightPressed() {
-		return RightPressed;
-	}
-
-	public void setRightPressed(boolean rightPressed) {
-		RightPressed = rightPressed;
-	}
-
-	public boolean isRShiftPressed() {
-		return RShiftPressed;
-	}
-
-	public void setRShiftPressed(boolean rShiftPressed) {
-		RShiftPressed = rShiftPressed;
-	}
-
-	public boolean isRShiftReleased() {
-		return RShiftReleased;
-	}
-
-	public void setRShiftReleased(boolean rShiftReleased) {
-		RShiftReleased = rShiftReleased;
 	}
 
 	public ArrayList<Thread> getThreads() {
@@ -565,10 +429,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 	public int getPLAYERCOUNT() {
 		return PLAYERCOUNT;
-	}
-
-	public void setPLAYERCOUNT(int pLAYERCOUNT) {
-		PLAYERCOUNT = pLAYERCOUNT;
 	}
 
 	public Player[] getPlayers() {

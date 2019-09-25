@@ -8,6 +8,7 @@ import javax.swing.ImageIcon;
 
 public class Player {
 	private Playspace space;
+	private ToolBox Tools;
 	private Item item;
 	private Image image;
 	private String imageDir;
@@ -22,27 +23,31 @@ public class Player {
 	private int height;
 	private int direction;
 	private int jumps;
+	private boolean UpPressed, UpReleased, LeftPressed, DownPressed, RightPressed, ShiftPressed, ShiftReleased;
 	private boolean stunned;
 	private boolean falling;
 	private boolean jumping;
 	private boolean dark;
 	private boolean directionBool;
-	private ToolBox Tools;
 
-	public Player(String imageDir, String darkImageDir, Playspace p) {
-		Tools = new ToolBox(p);
-		space = p;
-		health = 1000;
-		width = 90;
-		height = 150;
-		jumps = 0;
-		falling = false;
-		jumping = false;
-		dark = false;
-		image = new ImageIcon(imageDir).getImage();
-		image = Tools.scaleObject(image, width, height);
+	public Player(String imageDir, String darkImageDir, Playspace space) {
+		this.Tools = new ToolBox(space);
+		this.space = space;
+		this.health = 1000;
+		this.width = 90;
+		this.height = 150;
+		this.jumps = 0;
+		this.falling = false;
+		this.jumping = false;
+		this.dark = false;
+		this.image = new ImageIcon(imageDir).getImage();
+		this.image = Tools.scaleObject(image, width, height);
 		this.imageDir = imageDir;
 		this.darkImageDir = darkImageDir;
+
+		this.UpReleased = true;
+		this.ShiftReleased = true;
+
 	}
 
 	public Point leftHandItemLocation() {
@@ -218,6 +223,62 @@ public class Player {
 
 	public void setStunned(boolean stunned) {
 		this.stunned = stunned;
+	}
+
+	public boolean isUpPressed() {
+		return UpPressed;
+	}
+
+	public void setUpPressed(boolean upPressed) {
+		UpPressed = upPressed;
+	}
+
+	public boolean isUpReleased() {
+		return UpReleased;
+	}
+
+	public void setUpReleased(boolean upReleased) {
+		UpReleased = upReleased;
+	}
+
+	public boolean isLeftPressed() {
+		return LeftPressed;
+	}
+
+	public void setLeftPressed(boolean leftPressed) {
+		LeftPressed = leftPressed;
+	}
+
+	public boolean isDownPressed() {
+		return DownPressed;
+	}
+
+	public void setDownPressed(boolean downPressed) {
+		DownPressed = downPressed;
+	}
+
+	public boolean isRightPressed() {
+		return RightPressed;
+	}
+
+	public void setRightPressed(boolean rightPressed) {
+		RightPressed = rightPressed;
+	}
+
+	public boolean isShiftPressed() {
+		return ShiftPressed;
+	}
+
+	public void setShiftPressed(boolean shiftPressed) {
+		ShiftPressed = shiftPressed;
+	}
+
+	public boolean isShiftReleased() {
+		return ShiftReleased;
+	}
+
+	public void setShiftReleased(boolean shiftReleased) {
+		ShiftReleased = shiftReleased;
 	}
 
 }
