@@ -203,25 +203,24 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 
 		// Thread array setup
 		threads.add(doPhysics);
+
+		// Thread start
+		doPhysics.start();
 	}
 
 	/** Initiates threads for values **/
 	private void resetThreads() {
 
 		// Old Thread for replacing
-		Thread Acceleration = doPhysics;
+		Thread Physics = doPhysics;
 
 		// Thread Constructor Call
 		doPhysics = new ThreadPhysics(this);
 
 		// Updates Array
-		threads.set(threads.indexOf(Acceleration), doPhysics);
+		threads.set(threads.indexOf(Physics), doPhysics);
 
-		// Start thread
-		for (Thread t : threads) {
-			if (!t.equals(playSound))
-				t.start();
-		}
+		doPhysics.start();
 	}
 
 	/** Begins background music player **/
@@ -247,7 +246,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	/** Triggered when "timer" completes a cycle **/
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		resetThreads();
+		doPhysics.setRunning(true);
+		this.repaint();
 	}
 
 	/** Keypress detection **/
@@ -395,7 +395,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 			healthBars[i].setText("" + players[i].getHealth());
 			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
 			healthBarIndicators[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
-			healthBarIndicators[i].setSize(50 * (players[i].getHealth() / 1000), 10);
+			healthBarIndicators[i].setSize((int) 50 * (players[i].getHealth() / 1000), 10);
 		}
 
 		// Draw items loop
