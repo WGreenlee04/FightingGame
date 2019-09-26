@@ -21,7 +21,7 @@ public class ThreadStun extends Thread {
 		player.setStunned(true);
 
 		try {
-			Thread.sleep(((1000 - player.getHealth()) / damage) * 1000);
+			Thread.sleep(((1000 - player.getHealth()) / damage) * 10);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

@@ -22,7 +22,10 @@ public class ThreadDamage extends Thread {
 	}
 
 	private void stunPlayer() {
-
+		if (!target.isStunned()) {
+			ThreadStun t = new ThreadStun(target, item.getDamage());
+			t.start();
+		}
 	}
 
 	@Override
@@ -30,9 +33,11 @@ public class ThreadDamage extends Thread {
 
 		if (item.getDirection() == -1) {
 			target.setAccelX(target.getAccelX() - item.getForce());
+			target.setHealth(target.getHealth() - item.getDamage());
 			stunPlayer();
 		} else {
 			target.setAccelX(target.getAccelX() + item.getForce());
+			target.setHealth(target.getHealth() - item.getDamage());
 			stunPlayer();
 		}
 

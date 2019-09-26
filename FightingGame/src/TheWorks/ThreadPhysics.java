@@ -55,6 +55,8 @@ public class ThreadPhysics extends Thread {
 
 		running = false;
 
+		System.out.println(space.getPlayers()[0].isStunned());
+
 		this.interrupt();
 	}
 
@@ -83,10 +85,10 @@ public class ThreadPhysics extends Thread {
 				if (!space.getPlayers()[i].getItem().isAnimated()) {
 					animateItem(space.getPlayers()[i].getItem());
 				}
-				for (Player p : space.getPlayers()) {
-					if (!p.equals(space.getPlayers()[i]) && p.getHitbox().intersects(space.getPlayers()[i].getHitbox())
-							&& !p.isBeingDamaged()) {
-						damagePlayer(p, space.getPlayers()[i].getItem());
+				for (Player target : space.getPlayers()) {
+					if (!target.equals(space.getPlayers()[i]) && !target.isBeingDamaged()
+							&& space.getPlayers()[i].getItem().getHitbox().intersects(target.getHitbox())) {
+						damagePlayer(target, space.getPlayers()[i].getItem());
 					}
 				}
 			}
@@ -114,26 +116,22 @@ public class ThreadPhysics extends Thread {
 		// All players
 		for (int i = 0; i < space.getPlayers().length; i++) {
 
-			if (space.getRunnable()[i]) {
-
-				if (!space.getPlayers()[i].isStunned()) {
-
-					// Left Movement w/ dash
-					if (space.getPlayers()[i].isLeftPressed() && !space.getPlayers()[i].isRightPressed()) {
-						if (space.getPlayers()[i].getAccelX() == 0) {
-							space.getPlayers()[i].setAccelX(-space.getDASHSPEED() * 2);
-						} else {
-							space.getPlayers()[i].setAccelX(-space.getPLAYERSPEED() * 2);
-						}
+			if (space.getRunnable()[i] && !space.getPlayers()[i].isStunned()) {
+				// Left Movement w/ dash
+				if (space.getPlayers()[i].isLeftPressed() && !space.getPlayers()[i].isRightPressed()) {
+					if (space.getPlayers()[i].getAccelX() == 0) {
+						space.getPlayers()[i].setAccelX(-space.getDASHSPEED() * 2);
+					} else {
+						space.getPlayers()[i].setAccelX(-space.getPLAYERSPEED() * 2);
 					}
+				}
 
-					// Right Movement w/ dash
-					if (space.getPlayers()[i].isRightPressed() && !space.getPlayers()[i].isLeftPressed()) {
-						if (space.getPlayers()[i].getAccelX() == 0) {
-							space.getPlayers()[i].setAccelX(space.getDASHSPEED() * 2);
-						} else {
-							space.getPlayers()[i].setAccelX(space.getPLAYERSPEED() * 2);
-						}
+				// Right Movement w/ dash
+				if (space.getPlayers()[i].isRightPressed() && !space.getPlayers()[i].isLeftPressed()) {
+					if (space.getPlayers()[i].getAccelX() == 0) {
+						space.getPlayers()[i].setAccelX(space.getDASHSPEED() * 2);
+					} else {
+						space.getPlayers()[i].setAccelX(space.getPLAYERSPEED() * 2);
 					}
 				}
 
@@ -249,8 +247,9 @@ public class ThreadPhysics extends Thread {
 			}
 		}
 
-		// When items hit the ground, stop motion
 		for (Item i : space.getItems()) {
+
+			// When items hit the ground, stop motion
 			if (i.getY() + i.getHeight() + 35 > space.getHEIGHT()) {
 				i.setY(space.getHEIGHT() - (i.getHeight() + 35));
 			}

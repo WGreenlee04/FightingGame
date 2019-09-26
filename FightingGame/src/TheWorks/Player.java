@@ -82,6 +82,9 @@ public class Player {
 
 	public void setHealth(int h) {
 		health = h;
+		if (health < 0) {
+			health = 0;
+		}
 
 	}
 
