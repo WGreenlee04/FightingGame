@@ -35,29 +35,28 @@ public class ThreadPhysics extends Thread {
 	@Override
 	public void run() {
 
-		space.createHitboxes();
+		while (running) {
 
-		pickup();
+			setUnarmed();
 
-		hit();
+			space.createHitboxes();
 
-		accel();
+			pickup();
 
-		gravity();
+			hit();
 
-		move();
+			accel();
 
-		collideAll();
+			gravity();
 
-		renderObjects();
+			move();
 
-		space.repaint();
+			collideAll();
 
-		running = false;
+			renderObjects();
 
-		System.out.println(space.getPlayers()[0].isStunned());
-
-		this.interrupt();
+			running = false;
+		}
 	}
 
 	private void pickup() {
@@ -141,7 +140,8 @@ public class ThreadPhysics extends Thread {
 					space.getPlayers()[i].setAccelY(space.getJUMPHEIGHT() * 2);
 				}
 
-				// You just jumped, and we need to increase jump counter and reset
+				// You just jumped, and we need to increase jump counter and
+				// reset
 				// jump
 				if (space.getPlayers()[i].isUpReleased() && space.getPlayers()[i].getJumps() <= 2) {
 					space.getPlayers()[i].setJumping(false);
@@ -291,5 +291,9 @@ public class ThreadPhysics extends Thread {
 
 	public boolean isRunning() {
 		return running;
+	}
+
+	public void setRunning(boolean running) {
+		this.running = running;
 	}
 }
