@@ -1,59 +1,76 @@
 package TheWorks;
 
-import java.awt.BorderLayout;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.net.MalformedURLException;
+import java.net.URL;
 
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-public class TitleScreen extends JPanel {
+public class TitleScreen extends JPanel implements KeyListener {
 
 	private static final long serialVersionUID = -6610051464023407144L;
+
+	private final Color backgroundColor; // Color of backdrop
+	private final int WIDTH; // Width of panel
+	private final int HEIGHT; // Height of panel
+
 	private Application app;
 	private JButton button1;
 	private JButton button2;
 
 	public TitleScreen(Application app) {
 		super();
-		this.setSize(app.getWidth(), app.getHeight());
+
+		// Application variables
 		this.app = app;
+		HEIGHT = this.app.getHeight();
+		WIDTH = this.app.getWidth();
+		setLocation(0, 0);
+		setSize(WIDTH, HEIGHT);
+		setFocusable(true);
+		addKeyListener(this);
+		setVisible(true);
+		backgroundColor = new Color(50, 50, 60);
+		backgroundColor.brighter();
+		setBackground(backgroundColor);
 		button1 = new JButton("Singleplayer");
 		button2 = new JButton("Multiplayer");
 	}
 
 	public void setup() {
+		URL url = null;
+		try {
+			url = new URL("www.youtube.com/watch?v=iaA8Xkl5kTc");
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-		this.setVisible(true);
-		this.setLocation(0, 0);
+		if (url != null) {
+			showVideo(url);
+		}
 
-		button1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				app.initiateFrame(1);
-			}
-		});
-		this.add(button1, BorderLayout.CENTER);
-		button1.setVisible(true);
+	}
 
-		button2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				app.initiateFrame(2);
-			}
-		});
-		this.add(button2, BorderLayout.CENTER);
-		button2.setVisible(true);
+	private void showVideo(URL url) {
 
 	}
 
 	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
+	public void keyPressed(KeyEvent arg0) {
 
-		Image background = new ImageIcon("src/resources/background.png").getImage();
-		background = background.getScaledInstance(this.getWidth(), this.getHeight(), 0);
-		g.drawImage(background, 0, 0, this);
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
 	}
 }
