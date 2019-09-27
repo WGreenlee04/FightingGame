@@ -9,6 +9,8 @@ import java.awt.image.ImageObserver;
 
 import javax.swing.ImageIcon;
 
+import Items.Player;
+
 public class ToolBox {
 
 	private ImageObserver I;

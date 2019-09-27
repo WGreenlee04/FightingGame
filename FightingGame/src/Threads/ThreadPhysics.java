@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import Items.Fist;
 import Items.Item;
-import TheWorks.Player;
+import Items.Player;
 import TheWorks.Playspace;
 
 public class ThreadPhysics extends Thread {

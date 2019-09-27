@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import Items.Item;
+import Items.Player;
 import Items.Stick;
 import Threads.ThreadPhysics;
 import Threads.ThreadSound;

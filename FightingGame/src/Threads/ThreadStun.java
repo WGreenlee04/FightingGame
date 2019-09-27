@@ -1,6 +1,6 @@
 package Threads;
 
-import TheWorks.Player;
+import Items.Player;
 
 public class ThreadStun extends Thread {
 

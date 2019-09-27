@@ -1,13 +1,21 @@
 package TheWorks;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.swing.JButton;
+import javax.media.CannotRealizeException;
+import javax.media.Manager;
+import javax.media.NoPlayerException;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import Items.Player;
 
 public class TitleScreen extends JPanel implements KeyListener {
 
@@ -18,8 +26,6 @@ public class TitleScreen extends JPanel implements KeyListener {
 	private final int HEIGHT; // Height of panel
 
 	private Application app;
-	private JButton button1;
-	private JButton button2;
 
 	public TitleScreen(Application app) {
 		super();
@@ -36,8 +42,6 @@ public class TitleScreen extends JPanel implements KeyListener {
 		backgroundColor = new Color(50, 50, 60);
 		backgroundColor.brighter();
 		setBackground(backgroundColor);
-		button1 = new JButton("Singleplayer");
-		button2 = new JButton("Multiplayer");
 	}
 
 	public void setup() {
@@ -56,7 +60,32 @@ public class TitleScreen extends JPanel implements KeyListener {
 	}
 
 	private void showVideo(URL url) {
+		Manager.setHint(Manager.LIGHTWEIGHT_RENDERER, true);
 
+		try {
+			// create a player to play the media specified in the URL
+			Player mediaPlayer = Manager.createRealizedPlayer(mediaURL);
+
+			// get the components for the video and the playback controls
+			Component video = mediaPlayer.getVisualComponent();
+			Component controls = mediaPlayer.getControlPanelComponent();
+
+			if (video != null)
+				add(video, BorderLayout.CENTER); // add video component
+			if (controls != null)
+				add(controls, BorderLayout.SOUTH); // add controls
+
+			mediaPlayer.start(); // start playing the media clip
+		} // end try
+		catch (NoPlayerException noPlayerException) {
+			JOptionPane.showMessageDialog(null, "No media player found");
+		} // end catch
+		catch (CannotRealizeException cannotRealizeException) {
+			JOptionPane.showMessageDialog(null, "Could not realize media player.");
+		} // end catch
+		catch (IOException iOException) {
+			JOptionPane.showMessageDialog(null, "Error reading from the source.");
+		} // end catch
 	}
 
 	@Override

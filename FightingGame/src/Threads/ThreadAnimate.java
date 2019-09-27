@@ -5,7 +5,7 @@ import java.awt.Image;
 import javax.swing.ImageIcon;
 
 import Items.Item;
-import TheWorks.Player;
+import Items.Player;
 import TheWorks.Playspace;
 import TheWorks.ToolBox;
 

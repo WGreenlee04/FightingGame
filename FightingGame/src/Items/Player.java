@@ -1,4 +1,4 @@
-package TheWorks;
+package Items;
 
 import java.awt.Image;
 import java.awt.Point;
@@ -6,7 +6,8 @@ import java.awt.Rectangle;
 
 import javax.swing.ImageIcon;
 
-import Items.Item;
+import TheWorks.Playspace;
+import TheWorks.ToolBox;
 
 public class Player {
 	private Playspace space;

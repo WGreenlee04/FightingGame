@@ -1,7 +1,7 @@
 package Threads;
 
 import Items.Item;
-import TheWorks.Player;
+import Items.Player;
 import TheWorks.Playspace;
 
 public class ThreadDamage extends Thread {
