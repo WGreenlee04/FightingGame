@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -13,15 +11,26 @@ import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.Timer;
 
-public class Playspace extends JPanel implements ActionListener, KeyListener {
+import Items.Item;
+import Items.Stick;
+import Threads.ThreadPhysics;
+import Threads.ThreadSound;
+
+public class Playspace extends JPanel implements KeyListener {
 
 	private static final long serialVersionUID = 2089638191057847879L;
 
+	// STUFF FOR LOOP
+	private final int TICKS_PER_SECOND = 50;
+	private final int SKIP_TICKS = 1000 / TICKS_PER_SECOND;
+	private final int MAX_FRAMESKIP = 10;
+	private long nextGameTick;
+	private int loops;
+	private boolean gameRunning;
+
 	// Constants and Classes
 	private Application app;
-	private Timer timer;
 	private ToolBox Tools;
 	private final int WIDTH; // Width of panel
 	private final int HEIGHT; // Height of panel
@@ -82,9 +91,6 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		runnable = new boolean[PLAYERCOUNT];
 		items = new ArrayList<Item>();
 		threads = new ArrayList<Thread>();
-
-		// Timer setup
-		timer = new Timer(DELAY, this);
 
 		// Toolbox setup
 		Tools = new ToolBox(this);
@@ -166,8 +172,8 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		initThreads();
 		playSound("src/resources/Clayfighter (SNES) - Taffy's Theme.wav");
 
-		// Timer start
-		timer.start(); // Starts timer
+		// Game start
+		this.startGame();
 	}
 
 	// SinglePlayer
@@ -208,19 +214,26 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		doPhysics.start();
 	}
 
-	/** Initiates threads for values **/
-	private void resetThreads() {
+	/** resets the physics thread **/
+	private void resetPhysics() {
+		if (doPhysics.isAlive()) {
+			return;
+		}
+		ThreadPhysics temp = doPhysics;
 
-		// Old Thread for replacing
-		Thread Physics = doPhysics;
-
-		// Thread Constructor Call
 		doPhysics = new ThreadPhysics(this);
 
-		// Updates Array
-		threads.set(threads.indexOf(Physics), doPhysics);
+		threads.set(threads.indexOf(temp), doPhysics);
 
 		doPhysics.start();
+	}
+
+	public void cleanup() {
+		for (Thread t : threads) {
+			if (!t.isAlive()) {
+				threads.remove(threads.indexOf(t));
+			}
+		}
 	}
 
 	/** Begins background music player **/
@@ -243,11 +256,60 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 		}
 	}
 
-	/** Triggered when "timer" completes a cycle **/
+	/** Triggered when game completes a cycle **/
+	public void startGame() {
+		gameRunning = true;
+		nextGameTick = System.currentTimeMillis();
+		while (gameRunning) {
+
+			loops = 0;
+
+			while (System.currentTimeMillis() > nextGameTick && loops < MAX_FRAMESKIP) {
+				resetPhysics();
+
+				cleanup();
+				nextGameTick += SKIP_TICKS;
+				loops++;
+			}
+
+			this.repaint();
+		}
+	}
+
+	/** Draws everything on screen **/
 	@Override
-	public void actionPerformed(ActionEvent arg0) {
-		doPhysics.setRunning(true);
-		this.repaint();
+	public void paintComponent(Graphics g) {
+
+		// Draws main graphics
+		super.paintComponent(g);
+
+		// Loop for each player
+		for (int i = 0; i < players.length; i++) {
+
+			// Draw players
+			g.drawImage(players[i].getImage(), players[i].getX(), players[i].getY(), this);
+
+			if (developerMode) {
+				g.draw3DRect(players[i].getX(), players[i].getY(), players[i].getWidth(), players[i].getHeight(), true);
+			}
+
+			// Draw health bars
+			healthBars[i].setText("" + players[i].getHealth());
+			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
+			healthBarIndicators[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
+			healthBarIndicators[i].setSize((int) 50 * (players[i].getHealth() / 1000), 10);
+		}
+
+		// Draw items loop
+		for (Item item : items) {
+
+			// Draw item images
+			g.drawImage(item.getCurrentImage(), item.getX(), item.getY(), this);
+
+			if (developerMode) {
+				g.draw3DRect(item.getX(), item.getY(), item.getWidth(), item.getHeight(), true);
+			}
+		}
 	}
 
 	/** Keypress detection **/
@@ -374,50 +436,7 @@ public class Playspace extends JPanel implements ActionListener, KeyListener {
 	public void keyTyped(KeyEvent e) {
 	}
 
-	/** Draws everything on screen **/
-	@Override
-	public void paintComponent(Graphics g) {
-
-		// Draws main graphics
-		super.paintComponent(g);
-
-		// Loop for each player
-		for (int i = 0; i < players.length; i++) {
-
-			// Draw players
-			g.drawImage(players[i].getImage(), players[i].getX(), players[i].getY(), this);
-
-			if (developerMode) {
-				g.draw3DRect(players[i].getX(), players[i].getY(), players[i].getWidth(), players[i].getHeight(), true);
-			}
-
-			// Draw health bars
-			healthBars[i].setText("" + players[i].getHealth());
-			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
-			healthBarIndicators[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
-			healthBarIndicators[i].setSize((int) 50 * (players[i].getHealth() / 1000), 10);
-		}
-
-		// Draw items loop
-		for (Item item : items) {
-
-			// Draw item images
-			g.drawImage(item.getCurrentImage(), item.getX(), item.getY(), this);
-
-			if (developerMode) {
-				g.draw3DRect(item.getX(), item.getY(), item.getWidth(), item.getHeight(), true);
-			}
-		}
-	}
-
 	/** ALL GETTERS AND SETTERS **/
-	public Timer getTimer() {
-		return timer;
-	}
-
-	public void setTimer(Timer timer) {
-		this.timer = timer;
-	}
 
 	public ToolBox getTools() {
 		return Tools;

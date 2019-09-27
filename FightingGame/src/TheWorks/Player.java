@@ -6,6 +6,8 @@ import java.awt.Rectangle;
 
 import javax.swing.ImageIcon;
 
+import Items.Item;
+
 public class Player {
 	private Playspace space;
 	private ToolBox Tools;

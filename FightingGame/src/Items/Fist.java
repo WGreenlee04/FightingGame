@@ -1,6 +1,8 @@
-package TheWorks;
+package Items;
 
 import javax.swing.ImageIcon;
+
+import TheWorks.Playspace;
 
 public class Fist extends Item {
 

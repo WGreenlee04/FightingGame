@@ -1,11 +1,15 @@
-package TheWorks;
+package Threads;
 
 import java.util.ArrayList;
+
+import Items.Fist;
+import Items.Item;
+import TheWorks.Player;
+import TheWorks.Playspace;
 
 public class ThreadPhysics extends Thread {
 
 	private Playspace space;
-	private boolean running;
 	private ArrayList<ThreadAnimate> animations; // Active animation threads
 	private ArrayList<ThreadDamage> damages; // Active damage threads
 
@@ -14,7 +18,6 @@ public class ThreadPhysics extends Thread {
 		this.space = p;
 		this.animations = new ArrayList<ThreadAnimate>();
 		this.damages = new ArrayList<ThreadDamage>();
-		this.running = true;
 	}
 
 	private void animateItem(Item object) {
@@ -34,29 +37,25 @@ public class ThreadPhysics extends Thread {
 
 	@Override
 	public void run() {
+		setUnarmed();
 
-		while (running) {
+		space.createHitboxes();
 
-			setUnarmed();
+		pickup();
 
-			space.createHitboxes();
+		hit();
 
-			pickup();
+		accel();
 
-			hit();
+		gravity();
 
-			accel();
+		move();
 
-			gravity();
+		collideAll();
 
-			move();
+		renderObjects();
 
-			collideAll();
-
-			renderObjects();
-
-			running = false;
-		}
+		this.interrupt();
 	}
 
 	private void pickup() {
@@ -243,7 +242,6 @@ public class ThreadPhysics extends Thread {
 				p.setY(space.getHEIGHT() - (p.getHeight() + 35));
 				p.setJumps(0);
 				p.setFalling(false);
-				;
 			}
 		}
 
@@ -287,13 +285,5 @@ public class ThreadPhysics extends Thread {
 				}
 			}
 		}
-	}
-
-	public boolean isRunning() {
-		return running;
-	}
-
-	public void setRunning(boolean running) {
-		this.running = running;
 	}
 }

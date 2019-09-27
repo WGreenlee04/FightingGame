@@ -1,8 +1,13 @@
-package TheWorks;
+package Threads;
 
 import java.awt.Image;
 
 import javax.swing.ImageIcon;
+
+import Items.Item;
+import TheWorks.Player;
+import TheWorks.Playspace;
+import TheWorks.ToolBox;
 
 public class ThreadAnimate extends Thread {
 

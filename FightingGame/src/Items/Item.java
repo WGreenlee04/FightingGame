@@ -1,7 +1,11 @@
-package TheWorks;
+package Items;
 
 import java.awt.Image;
 import java.awt.Rectangle;
+
+import TheWorks.Player;
+import TheWorks.Playspace;
+import TheWorks.ToolBox;
 
 public class Item {
 	private Player player;
