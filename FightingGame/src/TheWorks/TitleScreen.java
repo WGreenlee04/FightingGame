@@ -6,16 +6,14 @@ import java.awt.Component;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import javax.media.CannotRealizeException;
 import javax.media.Manager;
 import javax.media.NoPlayerException;
+import javax.media.Player;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-
-import Items.Player;
 
 public class TitleScreen extends JPanel implements KeyListener {
 
@@ -37,25 +35,26 @@ public class TitleScreen extends JPanel implements KeyListener {
 		setLocation(0, 0);
 		setSize(WIDTH, HEIGHT);
 		setFocusable(true);
-		addKeyListener(this);
 		setVisible(true);
-		backgroundColor = new Color(50, 50, 60);
+		addKeyListener(this);
+		backgroundColor = new Color(100, 80, 60);
 		backgroundColor.brighter();
 		setBackground(backgroundColor);
 	}
 
 	public void setup() {
-		URL url = null;
-		try {
-			url = new URL("www.youtube.com/watch?v=iaA8Xkl5kTc");
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
-		if (url != null) {
-			showVideo(url);
-		}
+		JOptionPane.showMessageDialog(this, "Title screen to be added");
+		JOptionPane.showMessageDialog(this, "For now, press 1 or 2 for Single or Multiplayer");
+
+		/*
+		 * URL url = null; try { url = new
+		 * URL("https://www.youtube.com/watch?v=iaA8Xkl5kTc"); } catch
+		 * (MalformedURLException e) { // TODO Auto-generated catch block
+		 * e.printStackTrace(); }
+		 * 
+		 * if (url != null) { showVideo(url); }
+		 */
 
 	}
 
@@ -64,7 +63,7 @@ public class TitleScreen extends JPanel implements KeyListener {
 
 		try {
 			// create a player to play the media specified in the URL
-			Player mediaPlayer = Manager.createRealizedPlayer(mediaURL);
+			Player mediaPlayer = Manager.createRealizedPlayer(url);
 
 			// get the components for the video and the playback controls
 			Component video = mediaPlayer.getVisualComponent();
@@ -89,8 +88,14 @@ public class TitleScreen extends JPanel implements KeyListener {
 	}
 
 	@Override
-	public void keyPressed(KeyEvent arg0) {
-
+	public void keyPressed(KeyEvent e) {
+		System.out.println(e);
+		if (e.getKeyCode() == KeyEvent.VK_1) {
+			app.initiateFrame(1);
+		}
+		if (e.getKeyCode() == KeyEvent.VK_2) {
+			app.initiateFrame(2);
+		}
 	}
 
 	@Override

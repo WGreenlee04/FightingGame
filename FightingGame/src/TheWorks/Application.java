@@ -21,6 +21,7 @@ public class Application extends JFrame {
 		pspace = new Playspace(m, this);
 		add(pspace);
 		pspace.initSpace();
+		new Thread(pspace).start();
 	}
 
 	public void startGame() {

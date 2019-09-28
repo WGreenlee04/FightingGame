@@ -10,26 +10,22 @@ import TheWorks.Playspace;
 public class ThreadPhysics extends Thread {
 
 	private Playspace space;
-	private ArrayList<ThreadAnimate> animations; // Active animation threads
-	private ArrayList<ThreadDamage> damages; // Active damage threads
+	private boolean running;
 
 	public ThreadPhysics(Playspace p) {
 		super();
 		this.space = p;
-		this.animations = new ArrayList<ThreadAnimate>();
-		this.damages = new ArrayList<ThreadDamage>();
+		running = true;
 	}
 
 	private void animateItem(Item object) {
 		ThreadAnimate animation = new ThreadAnimate(object, space);
-		animations.add(animation);
 		object.setAnimated(true);
 		animation.start();
 	}
 
 	private void damagePlayer(Player player, Item item) {
 		ThreadDamage damage = new ThreadDamage(item, player, space);
-		damages.add(damage);
 		ThreadSound sound = new ThreadSound("src/resources/" + item.getName() + "Hit.wav");
 		damage.start();
 		sound.start();
@@ -37,25 +33,32 @@ public class ThreadPhysics extends Thread {
 
 	@Override
 	public void run() {
-		setUnarmed();
+		while (true) {
+			while (running) {
 
-		space.createHitboxes();
+				setUnarmed();
 
-		pickup();
+				space.createHitboxes();
 
-		hit();
+				pickup();
 
-		accel();
+				hit();
 
-		gravity();
+				accel();
 
-		move();
+				gravity();
 
-		collideAll();
+				move();
 
-		renderObjects();
+				collideAll();
 
-		this.interrupt();
+				renderObjects();
+
+				this.interrupt();
+
+				running = false;
+			}
+		}
 	}
 
 	private void pickup() {
@@ -285,5 +288,13 @@ public class ThreadPhysics extends Thread {
 				}
 			}
 		}
+	}
+
+	public boolean isRunning() {
+		return running;
+	}
+
+	public void setRunning(boolean running) {
+		this.running = running;
 	}
 }

@@ -18,7 +18,7 @@ import Items.Stick;
 import Threads.ThreadPhysics;
 import Threads.ThreadSound;
 
-public class Playspace extends JPanel implements KeyListener {
+public class Playspace extends JPanel implements KeyListener, Runnable {
 
 	private static final long serialVersionUID = 2089638191057847879L;
 
@@ -62,7 +62,7 @@ public class Playspace extends JPanel implements KeyListener {
 	private ArrayList<Item> items; // current items
 	private ArrayList<Thread> threads; // Active threads
 
-	/** Constructor, sets up frame and arrays **/
+	/** Constructor, sets frame and arrays up **/
 	public Playspace(int mode, Application app) {
 
 		// Sets up JPanel
@@ -163,7 +163,7 @@ public class Playspace extends JPanel implements KeyListener {
 			}
 	}
 
-	/** Sets all array defaults and sets images **/
+	/** Checks validity and initiates game **/
 	public void initSpace() {
 
 		// Try{}Catches
@@ -173,8 +173,7 @@ public class Playspace extends JPanel implements KeyListener {
 		initThreads();
 		playSound("src/resources/Clayfighter (SNES) - Taffy's Theme.wav");
 
-		// Game start
-		this.startGame();
+		// Interpreter is moved to the Application class where it runs the gameLoop
 	}
 
 	// SinglePlayer
@@ -188,7 +187,7 @@ public class Playspace extends JPanel implements KeyListener {
 		players[1] = b;
 	}
 
-	/** Checks if each player exists to prevent null pointers **/
+	/** Checks if each Player exists to prevent null pointers **/
 	private void checkPlayerMethodValidity() {
 		for (int i = 0; i < players.length; i++)
 			try {
@@ -215,7 +214,8 @@ public class Playspace extends JPanel implements KeyListener {
 		doPhysics.start();
 	}
 
-	/** resets the physics thread **/
+	/** Resets the physics thread **/
+	@Deprecated
 	private void resetPhysics() {
 		if (doPhysics.isAlive()) {
 			return;
@@ -227,14 +227,6 @@ public class Playspace extends JPanel implements KeyListener {
 		threads.set(threads.indexOf(temp), doPhysics);
 
 		doPhysics.start();
-	}
-
-	public void cleanup() {
-		for (Thread t : threads) {
-			if (!t.isAlive()) {
-				threads.remove(threads.indexOf(t));
-			}
-		}
 	}
 
 	/** Begins background music player **/
@@ -257,8 +249,9 @@ public class Playspace extends JPanel implements KeyListener {
 		}
 	}
 
-	/** Triggered when game completes a cycle **/
-	public void startGame() {
+	/** This is the main game loop thread **/
+	@Override
+	public void run() {
 		gameRunning = true;
 		nextGameTick = System.currentTimeMillis();
 		while (gameRunning) {
@@ -266,15 +259,15 @@ public class Playspace extends JPanel implements KeyListener {
 			loops = 0;
 
 			while (System.currentTimeMillis() > nextGameTick && loops < MAX_FRAMESKIP) {
-				resetPhysics();
+				doPhysics.setRunning(true);
 
-				cleanup();
 				nextGameTick += SKIP_TICKS;
 				loops++;
 			}
 
-			this.repaint();
+			repaint();
 		}
+
 	}
 
 	/** Draws everything on screen **/
@@ -437,7 +430,7 @@ public class Playspace extends JPanel implements KeyListener {
 	public void keyTyped(KeyEvent e) {
 	}
 
-	/** ALL GETTERS AND SETTERS **/
+	// ALL GETTERS AND SETTERS //
 
 	public ToolBox getTools() {
 		return Tools;
