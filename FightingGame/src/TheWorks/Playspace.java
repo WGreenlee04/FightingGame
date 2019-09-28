@@ -40,21 +40,21 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 	private final int FALLSPEED = -10; // Speed of fast fall
 
 	// Stuff for game loop
-	private final int TICKS_PER_SECOND = 50;
-	private final int SKIP_TICKS = 1000 / TICKS_PER_SECOND;
-	private final int MAX_FRAMESKIP = 10;
-	private long nextGameTick;
-	private int loops;
-	private boolean gameRunning;;
+	private final int TICKS_PER_SECOND = 50; // How many ticks are processed in a second
+	private final int SKIP_TICKS = 1000 / TICKS_PER_SECOND; // How many ticks to skip
+	private final int MAX_FRAMESKIP = 10; // Max processing frames
+	private long nextGameTick; // Next tick to operate on
+	private int loops; // How many loops of updating
+	private boolean gameRunning; // If game is running
 
 	// Here we go... Threads...
-	private ThreadPhysics doPhysics;
-	private ThreadSound playSound;
-	private Thread gameLoop;
+	private ThreadPhysics doPhysics; // Physics for game
+	private ThreadSound playSound; // Background music
+	private Thread gameLoop; // Runs game operations per thread
 
 	// Variables
 	private boolean[] runnable; // We don't want null pointers
-	private boolean developerMode;
+	private boolean developerMode; // Developer options
 
 	// Arrays
 	private Player[] players; // Array of players
@@ -201,7 +201,7 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 		gameLoop.start();
 	}
 
-	/** !!UNSTABLE!! Resets the physics thread **/
+	/** <i>!!UNSTABLE!!</i> Resets the physics thread **/
 	private void resetThreads() {
 
 		// If physics is done doing thing

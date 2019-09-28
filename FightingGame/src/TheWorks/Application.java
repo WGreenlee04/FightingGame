@@ -8,6 +8,10 @@ public class Application extends JFrame {
 	private Playspace pspace;
 	private TitleScreen title;
 
+	public static void main(String[] args) {
+		new Application().startGame();
+	}
+
 	public Application() {
 		setSize(1000, 800);
 		setTitle("StickFight");
