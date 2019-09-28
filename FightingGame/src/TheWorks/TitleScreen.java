@@ -89,7 +89,6 @@ public class TitleScreen extends JPanel implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		System.out.println(e);
 		if (e.getKeyCode() == KeyEvent.VK_1) {
 			app.initiateFrame(1);
 		}

@@ -54,8 +54,6 @@ public class ThreadPhysics extends Thread {
 
 				renderObjects();
 
-				this.interrupt();
-
 				running = false;
 			}
 		}

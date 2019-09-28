@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
 
 import Items.Item;
 import Items.Player;
@@ -18,17 +21,9 @@ import Items.Stick;
 import Threads.ThreadPhysics;
 import Threads.ThreadSound;
 
-public class Playspace extends JPanel implements KeyListener, Runnable {
+public class Playspace extends JPanel implements KeyListener, Runnable, ActionListener {
 
 	private static final long serialVersionUID = 2089638191057847879L;
-
-	// STUFF FOR LOOP
-	private final int TICKS_PER_SECOND = 50;
-	private final int SKIP_TICKS = 1000 / TICKS_PER_SECOND;
-	private final int MAX_FRAMESKIP = 10;
-	private long nextGameTick;
-	private int loops;
-	private boolean gameRunning;
 
 	// Constants and Classes
 	private Application app;
@@ -46,6 +41,18 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 	private final int FALLSPEED = -10; // Speed of fast fall
 	private final Color backgroundColor; // Color of backdrop
 	private final int PLAYERCOUNT; // Changing amount of players
+
+	// STUFF FOR OLD LOOP
+	private final int TICKS_PER_SECOND = 50;
+	private final int SKIP_TICKS = 1000 / TICKS_PER_SECOND;
+	private final int MAX_FRAMESKIP = 10;
+	private long nextGameTick;
+	private int loops;
+	private boolean gameRunning;
+
+	// WORKING LOOP ITEMS
+	Timer timer = new Timer(DELAY, this);
+	private boolean timerEnabled;
 
 	// Here we go... Threads...
 	private ThreadPhysics doPhysics;
@@ -214,7 +221,7 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 		doPhysics.start();
 	}
 
-	/** Resets the physics thread **/
+	/** !!UNSTABLE!! Resets the physics thread **/
 	@Deprecated
 	private void resetPhysics() {
 		if (doPhysics.isAlive()) {
@@ -252,6 +259,23 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 	/** This is the main game loop thread **/
 	@Override
 	public void run() {
+		timer.start();
+
+		gameRunning = true;
+		while (gameRunning) {
+
+			while (timerEnabled) {
+				doPhysics.setRunning(true);
+				timerEnabled = false;
+			}
+
+			repaint();
+		}
+	}
+
+	/** <i>!!UNUSABLE!!<i> **/
+	@Deprecated
+	public void oldRun() {
 		gameRunning = true;
 		nextGameTick = System.currentTimeMillis();
 		while (gameRunning) {
@@ -291,7 +315,7 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 			healthBars[i].setText("" + players[i].getHealth());
 			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
 			healthBarIndicators[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
-			healthBarIndicators[i].setSize((int) 50 * (players[i].getHealth() / 1000), 10);
+			healthBarIndicators[i].setSize(50 * (players[i].getHealth() / 1000), 10);
 		}
 
 		// Draw items loop
@@ -425,6 +449,12 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 		}
 	}
 
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		timerEnabled = true;
+
+	}
+
 	/** We need this, but would rather forget it... **/
 	@Override
 	public void keyTyped(KeyEvent e) {
@@ -534,5 +564,29 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 
 	public int getFALLSPEED() {
 		return FALLSPEED;
+	}
+
+	public boolean isGameRunning() {
+		return gameRunning;
+	}
+
+	public void setGameRunning(boolean gameRunning) {
+		this.gameRunning = gameRunning;
+	}
+
+	public boolean isTimerEnabled() {
+		return timerEnabled;
+	}
+
+	public void setTimerEnabled(boolean timerEnabled) {
+		this.timerEnabled = timerEnabled;
+	}
+
+	public boolean isDeveloperMode() {
+		return developerMode;
+	}
+
+	public void setDeveloperMode(boolean developerMode) {
+		this.developerMode = developerMode;
 	}
 }
