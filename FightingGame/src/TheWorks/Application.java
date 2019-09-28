@@ -20,13 +20,12 @@ public class Application extends JFrame {
 		this.remove(title);
 		pspace = new Playspace(m, this);
 		add(pspace);
-		pspace.initSpace();
-		new Thread(pspace).start();
+		pspace.setup();
 	}
 
 	public void startGame() {
 		title = new TitleScreen(this);
-		this.add(title);
+		add(title);
 		title.setup();
 
 	}

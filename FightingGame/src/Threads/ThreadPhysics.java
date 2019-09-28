@@ -33,65 +33,28 @@ public class ThreadPhysics extends Thread {
 
 	@Override
 	public void run() {
-		while (true) {
-			while (running) {
 
-				setUnarmed();
+		setUnarmed();
 
-				space.createHitboxes();
+		space.createHitboxes();
 
-				pickup();
+		pickup();
 
-				hit();
+		hit();
 
-				accel();
+		accel();
 
-				gravity();
+		gravity();
 
-				move();
+		move();
 
-				collideAll();
+		collideAll();
 
-				renderObjects();
+		renderObjects();
 
-				running = false;
-			}
-		}
-	}
+		running = false;
 
-	private void pickup() {
-		// The... Pickup... line?
-		for (int i = 0; i < space.getPLAYERCOUNT(); i++) {
-			if (space.getPlayers()[i].isShiftPressed() && space.getRunnable()[i]
-					&& (space.getPlayers()[i].getItem() == null || space.getPlayers()[i].getItem() instanceof Fist)) {
-				space.getPlayers()[i].setShiftPressed(false);
-				space.getPlayers()[i].setItem(null);
-				for (Item item : space.getItems()) {
-					if (item.getHitbox().intersects(space.getPlayers()[i].getHitbox()) && item.getPlayer() == null
-							&& space.getPlayers()[i].getItem() == null && !space.getPlayers()[i].isStunned()) {
-						space.getPlayers()[i].setItem(item);
-						item.setPlayer(space.getPlayers()[i]);
-					}
-				}
-			}
-		}
-	}
-
-	private void hit() {
-		for (int i = 0; i < space.getPLAYERCOUNT(); i++) {
-			if (space.getPlayers()[i].isShiftPressed() && space.getPlayers()[i].getItem() != null) {
-				space.getPlayers()[i].setShiftPressed(false);
-				if (!space.getPlayers()[i].getItem().isAnimated()) {
-					animateItem(space.getPlayers()[i].getItem());
-				}
-				for (Player target : space.getPlayers()) {
-					if (!target.equals(space.getPlayers()[i]) && !target.isBeingDamaged()
-							&& space.getPlayers()[i].getItem().getHitbox().intersects(target.getHitbox())) {
-						damagePlayer(target, space.getPlayers()[i].getItem());
-					}
-				}
-			}
-		}
+		this.interrupt();
 	}
 
 	private void setUnarmed() {
@@ -111,11 +74,44 @@ public class ThreadPhysics extends Thread {
 		}
 	}
 
+	private void pickup() {
+		// The... Pickup... line?
+		for (Player p : space.getPlayers()) {
+			if (p.isShiftPressed() && (p.getItem() == null || p.getItem() instanceof Fist)) {
+				p.setShiftPressed(false);
+				for (Item item : space.getItems()) {
+					if (item.getHitbox().intersects(p.getHitbox()) && item.getPlayer() == null && !p.isStunned()) {
+						p.getItem().setPlayer(null);
+						p.setItem(item);
+						item.setPlayer(p);
+					}
+				}
+			}
+		}
+	}
+
+	private void hit() {
+		for (Player attacker : space.getPlayers()) {
+			if (attacker.isShiftPressed() && attacker.getItem() != null) {
+				attacker.setShiftPressed(false);
+				if (!attacker.getItem().isAnimated()) {
+					animateItem(attacker.getItem());
+				}
+				for (Player target : space.getPlayers()) {
+					if (!target.equals(attacker) && !target.isBeingDamaged()
+							&& attacker.getItem().getHitbox().intersects(target.getHitbox())) {
+						damagePlayer(target, attacker.getItem());
+					}
+				}
+			}
+		}
+	}
+
 	private void accel() {
 		// All players
 		for (int i = 0; i < space.getPlayers().length; i++) {
 
-			if (space.getRunnable()[i] && !space.getPlayers()[i].isStunned()) {
+			if (space.getPlayerRunnable()[i] && !space.getPlayers()[i].isStunned()) {
 				// Left Movement w/ dash
 				if (space.getPlayers()[i].isLeftPressed() && !space.getPlayers()[i].isRightPressed()) {
 					if (space.getPlayers()[i].getAccelX() == 0) {

@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
@@ -13,7 +11,6 @@ import java.util.ArrayList;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.Timer;
 
 import Items.Item;
 import Items.Player;
@@ -21,16 +18,18 @@ import Items.Stick;
 import Threads.ThreadPhysics;
 import Threads.ThreadSound;
 
-public class Playspace extends JPanel implements KeyListener, Runnable, ActionListener {
+public class Playspace extends JPanel implements KeyListener, Runnable {
 
 	private static final long serialVersionUID = 2089638191057847879L;
 
 	// Constants and Classes
-	private Application app;
-	private ToolBox Tools;
+	private final Application app; // Parent window
+	private final Color backgroundColor; // Color of backdrop
+	private final ToolBox Tools; // All Image tools and methods
 	private final int WIDTH; // Width of panel
 	private final int HEIGHT; // Height of panel
-	private final int DELAY = 20; // Delay of actions in ms
+	private final int PLAYERCOUNT; // Changing amount of players
+	private final int DELAY = 20; // Delay of timer in ms
 	private final int GRAVITY = -4; // Quadratic gravity for players
 	private final int ITEMGRAVITY = -6; // Linear gravity for items
 	private final int FRICTION = 2; // Deceleration on objects
@@ -39,24 +38,19 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 	private final int PLAYERSPEED = 8; // Speed of players
 	private final int JUMPHEIGHT = 13; // Height of jump
 	private final int FALLSPEED = -10; // Speed of fast fall
-	private final Color backgroundColor; // Color of backdrop
-	private final int PLAYERCOUNT; // Changing amount of players
 
-	// STUFF FOR OLD LOOP
+	// Stuff for game loop
 	private final int TICKS_PER_SECOND = 50;
 	private final int SKIP_TICKS = 1000 / TICKS_PER_SECOND;
 	private final int MAX_FRAMESKIP = 10;
 	private long nextGameTick;
 	private int loops;
-	private boolean gameRunning;
-
-	// WORKING LOOP ITEMS
-	Timer timer = new Timer(DELAY, this);
-	private boolean timerEnabled;
+	private boolean gameRunning;;
 
 	// Here we go... Threads...
 	private ThreadPhysics doPhysics;
 	private ThreadSound playSound;
+	private Thread gameLoop;
 
 	// Variables
 	private boolean[] runnable; // We don't want null pointers
@@ -67,7 +61,6 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 	private JLabel[] healthBars; // number on bar
 	private JLabel[] healthBarIndicators; // bar itself
 	private ArrayList<Item> items; // current items
-	private ArrayList<Thread> threads; // Active threads
 
 	/** Constructor, sets frame and arrays up **/
 	public Playspace(int mode, Application app) {
@@ -82,9 +75,10 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 		setLayout(null);
 		setLocation(0, 0);
 		setSize(WIDTH, HEIGHT);
+		setVisible(true);
 		setFocusable(true);
 		addKeyListener(this);
-		setVisible(true);
+		requestFocusInWindow();
 		backgroundColor = new Color(50, 50, 60);
 		backgroundColor.brighter();
 		setBackground(backgroundColor);
@@ -98,7 +92,6 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 		healthBarIndicators = new JLabel[PLAYERCOUNT];
 		runnable = new boolean[PLAYERCOUNT];
 		items = new ArrayList<Item>();
-		threads = new ArrayList<Thread>();
 
 		// Toolbox setup
 		Tools = new ToolBox(this);
@@ -109,17 +102,17 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 		// Adds both players to board array
 		switch (mode) {
 		case 1:
-			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this));
+			players[0] = new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this);
 			break;
 
 		case 2:
-			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this),
-					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png", this));
+			players[0] = new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this);
+			players[1] = new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png", this);
 			break;
 
 		default:
-			add(new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this),
-					new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png", this));
+			players[0] = new Player("src/resources/stickBlue.png", "src/resources/darkStickBlue.png", this);
+			players[1] = new Player("src/resources/stickRed.png", "src/resources/darkStickRed.png", this);
 			break;
 
 		}
@@ -171,31 +164,20 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 	}
 
 	/** Checks validity and initiates game **/
-	public void initSpace() {
+	public void setup() {
 
-		// Try{}Catches
+		// Try{} Catches
 		checkPlayerMethodValidity();
 
 		// Thread setup
 		initThreads();
 		playSound("src/resources/Clayfighter (SNES) - Taffy's Theme.wav");
 
-		// Interpreter is moved to the Application class where it runs the gameLoop
-	}
-
-	// SinglePlayer
-	private void add(Player a) {
-		players[0] = a;
-	}
-
-	// 2 Player
-	private void add(Player a, Player b) {
-		players[0] = a;
-		players[1] = b;
 	}
 
 	/** Checks if each Player exists to prevent null pointers **/
 	private void checkPlayerMethodValidity() {
+
 		for (int i = 0; i < players.length; i++)
 			try {
 				if (players[i] != null) {
@@ -210,37 +192,32 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 
 	/** Initiates threads for values **/
 	private void initThreads() {
-
-		// Thread Constructor Call
+		// Thread Constructor Calls
 		doPhysics = new ThreadPhysics(this);
-
-		// Thread array setup
-		threads.add(doPhysics);
+		gameLoop = new Thread(this);
 
 		// Thread start
 		doPhysics.start();
+		gameLoop.start();
 	}
 
 	/** !!UNSTABLE!! Resets the physics thread **/
-	@Deprecated
-	private void resetPhysics() {
+	private void resetThreads() {
+
+		// If physics is done doing thing
 		if (doPhysics.isAlive()) {
 			return;
+		} else {
+			// Start it again
+			doPhysics = new ThreadPhysics(this);
+			doPhysics.start();
 		}
-		ThreadPhysics temp = doPhysics;
-
-		doPhysics = new ThreadPhysics(this);
-
-		threads.set(threads.indexOf(temp), doPhysics);
-
-		doPhysics.start();
 	}
 
 	/** Begins background music player **/
 	public void playSound(String soundFile) {
 
 		playSound = new ThreadSound(soundFile);
-		threads.add(playSound);
 		playSound.start();
 	}
 
@@ -259,23 +236,6 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 	/** This is the main game loop thread **/
 	@Override
 	public void run() {
-		timer.start();
-
-		gameRunning = true;
-		while (gameRunning) {
-
-			while (timerEnabled) {
-				doPhysics.setRunning(true);
-				timerEnabled = false;
-			}
-
-			repaint();
-		}
-	}
-
-	/** <i>!!UNUSABLE!!<i> **/
-	@Deprecated
-	public void oldRun() {
 		gameRunning = true;
 		nextGameTick = System.currentTimeMillis();
 		while (gameRunning) {
@@ -283,7 +243,7 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 			loops = 0;
 
 			while (System.currentTimeMillis() > nextGameTick && loops < MAX_FRAMESKIP) {
-				doPhysics.setRunning(true);
+				resetThreads();
 
 				nextGameTick += SKIP_TICKS;
 				loops++;
@@ -321,11 +281,14 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 		// Draw items loop
 		for (Item item : items) {
 
-			// Draw item images
-			g.drawImage(item.getCurrentImage(), item.getX(), item.getY(), this);
+			if (item != null) {
 
-			if (developerMode) {
-				g.draw3DRect(item.getX(), item.getY(), item.getWidth(), item.getHeight(), true);
+				// Draw item images
+				g.drawImage(item.getCurrentImage(), item.getX(), item.getY(), this);
+
+				if (developerMode) {
+					g.draw3DRect(item.getX(), item.getY(), item.getWidth(), item.getHeight(), true);
+				}
 			}
 		}
 	}
@@ -449,45 +412,18 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 		}
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		timerEnabled = true;
-
-	}
-
 	/** We need this, but would rather forget it... **/
 	@Override
 	public void keyTyped(KeyEvent e) {
 	}
 
 	// ALL GETTERS AND SETTERS //
-
-	public ToolBox getTools() {
-		return Tools;
-	}
-
-	public boolean[] getRunnable() {
+	public boolean[] getPlayerRunnable() {
 		return runnable;
 	}
 
-	public void setRunnable(boolean[] runnable) {
+	public void setPlayerRunnable(boolean[] runnable) {
 		this.runnable = runnable;
-	}
-
-	public Color getBackgroundColor() {
-		return backgroundColor;
-	}
-
-	public ArrayList<Thread> getThreads() {
-		return threads;
-	}
-
-	public void setThreads(ArrayList<Thread> threads) {
-		this.threads = threads;
-	}
-
-	public int getPLAYERCOUNT() {
-		return PLAYERCOUNT;
 	}
 
 	public Player[] getPlayers() {
@@ -498,28 +434,24 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 		this.players = players;
 	}
 
-	public JLabel[] getHealthBars() {
-		return healthBars;
-	}
-
-	public void setHealthBars(JLabel[] healthBars) {
-		this.healthBars = healthBars;
-	}
-
-	public JLabel[] getHealthBarIndicators() {
-		return healthBarIndicators;
-	}
-
-	public void setHealthBarIndicators(JLabel[] healthBarIndicators) {
-		this.healthBarIndicators = healthBarIndicators;
-	}
-
 	public ArrayList<Item> getItems() {
 		return items;
 	}
 
 	public void setItems(ArrayList<Item> items) {
 		this.items = items;
+	}
+
+	public ToolBox getTools() {
+		return Tools;
+	}
+
+	public Color getBackgroundColor() {
+		return backgroundColor;
+	}
+
+	public int getPLAYERCOUNT() {
+		return PLAYERCOUNT;
 	}
 
 	public int getWIDTH() {
@@ -572,14 +504,6 @@ public class Playspace extends JPanel implements KeyListener, Runnable, ActionLi
 
 	public void setGameRunning(boolean gameRunning) {
 		this.gameRunning = gameRunning;
-	}
-
-	public boolean isTimerEnabled() {
-		return timerEnabled;
-	}
-
-	public void setTimerEnabled(boolean timerEnabled) {
-		this.timerEnabled = timerEnabled;
 	}
 
 	public boolean isDeveloperMode() {

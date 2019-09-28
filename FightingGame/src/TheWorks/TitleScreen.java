@@ -55,7 +55,6 @@ public class TitleScreen extends JPanel implements KeyListener {
 		 * 
 		 * if (url != null) { showVideo(url); }
 		 */
-
 	}
 
 	private void showVideo(URL url) {
@@ -91,9 +90,11 @@ public class TitleScreen extends JPanel implements KeyListener {
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_1) {
 			app.initiateFrame(1);
+			setFocusable(false);
 		}
 		if (e.getKeyCode() == KeyEvent.VK_2) {
 			app.initiateFrame(2);
+			setFocusable(false);
 		}
 	}
 
