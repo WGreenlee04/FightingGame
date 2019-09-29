@@ -15,7 +15,7 @@ import javax.media.Player;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class TitleScreen extends JPanel implements KeyListener {
+public class TitleScreen extends JPanel {
 
 	private static final long serialVersionUID = -6610051464023407144L;
 
@@ -30,16 +30,40 @@ public class TitleScreen extends JPanel implements KeyListener {
 
 		// Application variables
 		this.app = app;
-		HEIGHT = this.app.getHeight();
-		WIDTH = this.app.getWidth();
-		setLocation(0, 0);
-		setSize(WIDTH, HEIGHT);
-		setFocusable(true);
+		HEIGHT = app.getHeight();
+		WIDTH = app.getWidth();
 		setVisible(true);
-		addKeyListener(this);
+		setLocation(0, 0);
+		setFocusable(true);
+		setSize(WIDTH, HEIGHT);
 		backgroundColor = new Color(100, 80, 60);
 		backgroundColor.brighter();
 		setBackground(backgroundColor);
+		addKeyListener(new KeyListener() {
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_1) {
+					app.setVisible(false);
+					app.initiateFrame(1);
+				}
+				if (e.getKeyCode() == KeyEvent.VK_2) {
+					app.setVisible(false);
+					app.initiateFrame(2);
+
+				}
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+			}
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+
+		});
+		setVisible(true);
 	}
 
 	public void setup() {
@@ -84,27 +108,5 @@ public class TitleScreen extends JPanel implements KeyListener {
 		catch (IOException iOException) {
 			JOptionPane.showMessageDialog(null, "Error reading from the source.");
 		} // end catch
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_1) {
-			app.initiateFrame(1);
-			setFocusable(false);
-		}
-		if (e.getKeyCode() == KeyEvent.VK_2) {
-			app.initiateFrame(2);
-			setFocusable(false);
-		}
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
 	}
 }

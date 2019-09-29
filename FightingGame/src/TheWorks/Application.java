@@ -13,23 +13,28 @@ public class Application extends JFrame {
 	}
 
 	public Application() {
+		super();
+
 		setSize(1000, 800);
+		setResizable(false);
 		setTitle("StickFight");
+		setVisible(true);
+		setFocusable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
-		setVisible(true);
+
 	}
 
 	public void initiateFrame(int m) {
-		this.remove(title);
-		pspace = new Playspace(m, this);
-		add(pspace);
+		Application PlayFrame = new Application();
+		pspace = new Playspace(m, PlayFrame);
+		PlayFrame.add(pspace);
 		pspace.setup();
 	}
 
 	public void startGame() {
 		title = new TitleScreen(this);
-		add(title);
+		this.add(title);
 		title.setup();
 
 	}

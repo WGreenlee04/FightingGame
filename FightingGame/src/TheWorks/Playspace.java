@@ -18,7 +18,7 @@ import Items.Stick;
 import Threads.ThreadPhysics;
 import Threads.ThreadSound;
 
-public class Playspace extends JPanel implements KeyListener, Runnable {
+public class Playspace extends JPanel implements Runnable {
 
 	private static final long serialVersionUID = 2089638191057847879L;
 
@@ -70,20 +70,145 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 
 		// Application variables
 		this.app = app;
-		HEIGHT = this.app.getHeight();
-		WIDTH = this.app.getWidth();
+		HEIGHT = app.getHeight();
+		WIDTH = app.getWidth();
+		setVisible(true);
 		setLayout(null);
 		setLocation(0, 0);
-		setSize(WIDTH, HEIGHT);
-		setVisible(true);
 		setFocusable(true);
-		addKeyListener(this);
-		requestFocusInWindow();
+		setSize(WIDTH, HEIGHT);
 		backgroundColor = new Color(50, 50, 60);
 		backgroundColor.brighter();
 		setBackground(backgroundColor);
+		requestFocusInWindow();
+		addKeyListener(new KeyListener() {
+			/** Keypress detection **/
+			@Override
+			public void keyPressed(KeyEvent e) {
 
-		// Gotta make all of these the right size...
+				int i = 0;
+				if (runnable[i]) {
+					// WASD Controls
+					if (e.getKeyCode() == KeyEvent.VK_A) {
+						players[i].setLeftPressed(true);
+						players[i].setDirection(-1);
+					}
+
+					if (e.getKeyCode() == KeyEvent.VK_D) {
+						players[i].setRightPressed(true);
+						players[i].setDirection(1);
+					}
+
+					if (e.getKeyCode() == KeyEvent.VK_S) {
+						players[i].setDownPressed(true);
+					}
+
+					if (e.getKeyCode() == KeyEvent.VK_W) {
+						players[i].setUpPressed(true);
+						players[i].setUpReleased(false);
+					}
+
+					if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT
+							&& players[i].isShiftReleased()) {
+						players[i].setShiftPressed(true);
+						players[i].setShiftReleased(false);
+					}
+				}
+
+				i = 1;
+				if (runnable[i]) {
+					// ULDR Controls
+					if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+						players[i].setLeftPressed(true);
+						players[i].setDirection(-1);
+					}
+
+					if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+						players[i].setRightPressed(true);
+						players[i].setDirection(1);
+					}
+
+					if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+						players[i].setDownPressed(true);
+					}
+
+					if (e.getKeyCode() == KeyEvent.VK_UP) {
+						players[i].setUpPressed(true);
+						players[i].setUpReleased(false);
+					}
+
+					if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT
+							&& players[i].isShiftReleased()) {
+						players[i].setShiftPressed(true);
+						players[i].setShiftReleased(false);
+					}
+				}
+			}
+
+			/** Key Release detection **/
+			@Override
+			public void keyReleased(KeyEvent e) {
+
+				if (e.getKeyCode() == KeyEvent.VK_F11) {
+					developerMode = !developerMode;
+				}
+
+				int i = 0;
+				// WASD Controls
+				if (e.getKeyCode() == KeyEvent.VK_A) {
+					players[i].setLeftPressed(false);
+				}
+
+				if (e.getKeyCode() == KeyEvent.VK_S) {
+					players[i].setDownPressed(false);
+				}
+
+				if (e.getKeyCode() == KeyEvent.VK_D) {
+					players[i].setRightPressed(false);
+				}
+
+				if (e.getKeyCode() == KeyEvent.VK_W) {
+					players[i].setUpPressed(false);
+					players[i].setUpReleased(true);
+				}
+				if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
+					players[i].setShiftPressed(false);
+					players[i].setShiftReleased(true);
+				}
+
+				i = 1;
+				// ULDR Controls
+				if (e.getKeyCode() == KeyEvent.VK_UP) {
+					players[i].setUpPressed(false);
+					players[i].setUpReleased(true);
+				}
+
+				if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+					players[i].setDownPressed(false);
+				}
+
+				if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+					players[i].setLeftPressed(false);
+				}
+
+				if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+					players[i].setRightPressed(false);
+				}
+
+				if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
+					players[i].setShiftPressed(false);
+					players[i].setShiftReleased(true);
+				}
+			}
+
+			/** We need this, but would rather forget it... **/
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+		});
+		setVisible(true);
+
+		// Gotta make all of these arrays the right size...
 		PLAYERCOUNT = mode;
 
 		// Array inits
@@ -236,6 +361,7 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 	/** This is the main game loop thread **/
 	@Override
 	public void run() {
+
 		gameRunning = true;
 		nextGameTick = System.currentTimeMillis();
 		while (gameRunning) {
@@ -275,7 +401,7 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 			healthBars[i].setText("" + players[i].getHealth());
 			healthBars[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
 			healthBarIndicators[i].setLocation(players[i].getX() + 18, players[i].getY() - 10);
-			healthBarIndicators[i].setSize(50 * (players[i].getHealth() / 1000), 10);
+			healthBarIndicators[i].setSize((int) (50 * (players[i].getHealth() / 1000)), 10);
 		}
 
 		// Draw items loop
@@ -291,130 +417,6 @@ public class Playspace extends JPanel implements KeyListener, Runnable {
 				}
 			}
 		}
-	}
-
-	/** Keypress detection **/
-	@Override
-	public void keyPressed(KeyEvent e) {
-
-		int i = 0;
-		if (runnable[i]) {
-			// WASD Controls
-			if (e.getKeyCode() == KeyEvent.VK_A) {
-				players[i].setLeftPressed(true);
-				players[i].setDirection(-1);
-			}
-
-			if (e.getKeyCode() == KeyEvent.VK_D) {
-				players[i].setRightPressed(true);
-				players[i].setDirection(1);
-			}
-
-			if (e.getKeyCode() == KeyEvent.VK_S) {
-				players[i].setDownPressed(true);
-			}
-
-			if (e.getKeyCode() == KeyEvent.VK_W) {
-				players[i].setUpPressed(true);
-				players[i].setUpReleased(false);
-			}
-
-			if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT
-					&& players[i].isShiftReleased()) {
-				players[i].setShiftPressed(true);
-				players[i].setShiftReleased(false);
-			}
-		}
-
-		i = 1;
-		if (runnable[i]) {
-			// ULDR Controls
-			if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-				players[i].setLeftPressed(true);
-				players[i].setDirection(-1);
-			}
-
-			if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-				players[i].setRightPressed(true);
-				players[i].setDirection(1);
-			}
-
-			if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-				players[i].setDownPressed(true);
-			}
-
-			if (e.getKeyCode() == KeyEvent.VK_UP) {
-				players[i].setUpPressed(true);
-				players[i].setUpReleased(false);
-			}
-
-			if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT
-					&& players[i].isShiftReleased()) {
-				players[i].setShiftPressed(true);
-				players[i].setShiftReleased(false);
-			}
-		}
-	}
-
-	/** Key Release detection **/
-	@Override
-	public void keyReleased(KeyEvent e) {
-
-		if (e.getKeyCode() == KeyEvent.VK_F11) {
-			developerMode = !developerMode;
-		}
-
-		int i = 0;
-		// WASD Controls
-		if (e.getKeyCode() == KeyEvent.VK_A) {
-			players[i].setLeftPressed(false);
-		}
-
-		if (e.getKeyCode() == KeyEvent.VK_S) {
-			players[i].setDownPressed(false);
-		}
-
-		if (e.getKeyCode() == KeyEvent.VK_D) {
-			players[i].setRightPressed(false);
-		}
-
-		if (e.getKeyCode() == KeyEvent.VK_W) {
-			players[i].setUpPressed(false);
-			players[i].setUpReleased(true);
-		}
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_LEFT) {
-			players[i].setShiftPressed(false);
-			players[i].setShiftReleased(true);
-		}
-
-		i = 1;
-		// ULDR Controls
-		if (e.getKeyCode() == KeyEvent.VK_UP) {
-			players[i].setUpPressed(false);
-			players[i].setUpReleased(true);
-		}
-
-		if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-			players[i].setDownPressed(false);
-		}
-
-		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			players[i].setLeftPressed(false);
-		}
-
-		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			players[i].setRightPressed(false);
-		}
-
-		if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
-			players[i].setShiftPressed(false);
-			players[i].setShiftReleased(true);
-		}
-	}
-
-	/** We need this, but would rather forget it... **/
-	@Override
-	public void keyTyped(KeyEvent e) {
 	}
 
 	// ALL GETTERS AND SETTERS //
