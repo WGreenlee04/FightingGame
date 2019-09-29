@@ -7,49 +7,82 @@ import TheWorks.Playspace;
 import TheWorks.ToolBox;
 
 public class Item {
+	private final Playspace space;
+	private final ToolBox Tools;
+	private final Image originalImage;
+	private final int dropRate;
+	private final int width;
+	private final int height;
 	private Player player;
-	private Playspace space;
 	private Image currentImage;
-	private Image originalImage;
 	private Rectangle hitbox;
-	private ToolBox Tools = new ToolBox(space);
 	private int damage;
 	private int force;
 	private int x;
 	private int y;
 	private int accelX;
 	private int accelY;
-	private int width;
-	private int height;
 	private int attackDelay;
-	private int dropRate;
 	private int direction;
 	private boolean animated;
 
-	public Item() {
-	}
-
 	public Item(int damage, int force, int x, int y, int attackDelay, int dropRate, Image img, int width, int height,
 			Playspace space) {
+		this.Tools = new ToolBox(space);
+		this.space = space;
 		this.damage = damage;
 		this.force = force;
+		this.width = width;
+		this.height = height;
 		this.x = x;
 		this.y = y;
 		this.attackDelay = attackDelay;
 		this.dropRate = dropRate;
-		this.currentImage = img;
-		this.width = width;
-		this.height = height;
 		this.originalImage = Tools.scaleObject(img, width, height);
+		this.currentImage = originalImage;
 		this.direction = 1;
-		this.space = space;
 		this.animated = false;
-		Tools.scaleObject(originalImage, width, height);
 
 	}
 
 	public String getName() {
 		return "";
+	}
+
+	public Playspace getSpace() {
+		return space;
+	}
+
+	public Image getCurrentImage() {
+		return currentImage;
+	}
+
+	public void setCurrentImage(Image currentImage) {
+		this.currentImage = currentImage;
+	}
+
+	public Rectangle getHitbox() {
+		return hitbox;
+	}
+
+	public void setHitbox(Rectangle hitbox) {
+		this.hitbox = hitbox;
+	}
+
+	public Image getOriginalImage() {
+		return originalImage;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public int getDropRate() {
+		return dropRate;
 	}
 
 	public int getDamage() {
@@ -92,36 +125,12 @@ public class Item {
 		this.accelY = accelY;
 	}
 
-	public int getWidth() {
-		return width;
-	}
-
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	public int getHeight() {
-		return height;
-	}
-
-	public void setHeight(int height) {
-		this.height = height;
-	}
-
 	public int getAttackDelay() {
 		return attackDelay;
 	}
 
 	public void setAttackDelay(int attackDelay) {
 		this.attackDelay = attackDelay;
-	}
-
-	public int getDropRate() {
-		return dropRate;
-	}
-
-	public void setDropRate(int dropRate) {
-		this.dropRate = dropRate;
 	}
 
 	public int getDirection() {
@@ -140,44 +149,12 @@ public class Item {
 		this.player = player;
 	}
 
-	public Playspace getSpace() {
-		return space;
-	}
-
-	public void setSpace(Playspace space) {
-		this.space = space;
-	}
-
-	public Image getCurrentImage() {
-		return currentImage;
-	}
-
-	public void setCurrentImage(Image currentImage) {
-		this.currentImage = currentImage;
-	}
-
-	public Rectangle getHitbox() {
-		return hitbox;
-	}
-
-	public void setHitbox(Rectangle hitbox) {
-		this.hitbox = hitbox;
-	}
-
 	public int getForce() {
 		return force;
 	}
 
 	public void setForce(int force) {
 		this.force = force;
-	}
-
-	public Image getOriginalImage() {
-		return originalImage;
-	}
-
-	public void setOriginalImage(Image originalImage) {
-		this.originalImage = originalImage;
 	}
 
 	public boolean isAnimated() {

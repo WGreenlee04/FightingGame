@@ -34,8 +34,6 @@ public class ThreadPhysics extends Thread {
 	@Override
 	public void run() {
 
-		setUnarmed();
-
 		space.createHitboxes();
 
 		pickup();
@@ -48,7 +46,7 @@ public class ThreadPhysics extends Thread {
 
 		move();
 
-		collideAll();
+		wallLoop();
 
 		renderObjects();
 
@@ -80,8 +78,10 @@ public class ThreadPhysics extends Thread {
 			if (p.isShiftPressed() && (p.getItem() == null || p.getItem() instanceof Fist)) {
 				p.setShiftPressed(false);
 				for (Item item : space.getItems()) {
-					if (item.getHitbox().intersects(p.getHitbox()) && item.getPlayer() == null && !p.isStunned()) {
-						p.getItem().setPlayer(null);
+					if (item.getHitbox().intersects(p.getHitbox()) && item.getPlayer() == null
+							&& (p.getItem() == null || p.getItem() instanceof Fist) && !p.isStunned()) {
+						if (p.getItem() instanceof Fist)
+							p.getItem().setPlayer(null);
 						p.setItem(item);
 						item.setPlayer(p);
 					}
@@ -96,11 +96,11 @@ public class ThreadPhysics extends Thread {
 				attacker.setShiftPressed(false);
 				if (!attacker.getItem().isAnimated()) {
 					animateItem(attacker.getItem());
-				}
-				for (Player target : space.getPlayers()) {
-					if (!target.equals(attacker) && !target.isBeingDamaged()
-							&& attacker.getItem().getHitbox().intersects(target.getHitbox())) {
-						damagePlayer(target, attacker.getItem());
+					for (Player target : space.getPlayers()) {
+						if (!target.equals(attacker) && !target.isBeingDamaged()
+								&& attacker.getItem().getHitbox().intersects(target.getHitbox())) {
+							damagePlayer(target, attacker.getItem());
+						}
 					}
 				}
 			}
@@ -175,9 +175,13 @@ public class ThreadPhysics extends Thread {
 			}
 
 		// Gravity on items
-		for (Item item : space.getItems()) {
-			if (item.getPlayer() == null) {
-				item.setAccelY(space.getITEMGRAVITY());
+		for (Item i : space.getItems()) {
+			if (i.getPlayer() == null) {
+				if (i.getAccelY() <= 0) {
+					i.setAccelY(i.getAccelY() + space.getITEMGRAVITY());
+				} else {
+					i.setAccelY(i.getAccelY() - 2);
+				}
 			}
 		}
 	}
@@ -187,20 +191,28 @@ public class ThreadPhysics extends Thread {
 		// if acceleration of x, do acceleration, decreasing it by one each
 		// time.
 		for (Player p : space.getPlayers()) {
+
 			if (p.getAccelX() > 0) {
 				p.setX(p.getX() + p.getAccelX());
 				p.setAccelX(p.getAccelX() - space.getFRICTION());
-				;
 			}
 			if (p.getAccelX() < 0) {
 				p.setX(p.getX() + p.getAccelX());
 				p.setAccelX(p.getAccelX() + space.getFRICTION());
 			}
+
 			if (p.getAccelY() > 0) {
 				p.setY(p.getY() - p.getAccelY());
 			}
-			if (p.getAccelY() < 0) {
-				p.setY(p.getY() - p.getAccelY());
+			if (!isCollidingFloor(p)) {
+				if (p.getAccelY() < 0) {
+					p.setY(p.getY() - p.getAccelY());
+				}
+			} else {
+				p.setAccelY(0);
+				p.setY(space.getFLOOR() - p.getHeight());
+				p.setJumps(0);
+				p.setFalling(false);
 			}
 		}
 
@@ -214,18 +226,51 @@ public class ThreadPhysics extends Thread {
 				i.setX(i.getX() + i.getAccelX());
 				i.setAccelX(i.getAccelX() + space.getFRICTION());
 			}
+
 			if (i.getAccelY() > 0) {
 				i.setY(i.getY() - i.getAccelY());
 			}
-			if (i.getAccelY() < 0) {
-				i.setY(i.getY() - i.getAccelY());
+			if (!isCollidingFloor(i)) {
+				if (i.getAccelY() < 0) {
+					i.setY(i.getY() - i.getAccelY());
+				}
+			} else {
+				i.setAccelY(0);
+				i.setY(space.getFLOOR() - i.getHeight());
 			}
 		}
 	}
 
-	private void collideAll() {
+	private boolean isCollidingFloor(Player p) {
 
-		// Collides objects
+		boolean colliding = false;
+
+		// If at floor, colliding
+		if (p.getY() + p.getHeight() + (-p.getAccelY()) > space.getFLOOR()) {
+
+			colliding = true;
+		}
+		return colliding;
+	}
+
+	private boolean isCollidingFloor(Item i) {
+
+		boolean colliding = false;
+
+		// When items hit the ground, stop motion
+		if (i.getY() + i.getHeight() + (-i.getAccelY()) > space.getFLOOR()) {
+			colliding = true;
+		}
+
+		return colliding;
+	}
+
+	private boolean isCollidingPlayers(Player p) {
+		return false;
+	}
+
+	private void wallLoop() {
+
 		for (Player p : space.getPlayers()) {
 
 			// If at wall, loop over (haha)
@@ -233,21 +278,6 @@ public class ThreadPhysics extends Thread {
 				p.setX(space.getWIDTH());
 			if (p.getX() > space.getWIDTH())
 				p.setX(0 - p.getWidth());
-
-			// If at floor, don't move through
-			if (p.getY() + p.getHeight() + 35 > space.getHEIGHT()) {
-				p.setY(space.getHEIGHT() - (p.getHeight() + 35));
-				p.setJumps(0);
-				p.setFalling(false);
-			}
-		}
-
-		for (Item i : space.getItems()) {
-
-			// When items hit the ground, stop motion
-			if (i.getY() + i.getHeight() + 35 > space.getHEIGHT()) {
-				i.setY(space.getHEIGHT() - (i.getHeight() + 35));
-			}
 		}
 	}
 

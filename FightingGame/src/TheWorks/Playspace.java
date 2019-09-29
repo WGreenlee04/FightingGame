@@ -28,10 +28,11 @@ public class Playspace extends JPanel implements Runnable {
 	private final ToolBox Tools; // All Image tools and methods
 	private final int WIDTH; // Width of panel
 	private final int HEIGHT; // Height of panel
+	private final int FLOOR;
 	private final int PLAYERCOUNT; // Changing amount of players
 	private final int DELAY = 20; // Delay of timer in ms
 	private final int GRAVITY = -4; // Quadratic gravity for players
-	private final int ITEMGRAVITY = -6; // Linear gravity for items
+	private final int ITEMGRAVITY = -1; // Gravity for items
 	private final int FRICTION = 2; // Deceleration on objects
 	private final int ITEMCOUNT = 2; // The number of items on board at start
 	private final int DASHSPEED = 4; // Speed at which players change direction
@@ -72,6 +73,7 @@ public class Playspace extends JPanel implements Runnable {
 		this.app = app;
 		HEIGHT = app.getHeight();
 		WIDTH = app.getWidth();
+		FLOOR = HEIGHT - 35;
 		setVisible(true);
 		setLayout(null);
 		setLocation(0, 0);
@@ -281,10 +283,10 @@ public class Playspace extends JPanel implements Runnable {
 		for (int i = 0; i < players.length; i++)
 			if (i == 0) {
 				players[i].setX(0);
-				players[i].setY(HEIGHT);
+				players[i].setY(FLOOR - players[i].getHeight());
 			} else {
 				players[i].setX((WIDTH / (i) - 100) - players[i].getImage().getWidth(this));
-				players[i].setY(HEIGHT);
+				players[i].setY(FLOOR - players[i].getHeight());
 			}
 	}
 
@@ -464,6 +466,10 @@ public class Playspace extends JPanel implements Runnable {
 		return HEIGHT;
 	}
 
+	public int getFLOOR() {
+		return FLOOR;
+	}
+
 	public int getDELAY() {
 		return DELAY;
 	}
@@ -498,10 +504,6 @@ public class Playspace extends JPanel implements Runnable {
 
 	public int getFALLSPEED() {
 		return FALLSPEED;
-	}
-
-	public boolean isGameRunning() {
-		return gameRunning;
 	}
 
 	public void setGameRunning(boolean gameRunning) {
