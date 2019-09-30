@@ -2,8 +2,6 @@ package Threads;
 
 import java.awt.Image;
 
-import javax.swing.ImageIcon;
-
 import Items.Item;
 import Items.Player;
 import TheWorks.Playspace;
@@ -15,9 +13,10 @@ public class ThreadAnimate extends Thread {
 	private Item animationSubjectItem;
 	private Player animationSubjectPlayer;
 	private final int degrees = 5;
-	private final int endRotation = 90;
-	private final int delay = 20;
+	private final int endRotation = 100;
+	private final int delay = 10;
 	private final ToolBox Tools = new ToolBox(space);
+	private Image currentFrame;
 	private boolean running;
 
 	public ThreadAnimate(Item o, Playspace p) {
@@ -45,8 +44,16 @@ public class ThreadAnimate extends Thread {
 		if (animationSubjectItem != null) {
 			Image original = animationSubjectItem.getCurrentImage();
 			for (int i = degrees; i <= endRotation; i += degrees) {
-				animationSubjectItem.setCurrentImage(
-						new ImageIcon("src/resources/" + animationSubjectItem.getName() + i + ".png").getImage());
+				if (animationSubjectItem.getPlayer().getDirection() == -1) {
+					currentFrame = Tools.rotateObject(original, -i);
+				} else {
+					currentFrame = Tools.rotateObject(original, i);
+				}
+
+				animationSubjectItem.setyOffset(i);
+				animationSubjectItem.setWidth(currentFrame.getWidth(space));
+				animationSubjectItem.setHeight(currentFrame.getHeight(space));
+				animationSubjectItem.setCurrentImage(currentFrame);
 				try {
 					this.sleep(delay);
 				} catch (Exception e) {
@@ -54,6 +61,10 @@ public class ThreadAnimate extends Thread {
 				}
 
 			}
+			animationSubjectItem.setxOffset(0);
+			animationSubjectItem.setyOffset(0);
+			animationSubjectItem.setWidth(original.getWidth(space));
+			animationSubjectItem.setHeight(original.getHeight(space));
 			animationSubjectItem.setCurrentImage(original);
 		}
 		closeThread();

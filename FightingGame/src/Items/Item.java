@@ -11,15 +11,17 @@ public class Item {
 	private final ToolBox Tools;
 	private final Image originalImage;
 	private final int dropRate;
-	private final int width;
-	private final int height;
+	private int width;
+	private int height;
 	private Player player;
 	private Image currentImage;
 	private Rectangle hitbox;
 	private int damage;
 	private int force;
 	private int x;
+	private int xOffset;
 	private int y;
+	private int yOffset;
 	private int accelX;
 	private int accelY;
 	private int attackDelay;
@@ -73,8 +75,16 @@ public class Item {
 		return originalImage;
 	}
 
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
 	public int getWidth() {
 		return width;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
 	}
 
 	public int getHeight() {
@@ -127,6 +137,22 @@ public class Item {
 
 	public int getAttackDelay() {
 		return attackDelay;
+	}
+
+	public int getxOffset() {
+		return xOffset;
+	}
+
+	public void setxOffset(int xOffset) {
+		this.xOffset = xOffset;
+	}
+
+	public int getyOffset() {
+		return yOffset;
+	}
+
+	public void setyOffset(int yOffset) {
+		this.yOffset = yOffset;
 	}
 
 	public void setAttackDelay(int attackDelay) {

@@ -96,6 +96,8 @@ public class ThreadPhysics extends Thread {
 				attacker.setShiftPressed(false);
 				if (!attacker.getItem().isAnimated()) {
 					animateItem(attacker.getItem());
+
+					// THIS NEEDS TO BE MOVED INTO THE ANIMATE CLASS, AND CALLED ON HIT FRAMES
 					for (Player target : space.getPlayers()) {
 						if (!target.equals(attacker) && !target.isBeingDamaged()
 								&& attacker.getItem().getHitbox().intersects(target.getHitbox())) {
@@ -241,6 +243,57 @@ public class ThreadPhysics extends Thread {
 		}
 	}
 
+	private void wallLoop() {
+
+		for (Player p : space.getPlayers()) {
+
+			// If at wall, loop over (haha)
+			if (p.getX() < 0 - p.getWidth())
+				p.setX(space.getWIDTH());
+			if (p.getX() > space.getWIDTH())
+				p.setX(0 - p.getWidth());
+		}
+	}
+
+	private void renderObjects() {
+
+		// Sets pos and image for Items
+		for (Item item : space.getItems()) {
+			if (item.getPlayer() != null) {
+				if (item.getDirection() != item.getPlayer().getDirection()) {
+					item.setDirection(item.getPlayer().getDirection());
+					if (item.getCurrentImage().getHeight(space) > 0 && item.getCurrentImage().getWidth(space) > 0)
+						item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
+				}
+
+				if (!item.isAnimated()) {
+					if (item.getDirection() == 1
+							&& !space.getTools().CompareImages(item.getCurrentImage(), item.getOriginalImage())) {
+						item.setCurrentImage(item.getOriginalImage());
+					}
+
+					if (item.getDirection() == -1
+							&& space.getTools().CompareImages(item.getCurrentImage(), item.getOriginalImage())) {
+						item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
+					}
+				}
+
+				if (item.getDirection() == -1) {
+					item.setX(
+							(int) item.getPlayer().leftHandItemLocation().getX() - item.getWidth() + item.getxOffset());
+					item.setY((int) item.getPlayer().leftHandItemLocation().getY() - item.getHeight()
+							+ item.getyOffset());
+				}
+				if (item.getDirection() == 1) {
+					item.setX((int) item.getPlayer().rightHandItemLocation().getX() + item.getWidth()
+							+ item.getxOffset());
+					item.setY((int) item.getPlayer().rightHandItemLocation().getY() - item.getHeight()
+							+ item.getyOffset());
+				}
+			}
+		}
+	}
+
 	private boolean isCollidingFloor(Player p) {
 
 		boolean colliding = false;
@@ -267,51 +320,6 @@ public class ThreadPhysics extends Thread {
 
 	private boolean isCollidingPlayers(Player p) {
 		return false;
-	}
-
-	private void wallLoop() {
-
-		for (Player p : space.getPlayers()) {
-
-			// If at wall, loop over (haha)
-			if (p.getX() < 0 - p.getWidth())
-				p.setX(space.getWIDTH());
-			if (p.getX() > space.getWIDTH())
-				p.setX(0 - p.getWidth());
-		}
-	}
-
-	private void renderObjects() {
-
-		// Sets pos and image for Items
-		for (Item item : space.getItems()) {
-			if (item.getPlayer() != null) {
-				if (item.getDirection() != item.getPlayer().getDirection()) {
-					item.setDirection(item.getPlayer().getDirection());
-					if (item.getCurrentImage().getHeight(space) > 0 && item.getCurrentImage().getWidth(space) > 0)
-						item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
-				}
-
-				if (item.getDirection() == 1
-						&& !space.getTools().CompareImages(item.getCurrentImage(), item.getOriginalImage())) {
-					item.setCurrentImage(item.getOriginalImage());
-				}
-
-				if (item.getDirection() == -1
-						&& space.getTools().CompareImages(item.getCurrentImage(), item.getOriginalImage())) {
-					item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
-				}
-
-				if (item.getDirection() == -1) {
-					item.setX((int) item.getPlayer().leftHandItemLocation().getX() - item.getWidth());
-					item.setY((int) item.getPlayer().leftHandItemLocation().getY() - item.getHeight());
-				}
-				if (item.getDirection() == 1) {
-					item.setX((int) item.getPlayer().rightHandItemLocation().getX() + item.getWidth());
-					item.setY((int) item.getPlayer().rightHandItemLocation().getY() - item.getHeight());
-				}
-			}
-		}
 	}
 
 	public boolean isRunning() {
