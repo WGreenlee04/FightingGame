@@ -18,12 +18,14 @@ public class ThreadPhysics extends Thread {
 		running = true;
 	}
 
+	/* Creates a new animation thread for the object */
 	private void animateItem(Item object) {
 		ThreadAnimate animation = new ThreadAnimate(object, space);
 		object.setAnimated(true);
 		animation.start();
 	}
 
+	/* Creates a new damage thread for the player, with item's damage */
 	private void damagePlayer(Player player, Item item) {
 		ThreadDamage damage = new ThreadDamage(item, player, space);
 		ThreadSound sound = new ThreadSound("src/resources/" + item.getName() + "Hit.wav");
@@ -34,27 +36,31 @@ public class ThreadPhysics extends Thread {
 	@Override
 	public void run() {
 
-		space.createHitboxes();
+		/* Methods which delegate movement of Players and Items */
 
-		pickup();
+		accel(); // Reads key inputs for acceleration
 
-		hit();
+		gravity(); // Adds downward acceleration
 
-		accel();
+		move(); // Applies acceleration
 
-		gravity();
+		wallLoop(); // Sets players' position if out of bounds
 
-		move();
+		renderItems(); // Sets position of Items
 
-		wallLoop();
+		space.createHitboxes(); // Creates hitboxes after movement
 
-		renderObjects();
+		pickup(); // Picks up items at player request
+
+		hit(); // Damages players if they press shift
 
 		running = false;
 
 		this.interrupt();
 	}
 
+	/** Later going to set default weapon to fist **/
+	@Deprecated
 	private void setUnarmed() {
 		for (Player p : space.getPlayers()) {
 			if (p.getItem() == null) {
@@ -66,22 +72,29 @@ public class ThreadPhysics extends Thread {
 				ArrayList<Item> tempArray = space.getItems();
 				tempArray.add(unarmed);
 				space.setItems(tempArray);
-				renderObjects();
 
 			}
 		}
 	}
 
+	/** Detects shift presses and picks up Items **/
 	private void pickup() {
-		// The... Pickup... line?
+
+		// Each player
 		for (Player p : space.getPlayers()) {
 			if (p.isShiftPressed() && (p.getItem() == null || p.getItem() instanceof Fist)) {
 				p.setShiftPressed(false);
+				// Each Item
 				for (Item item : space.getItems()) {
-					if (item.getHitbox().intersects(p.getHitbox()) && item.getPlayer() == null
-							&& (p.getItem() == null || p.getItem() instanceof Fist) && !p.isStunned()) {
-						if (p.getItem() instanceof Fist)
-							p.getItem().setPlayer(null);
+					// If Player isn't stunned, and they don't have an Item, pickup intersection
+					if (!p.isStunned() && (p.getItem() == null || p.getItem() instanceof Fist)
+							&& item.getHitbox().intersects(p.getHitbox())) {
+						// If they are unarmed
+						if (p.getItem() instanceof Fist) {
+							p.getItem().setPlayer(null); // Detach from player
+							p.getItem().setCurrentImage(null); // Make invisible
+						}
+
 						p.setItem(item);
 						item.setPlayer(p);
 					}
@@ -90,12 +103,17 @@ public class ThreadPhysics extends Thread {
 		}
 	}
 
+	/** Detects shift presses and hits other Players if Player has Item **/
 	private void hit() {
+
+		// For each possible attacker
 		for (Player attacker : space.getPlayers()) {
+			// If they have an Item
 			if (attacker.isShiftPressed() && attacker.getItem() != null) {
 				attacker.setShiftPressed(false);
+				// If they haven't attacked already
 				if (!attacker.getItem().isAnimated()) {
-					animateItem(attacker.getItem());
+					animateItem(attacker.getItem()); // Animate the Item (and damage)
 
 					// THIS NEEDS TO BE MOVED INTO THE ANIMATE CLASS, AND CALLED ON HIT FRAMES
 					for (Player target : space.getPlayers()) {
@@ -109,6 +127,7 @@ public class ThreadPhysics extends Thread {
 		}
 	}
 
+	/** Detects keyPresses and accelerates Players **/
 	private void accel() {
 		// All players
 		for (int i = 0; i < space.getPlayers().length; i++) {
@@ -166,6 +185,7 @@ public class ThreadPhysics extends Thread {
 		}
 	}
 
+	/** Gravity on all things displayed on board **/
 	private void gravity() {
 
 		// Gravity on players
@@ -188,10 +208,10 @@ public class ThreadPhysics extends Thread {
 		}
 	}
 
+	/** If no collisions, move players at distance **/
 	private void move() {
 
-		// if acceleration of x, do acceleration, decreasing it by one each
-		// time.
+		// If acceleration of x, do acceleration, decreasing it by one.
 		for (Player p : space.getPlayers()) {
 
 			if (p.getAccelX() > 0) {
@@ -243,6 +263,7 @@ public class ThreadPhysics extends Thread {
 		}
 	}
 
+	/** If players are out of bounds, set them to the other side **/
 	private void wallLoop() {
 
 		for (Player p : space.getPlayers()) {
@@ -255,18 +276,23 @@ public class ThreadPhysics extends Thread {
 		}
 	}
 
-	private void renderObjects() {
+	/** Sets Items to Player positions, and set to directions **/
+	private void renderItems() {
 
-		// Sets pos and image for Items
+		// For each Item
 		for (Item item : space.getItems()) {
+			// If it has a Player
 			if (item.getPlayer() != null) {
+				// Equalize their directions, with default being 1
 				if (item.getDirection() != item.getPlayer().getDirection()) {
 					item.setDirection(item.getPlayer().getDirection());
 					if (item.getCurrentImage().getHeight(space) > 0 && item.getCurrentImage().getWidth(space) > 0)
 						item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
 				}
 
+				// If the item isn't animated
 				if (!item.isAnimated()) {
+					// Set it back to the correct direction if out of sync from Player
 					if (item.getDirection() == 1
 							&& !space.getTools().CompareImages(item.getCurrentImage(), item.getOriginalImage())) {
 						item.setCurrentImage(item.getOriginalImage());
@@ -278,13 +304,18 @@ public class ThreadPhysics extends Thread {
 					}
 				}
 
+				// If facing left
 				if (item.getDirection() == -1) {
+					// Set it to left hand
 					item.setX(
 							(int) item.getPlayer().leftHandItemLocation().getX() - item.getWidth() + item.getxOffset());
 					item.setY((int) item.getPlayer().leftHandItemLocation().getY() - item.getHeight()
 							+ item.getyOffset());
 				}
+
+				// If facing right
 				if (item.getDirection() == 1) {
+					// Set it to right hand
 					item.setX((int) item.getPlayer().rightHandItemLocation().getX() + item.getWidth()
 							+ item.getxOffset());
 					item.setY((int) item.getPlayer().rightHandItemLocation().getY() - item.getHeight()
@@ -294,30 +325,29 @@ public class ThreadPhysics extends Thread {
 		}
 	}
 
+	/** Detects if Players are in contact with ground on next move **/
 	private boolean isCollidingFloor(Player p) {
-
-		boolean colliding = false;
 
 		// If at floor, colliding
 		if (p.getY() + p.getHeight() + (-p.getAccelY()) > space.getFLOOR()) {
 
-			colliding = true;
+			return true;
 		}
-		return colliding;
+		return false;
 	}
 
+	/** Detects if Items are in contact with ground on next move **/
 	private boolean isCollidingFloor(Item i) {
 
-		boolean colliding = false;
-
-		// When items hit the ground, stop motion
+		// If at floor, colliding
 		if (i.getY() + i.getHeight() + (-i.getAccelY()) > space.getFLOOR()) {
-			colliding = true;
-		}
 
-		return colliding;
+			return true;
+		}
+		return false;
 	}
 
+	/** Yet to be implemented, will detect Player hitboxes **/
 	private boolean isCollidingPlayers(Player p) {
 		return false;
 	}

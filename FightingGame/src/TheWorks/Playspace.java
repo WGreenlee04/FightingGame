@@ -30,7 +30,6 @@ public class Playspace extends JPanel implements Runnable {
 	private final int HEIGHT; // Height of panel
 	private final int FLOOR;
 	private final int PLAYERCOUNT; // Changing amount of players
-	private final int DELAY = 20; // Delay of timer in ms
 	private final int GRAVITY = -4; // Quadratic gravity for players
 	private final int ITEMGRAVITY = -1; // Gravity for items
 	private final int FRICTION = 2; // Deceleration on objects
@@ -41,7 +40,7 @@ public class Playspace extends JPanel implements Runnable {
 	private final int FALLSPEED = -10; // Speed of fast fall
 
 	// Stuff for game loop
-	private final int TICKS_PER_SECOND = 50; // How many ticks are processed in a second
+	private final int TICKS_PER_SECOND = 40; // How many ticks are processed in a second
 	private final int SKIP_TICKS = 1000 / TICKS_PER_SECOND; // How many ticks to skip
 	private final int MAX_FRAMESKIP = 10; // Max processing frames
 	private long nextGameTick; // Next tick to operate on
@@ -468,10 +467,6 @@ public class Playspace extends JPanel implements Runnable {
 
 	public int getFLOOR() {
 		return FLOOR;
-	}
-
-	public int getDELAY() {
-		return DELAY;
 	}
 
 	public int getGRAVITY() {

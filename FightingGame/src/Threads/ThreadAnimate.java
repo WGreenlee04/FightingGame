@@ -50,7 +50,7 @@ public class ThreadAnimate extends Thread {
 					currentFrame = Tools.rotateObject(original, i);
 				}
 
-				animationSubjectItem.setyOffset(i);
+				animationSubjectItem.setyOffset(i + 1);
 				animationSubjectItem.setWidth(currentFrame.getWidth(space));
 				animationSubjectItem.setHeight(currentFrame.getHeight(space));
 				animationSubjectItem.setCurrentImage(currentFrame);
