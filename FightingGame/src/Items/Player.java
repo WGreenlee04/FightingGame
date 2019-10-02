@@ -21,7 +21,9 @@ public class Player {
 	private int accelX;
 	private int accelY;
 	private int x;
+	private int oldX;
 	private int y;
+	private int oldY;
 	private int width;
 	private int height;
 	private int direction;
@@ -122,6 +124,22 @@ public class Player {
 
 	public void setY(int y) {
 		this.y = y;
+	}
+
+	public int getOldX() {
+		return oldX;
+	}
+
+	public void setOldX(int oldX) {
+		this.oldX = oldX;
+	}
+
+	public int getOldY() {
+		return oldY;
+	}
+
+	public void setOldY(int oldY) {
+		this.oldY = oldY;
 	}
 
 	public void setDirection(int i) {

@@ -283,11 +283,17 @@ public class ThreadPhysics extends Thread {
 		for (Item item : space.getItems()) {
 			// If it has a Player
 			if (item.getPlayer() != null) {
-				// Equalize their directions, with default being 1
-				if (item.getDirection() != item.getPlayer().getDirection()) {
-					item.setDirection(item.getPlayer().getDirection());
-					if (item.getCurrentImage().getHeight(space) > 0 && item.getCurrentImage().getWidth(space) > 0)
-						item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
+				Player p = item.getPlayer();
+				// If the player has moved
+				if (p.getOldX() != p.getX() || p.getOldY() != p.getY()) {
+					p.setOldX(p.getX());
+					p.setOldY(p.getY());
+					// Equalize their directions, with default being 1
+					if (item.getDirection() != item.getPlayer().getDirection()) {
+						item.setDirection(item.getPlayer().getDirection());
+						if (item.getCurrentImage().getHeight(space) > 0 && item.getCurrentImage().getWidth(space) > 0)
+							item.setCurrentImage(space.getTools().flipObject(item.getCurrentImage()));
+					}
 				}
 
 				// If the item isn't animated

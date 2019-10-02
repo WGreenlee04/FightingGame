@@ -19,8 +19,10 @@ public class Item {
 	private int damage;
 	private int force;
 	private int x;
+	private int oldX;
 	private int xOffset;
 	private int y;
+	private int oldY;
 	private int yOffset;
 	private int accelX;
 	private int accelY;
@@ -37,6 +39,8 @@ public class Item {
 		this.width = width;
 		this.height = height;
 		this.x = x;
+		this.oldX = 0;
+		this.oldY = 0;
 		this.y = y;
 		this.attackDelay = attackDelay;
 		this.dropRate = dropRate;
@@ -117,6 +121,22 @@ public class Item {
 
 	public void setY(int y) {
 		this.y = y;
+	}
+
+	public int getOldX() {
+		return oldX;
+	}
+
+	public void setOldX(int oldX) {
+		this.oldX = oldX;
+	}
+
+	public int getOldY() {
+		return oldY;
+	}
+
+	public void setOldY(int oldY) {
+		this.oldY = oldY;
 	}
 
 	public int getAccelX() {

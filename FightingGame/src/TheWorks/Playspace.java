@@ -40,7 +40,7 @@ public class Playspace extends JPanel implements Runnable {
 	private final int FALLSPEED = -10; // Speed of fast fall
 
 	// Stuff for game loop
-	private final int TICKS_PER_SECOND = 40; // How many ticks are processed in a second
+	private final int TICKS_PER_SECOND = 50; // How many ticks are processed in a second
 	private final int SKIP_TICKS = 1000 / TICKS_PER_SECOND; // How many ticks to skip
 	private final int MAX_FRAMESKIP = 10; // Max processing frames
 	private long nextGameTick; // Next tick to operate on
@@ -178,27 +178,29 @@ public class Playspace extends JPanel implements Runnable {
 				}
 
 				i = 1;
-				// ULDR Controls
-				if (e.getKeyCode() == KeyEvent.VK_UP) {
-					players[i].setUpPressed(false);
-					players[i].setUpReleased(true);
-				}
+				if (runnable[i]) {
+					// ULDR Controls
+					if (e.getKeyCode() == KeyEvent.VK_UP) {
+						players[i].setUpPressed(false);
+						players[i].setUpReleased(true);
+					}
 
-				if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-					players[i].setDownPressed(false);
-				}
+					if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+						players[i].setDownPressed(false);
+					}
 
-				if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-					players[i].setLeftPressed(false);
-				}
+					if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+						players[i].setLeftPressed(false);
+					}
 
-				if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-					players[i].setRightPressed(false);
-				}
+					if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+						players[i].setRightPressed(false);
+					}
 
-				if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
-					players[i].setShiftPressed(false);
-					players[i].setShiftReleased(true);
+					if (e.getKeyCode() == KeyEvent.VK_SHIFT && e.getKeyLocation() == KeyEvent.KEY_LOCATION_RIGHT) {
+						players[i].setShiftPressed(false);
+						players[i].setShiftReleased(true);
+					}
 				}
 			}
 
@@ -207,7 +209,7 @@ public class Playspace extends JPanel implements Runnable {
 			public void keyTyped(KeyEvent e) {
 			}
 		});
-		setVisible(true);
+		setVisible(false);
 
 		// Gotta make all of these arrays the right size...
 		PLAYERCOUNT = mode;
@@ -216,7 +218,7 @@ public class Playspace extends JPanel implements Runnable {
 		players = new Player[PLAYERCOUNT];
 		healthBars = new JLabel[PLAYERCOUNT];
 		healthBarIndicators = new JLabel[PLAYERCOUNT];
-		runnable = new boolean[PLAYERCOUNT];
+		runnable = new boolean[4];
 		items = new ArrayList<Item>();
 
 		// Toolbox setup
@@ -408,14 +410,11 @@ public class Playspace extends JPanel implements Runnable {
 		// Draw items loop
 		for (Item item : items) {
 
-			if (item != null) {
+			// Draw item images
+			g.drawImage(item.getCurrentImage(), item.getX(), item.getY(), this);
 
-				// Draw item images
-				g.drawImage(item.getCurrentImage(), item.getX(), item.getY(), this);
-
-				if (developerMode) {
-					g.draw3DRect(item.getX(), item.getY(), item.getWidth(), item.getHeight(), true);
-				}
+			if (developerMode) {
+				g.draw3DRect(item.getX(), item.getY(), item.getWidth(), item.getHeight(), true);
 			}
 		}
 	}
