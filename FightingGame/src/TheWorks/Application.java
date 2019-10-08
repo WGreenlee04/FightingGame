@@ -20,7 +20,6 @@ public class Application extends JFrame {
 		setTitle("StickFight");
 		setVisible(true);
 		setFocusable(false);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 
 	}

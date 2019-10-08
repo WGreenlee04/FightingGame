@@ -63,9 +63,9 @@ public class ThreadAnimate extends Thread {
 			}
 			animationSubjectItem.setxOffset(0);
 			animationSubjectItem.setyOffset(0);
+			animationSubjectItem.setCurrentImage(original);
 			animationSubjectItem.setWidth(original.getWidth(space));
 			animationSubjectItem.setHeight(original.getHeight(space));
-			animationSubjectItem.setCurrentImage(original);
 		}
 		closeThread();
 	}

@@ -40,7 +40,7 @@ public class Playspace extends JPanel implements Runnable {
 	private final int FALLSPEED = -10; // Speed of fast fall
 
 	// Stuff for game loop
-	private final int TICKS_PER_SECOND = 50; // How many ticks are processed in a second
+	private final int TICKS_PER_SECOND = 40; // How many ticks are processed in a second
 	private final int SKIP_TICKS = 1000 / TICKS_PER_SECOND; // How many ticks to skip
 	private final int MAX_FRAMESKIP = 10; // Max processing frames
 	private long nextGameTick; // Next tick to operate on
@@ -209,7 +209,6 @@ public class Playspace extends JPanel implements Runnable {
 			public void keyTyped(KeyEvent e) {
 			}
 		});
-		setVisible(false);
 
 		// Gotta make all of these arrays the right size...
 		PLAYERCOUNT = mode;
@@ -508,7 +507,4 @@ public class Playspace extends JPanel implements Runnable {
 		return developerMode;
 	}
 
-	public void setDeveloperMode(boolean developerMode) {
-		this.developerMode = developerMode;
-	}
 }

@@ -19,14 +19,14 @@ public class ThreadPhysics extends Thread {
 	}
 
 	/* Creates a new animation thread for the object */
-	private void animateItem(Item object) {
+	private void animate(Item object) {
 		ThreadAnimate animation = new ThreadAnimate(object, space);
 		object.setAnimated(true);
 		animation.start();
 	}
 
 	/* Creates a new damage thread for the player, with item's damage */
-	private void damagePlayer(Player player, Item item) {
+	private void damage(Player player, Item item) {
 		ThreadDamage damage = new ThreadDamage(item, player, space);
 		ThreadSound sound = new ThreadSound("src/resources/" + item.getName() + "Hit.wav");
 		damage.start();
@@ -113,13 +113,13 @@ public class ThreadPhysics extends Thread {
 				attacker.setShiftPressed(false);
 				// If they haven't attacked already
 				if (!attacker.getItem().isAnimated()) {
-					animateItem(attacker.getItem()); // Animate the Item (and damage)
+					animate(attacker.getItem()); // Animate the Item (and damage)
 
 					// THIS NEEDS TO BE MOVED INTO THE ANIMATE CLASS, AND CALLED ON HIT FRAMES
 					for (Player target : space.getPlayers()) {
 						if (!target.equals(attacker) && !target.isBeingDamaged()
 								&& attacker.getItem().getHitbox().intersects(target.getHitbox())) {
-							damagePlayer(target, attacker.getItem());
+							damage(target, attacker.getItem());
 						}
 					}
 				}
