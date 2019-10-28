@@ -11,6 +11,7 @@ public class ThreadAnimate extends Thread {
 
 	private Playspace space;
 	private Item animationSubjectItem;
+	private Player attacker;
 	private Player animationSubjectPlayer;
 	private final int degrees = 5;
 	private final int endRotation = 100;
@@ -23,6 +24,7 @@ public class ThreadAnimate extends Thread {
 
 		this.space = p;
 		this.animationSubjectItem = o;
+		this.attacker = o.getPlayer();
 		this.running = true;
 	}
 
@@ -31,6 +33,14 @@ public class ThreadAnimate extends Thread {
 		this.space = p;
 		this.animationSubjectPlayer = o;
 		this.running = true;
+	}
+
+	/* Creates a new damage thread for the player, with item's damage */
+	private void damage(Player player, Item item) {
+		ThreadDamage damage = new ThreadDamage(item, player, space);
+		ThreadSound sound = new ThreadSound("src/resources/" + item.getName() + "Hit.wav");
+		damage.start();
+		sound.start();
 	}
 
 	private void closeThread() {
@@ -48,6 +58,13 @@ public class ThreadAnimate extends Thread {
 					currentFrame = Tools.rotateObject(original, -i);
 				} else {
 					currentFrame = Tools.rotateObject(original, i);
+				}
+				// THIS NEEDS TO BE MOVED INTO THE ANIMATE CLASS, AND CALLED ON HIT FRAMES
+				for (Player target : space.getPlayers()) {
+					if (!target.equals(attacker) && !target.isBeingDamaged()
+							&& attacker.getItem().getHitbox().intersects(target.getHitbox())) {
+						damage(target, attacker.getItem());
+					}
 				}
 
 				animationSubjectItem.setyOffset(i + 1);

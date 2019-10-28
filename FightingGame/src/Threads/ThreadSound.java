@@ -45,9 +45,9 @@ public class ThreadSound extends Thread {
 				e.printStackTrace();
 			}
 		}
-		if (clip != null && soundDir.equals("src/resources/Clayfighter (SNES) - Taffy's Theme.wav") && !clip.isActive()
+		while (clip != null && soundDir.equals("src/resources/Clayfighter (SNES) - Taffy's Theme.wav")
 				&& !clip.isActive()) {
-			clip.loop(4);
+			clip.loop(1);
 		}
 
 		closeThread();
@@ -60,6 +60,14 @@ public class ThreadSound extends Thread {
 
 	public void pause() {
 		clip.stop();
+	}
+
+	public boolean isRunning() {
+		return running;
+	}
+
+	public void setRunning(boolean running) {
+		this.running = running;
 	}
 
 }

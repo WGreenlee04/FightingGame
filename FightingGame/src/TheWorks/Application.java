@@ -21,7 +21,6 @@ public class Application extends JFrame {
 		setVisible(true);
 		setFocusable(false);
 		setLocationRelativeTo(null);
-
 	}
 
 	public void initiateFrame(int m) {
