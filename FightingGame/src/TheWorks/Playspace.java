@@ -6,8 +6,13 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.File;
 import java.util.ArrayList;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -16,7 +21,6 @@ import Items.Item;
 import Items.Player;
 import Items.Stick;
 import Threads.ThreadPhysics;
-import Threads.ThreadSound;
 
 public class Playspace extends JPanel implements Runnable {
 
@@ -25,6 +29,7 @@ public class Playspace extends JPanel implements Runnable {
 	// Constants and Classes
 	private final Application app; // Parent window
 	private final Color backgroundColor; // Color of backdrop
+	private Clip clip;
 	private final ToolBox Tools; // All Image tools and methods
 	private final int WIDTH; // Width of panel
 	private final int HEIGHT; // Height of panel
@@ -49,7 +54,6 @@ public class Playspace extends JPanel implements Runnable {
 
 	// Here we go... Threads...
 	private ThreadPhysics doPhysics; // Physics for game
-	private ThreadSound playSound; // Background music
 	private Thread gameLoop; // Runs game operations per thread
 
 	// Variables
@@ -342,10 +346,31 @@ public class Playspace extends JPanel implements Runnable {
 	}
 
 	/** Begins background music player **/
-	public void playSound(String soundFile) {
+	public void playSound(String soundDir) {
 
-		playSound = new ThreadSound(soundFile);
-		playSound.start();
+		if (clip == null) {
+			try {
+				// get the sound file as a resource out of my jar file;
+				// the sound file must be in the same directory as this
+				// class file.
+				// the input stream portion of this recipe comes from a
+				// javaworld.com article.
+				AudioInputStream inputStream = AudioSystem.getAudioInputStream(new File(soundDir).getAbsoluteFile());
+				clip = AudioSystem.getClip();
+				clip.open(inputStream);
+				FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+				if (clip != null && soundDir.equals("src/resources/Clayfighter (SNES) - Taffy's Theme.wav"))
+					gainControl.setValue(-10.0f); // Reduce volume by 10
+													// decibels.
+				clip.start();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		while (clip != null && soundDir.equals("src/resources/Clayfighter (SNES) - Taffy's Theme.wav")
+				&& !clip.isActive()) {
+			clip.loop(1);
+		}
 	}
 
 	/** Creates new hitboxes for Items and Players **/
@@ -505,6 +530,10 @@ public class Playspace extends JPanel implements Runnable {
 
 	public boolean isDeveloperMode() {
 		return developerMode;
+	}
+
+	public int getSKIPTICKS() {
+		return SKIP_TICKS;
 	}
 
 }

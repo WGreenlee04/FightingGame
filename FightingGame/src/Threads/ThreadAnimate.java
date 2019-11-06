@@ -15,7 +15,7 @@ public class ThreadAnimate extends Thread {
 	private Player animationSubjectPlayer;
 	private final int degrees = 5;
 	private final int endRotation = 100;
-	private final int delay = 10;
+	private final int delay = 20;
 	private final ToolBox Tools = new ToolBox(space);
 	private Image currentFrame;
 	private boolean running;
@@ -38,9 +38,8 @@ public class ThreadAnimate extends Thread {
 	/* Creates a new damage thread for the player, with item's damage */
 	private void damage(Player player, Item item) {
 		ThreadDamage damage = new ThreadDamage(item, player, space);
-		ThreadSound sound = new ThreadSound("src/resources/" + item.getName() + "Hit.wav");
 		damage.start();
-		sound.start();
+		space.playSound("src/resources/" + item.getName() + "Hit.wav");
 	}
 
 	private void closeThread() {
